@@ -140,6 +140,30 @@ address {
   width: 20vw;
 }
 
+.over {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  animation: 5s ease-out 0s infinite pulseOpacity;
+}
+
+.over:hover {
+  opacity: .5;
+}
+
+@keyframes pulseOpacity {
+  0% {
+    opacity: 1
+  }
+  50% {
+    opacity: 0.5
+  }
+  100% {
+    opacity: 1
+  }
+}
+
 @media (max-width: 767px) {
   body {
     font-size: 4vw;
