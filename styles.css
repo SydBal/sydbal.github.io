@@ -149,16 +149,48 @@ address {
   background: transparent;
   opacity: 0;
   -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
-  mask: radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%));
-  animation: 5s ease-out 0s infinite pulseOpacity;
+  mask: radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
+}
+
+.over.blink {
+  animation: 10s linear 0s infinite pulseOpacity;
+}
+
+.over.hover {
+  transition: all 1s;
+}
+
+.over.hover:hover {
+  -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
+  mask: radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
+  animation: none;
+  opacity: 1;
+  transition: all 1s;
+}
+
+.border-gradient-purple {
+  border-image-slice: 1;
+  border-image-source: linear-gradient(to left, #743ad5, #d53a9d);
 }
 
 @keyframes pulseOpacity {
   0% {
     opacity: 0;
   }
+  10% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.25;
+  }
+  30% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.5;
+  }
   50% {
-    opacity: 1;
+    opacity: 0;
   }
   100% {
     opacity: 0;
