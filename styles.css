@@ -138,29 +138,31 @@ address {
   border-radius: 100%;
   border: 1vw solid white;
   width: 20vw;
+  height: 20vw;
 }
 
 .over {
   position: absolute;
+  display: inline-block;
   left: 0;
   right: 0;
   margin: 0 auto;
+  background: transparent;
+  opacity: 0;
+  -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
+  mask: radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%));
   animation: 5s ease-out 0s infinite pulseOpacity;
-}
-
-.over:hover {
-  opacity: .5;
 }
 
 @keyframes pulseOpacity {
   0% {
-    opacity: 1
+    opacity: 0;
   }
   50% {
-    opacity: 0.5
+    opacity: 1;
   }
   100% {
-    opacity: 1
+    opacity: 0;
   }
 }
 
