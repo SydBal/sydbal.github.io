@@ -3,6 +3,10 @@
   margin: 0;
 }
 
+html.inverse {
+  filter: invert(1);
+}
+
 body {
   margin: 0;
   font-family: 'Ubuntu', sans-serif;
@@ -134,13 +138,13 @@ address {
   }
 }
 
-.main-avatar {
+.avatar {
   border-radius: 100%;
   border: 1vw solid white;
   width: 20vw;
 }
 
-.over {
+.avatar.over {
   position: absolute;
   display: inline-block;
   left: 0;
@@ -148,30 +152,38 @@ address {
   margin: 0 auto;
   background: transparent;
   opacity: 0;
-  -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
-  mask: radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
+  -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, black 100%);
+  mask: radial-gradient(50% 50%, circle, transparent 0%, black 100%);
 }
 
-.over.blink {
-  animation: 10s linear 0s infinite pulseOpacity;
+.avatar.over.blink {
+  animation: 4s linear 0s infinite pulseOpacity;
 }
 
-.over.hover {
+.avatar.over.hover {
   transition: all 1s;
+}
+
+.avatar.over.hover:hover {
+  border-color: #0090D0;
+}
+
+#avatar-button {
+  cursor: pointer;
 }
 
 .over.hover:hover {
-  -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
-  mask: radial-gradient(50% 50%, circle, transparent 0%, transparent 10%, black 100%);
+  -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, black 100%);
+  mask: radial-gradient(50% 50%, circle, transparent 0%,  black 100%);
   animation: none;
   opacity: 1;
-  transition: all 1s;
+  transition: all 2s;
 }
 
-.border-gradient-purple {
+/* .border-gradient-purple {
   border-image-slice: 1;
   border-image-source: linear-gradient(to left, #743ad5, #d53a9d);
-}
+} */
 
 @keyframes pulseOpacity {
   0% {
@@ -181,7 +193,7 @@ address {
     opacity: 0;
   }
   20% {
-    opacity: 0.25;
+    opacity: 0.5;
   }
   30% {
     opacity: 0;
@@ -213,7 +225,7 @@ address {
     left: 20vw;
   }
 
-  .main-avatar {
+  .avatar {
     width: 60vw;
   }
 

@@ -2,8 +2,8 @@
   <head>
     <title>Dominic Balassone</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="reboot.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="utils.css">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
   </head>
   <body class="hex-back">
@@ -11,12 +11,13 @@
       <p class="welcome">Welcome to my website!</p>
       <div class="main primary-box border-gradient-purple">
         <h1>Dominic.Balass.one</h1>
-        <img src="avatar.png" alt="Photo of Dominic Balassone" class="main-avatar">
-        <img src="avatar-alt.jpg" class="main-avatar over blink">
-        <img src="avatar-alt.jpg" class="main-avatar over hover">
+        <img src="avatar.png" alt="Photo of Dominic Balassone" class="avatar base">
+        <img src="avatar-alt.jpg" class="avatar over blink">
+        <img id="avatar-button"  tabindex="0" role="button" aria-pressed="false" src="avatar-alt.jpg" class="avatar over hover">
         <address><a href="mailto:dominic.balassone@gmail.com">dominic.balassone@gmail.com</a></address>
         <address><a href="https://github.com/sydbal">https://github.com/sydbal</a></address>
       </div>
     </div>
+    <script src="index.js"></script>
   </body>
 </html>
