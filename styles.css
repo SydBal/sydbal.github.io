@@ -43,7 +43,7 @@ a:visited {
 }
 
 a:hover {
-  color: blue;
+  color: rgb(0, 144, 208);
 }
 
 a:active {
@@ -190,7 +190,7 @@ address {
 }
 
 .avatar.over.hover {
-  -webkit-mask-image: -webkit-radial-gradient(50% 50%, circle, transparent 0%, black 60%);
+  -webkit-mask-image: -webkit-radial-gradient(50% 40%, circle, transparent 0%, black 60%);
   mask: radial-gradient(50% 50%, circle, transparent 0%,  black 60%);
   border-color: white;
   transition: all 1s linear;
@@ -222,6 +222,14 @@ address {
 .inverse .over.hover + .parent-filler {
   opacity: 1;
   /* transition: all 1s; */
+}
+
+.row {
+  display: flex;
+}
+
+.column {
+  flex: 50%;
 }
 
 /* .border-gradient-purple {
