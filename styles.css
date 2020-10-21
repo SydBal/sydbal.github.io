@@ -108,7 +108,7 @@ a:active {
   position: absolute;
   padding: 2vw;
   width: 100%;
-  min-height: 80vh;
+  min-height: 85vh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
