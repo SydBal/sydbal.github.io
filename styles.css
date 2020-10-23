@@ -274,6 +274,13 @@ li::marker {
   width: 12vw;
 }
 
+.gwc-img {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 25vw;
+}
+
 /* .border-gradient-purple {
   border-image-slice: 1;
   border-image-source: linear-gradient(to left, #743ad5, #d53a9d);
@@ -304,7 +311,7 @@ li::marker {
 }
 
 @media (max-width: 767px) {
-  body {
+  body .main {
     font-size: 4vw;
   }
   .primary-box {
