@@ -270,15 +270,15 @@ li::marker {
 .tb-img {
   position: absolute;
   right: 0;
-  top: 0;
-  width: 12vw;
+  top: 2vw;
+  width: 10vw;
 }
 
 .gwc-img {
   position: absolute;
   right: 0;
-  top: 0;
-  width: 25vw;
+  top: 2vw;
+  width: 20vw;
 }
 
 /* .border-gradient-purple {
