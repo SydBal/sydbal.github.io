@@ -180,7 +180,7 @@ address {
 }
 
 .avatar.over.blink {
-  animation: 4s linear 0s infinite pulseOpacity;
+  animation: 4s linear 0s infinite pulseOpacity, 1s ease-out 0s 1 popIn;
 }
 
 .inverse .avatar {
@@ -285,6 +285,19 @@ li::marker {
   border-image-slice: 1;
   border-image-source: linear-gradient(to left, #743ad5, #d53a9d);
 } */
+
+#resume {
+  box-sizing: border-box;
+  padding: .5vw 3vw;
+  border: 0.5vw solid white;
+  background: white;
+  margin: 1vw 0 2vw;
+  top: 1vw;
+  cursor: pointer;
+}
+#resume:hover {
+  border: 0.5vw solid #0090D0;
+}
 
 @keyframes pulseOpacity {
   0% {
