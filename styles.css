@@ -188,7 +188,7 @@ address {
   transition: transform 1s linear;
 }
 
-#avatar-button {
+.inverse #avatar-button {
   cursor: pointer;
 }
 
