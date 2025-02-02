@@ -104,7 +104,7 @@ a:active {
 }
 
 .outer {
-  position: absolute;
+  /* position: absolute; */
   padding: 2vw;
   width: 100%;
   min-height: 85vh;
@@ -113,10 +113,6 @@ a:active {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-.main {
-  /* padding: 0 2vw 1vw; */
 }
 
 .primary-box {
@@ -136,24 +132,6 @@ address {
   }
   100% {
     transform: scale(1);
-  }
-}
-
-.welcome {
-  /* animation: 2s linear 0s 1 slideUp; */
-  left: 16vw;
-  top: 0.5vw;
-}
-
-@keyframes slideUp {
-  0% {
-    top: 4vw;
-  }
-  50% {
-    top: 4vw;
-  }
-  100% {
-    top: 0.5vw;
   }
 }
 
@@ -251,8 +229,17 @@ li::marker {
   left: 0;
 }
 
-.job {
+h2 {
+  margin-bottom: 3vw;
+}
+
+.time-at-job {
+  font-size: 2vw;
   margin-bottom: 2vw;
+}
+
+.job {
+  margin-bottom: 6vw;
 }
 
 .tal {
@@ -281,10 +268,12 @@ li::marker {
   width: 25vw;
 }
 
-/* .border-gradient-purple {
-  border-image-slice: 1;
-  border-image-source: linear-gradient(to left, #743ad5, #d53a9d);
-} */
+.ucsc-img {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 16vw;
+}
 
 #resume {
   box-sizing: border-box;
@@ -323,6 +312,10 @@ li::marker {
   }
 }
 
+hr {
+  margin-bottom: 5vw;
+}
+
 @media (max-width: 767px) {
   body .main {
     font-size: 4vw;
@@ -335,24 +328,88 @@ li::marker {
     padding: 1vw;
   }
 
-  .welcome {
-    left: 20vw;
-    top: 0;
-  }
-
   .avatar {
     width: 60vw;
   }
+}
 
-  @keyframes slideUp {
-    0% {
-      top: 5vw;
-    }
-    50% {
-      top: 5vw;
-    }
-    100% {
-      top: 0vw;
-    }
+@media (min-width: 1441px) {
+  .outer {
+    position: relative;
+    margin: 0 auto;
+    max-width: 1440px;
+    padding: 2rem
+  }
+
+  body {
+    font-size: 3rem;
+  }
+
+  a {
+    padding: 1rem 0;
+  }
+  
+  .primary-box {
+    border: 3rem solid white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem 2rem;
+  }
+
+  .avatar {
+    border: 1rem solid white;
+    width: 20rem;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    padding-left: 5rem
+  }
+  
+  li {
+    margin-bottom: 1rem
+  }
+
+  h2 {
+    margin-bottom: 3rem;
+  }
+  
+  .time-at-job {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .job {
+    margin-bottom: 5rem;
+  }
+
+  .tb-img {
+    width: 12rem;
+  }
+
+  .gwc-img {
+    width: 20rem;
+  }
+
+  .ucsc-img {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 16rem;
+  }
+
+  #resume {
+    padding: .5rem 3rem;
+    border: 0.5rem solid white;
+    background: white;
+    margin: 1rem 0 2rem;
+    top: 1rem;
+    cursor: pointer;
+  }
+  #resume:hover {
+    border: 0.5rem solid #0090D0;
+  }
+
+  hr {
+    margin-bottom: 5rem;
   }
 }
