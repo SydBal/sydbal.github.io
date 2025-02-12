@@ -19,6 +19,22 @@ body {
   font-size: 3vw;
   text-align: center;
   color:white;
+
+  a {
+    padding: 0;
+  }
+
+  ul {
+    list-style-type: square;
+  }
+
+  li {
+    font-size: 2vw;
+
+    @media (max-width: 768px) {
+      font-size: 14px;
+    }
+  }
 }
 
 .parent-filler {
@@ -239,7 +255,7 @@ h2 {
 }
 
 .job {
-  margin-bottom: 6vw;
+  margin-bottom: 5vw;
 }
 
 .tal {
@@ -252,6 +268,13 @@ h2 {
 
 .tac {
   text-align:center;
+}
+
+.intu-img {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 11vw;
 }
 
 .tb-img {
@@ -280,8 +303,7 @@ h2 {
   padding: .5vw 3vw;
   border: 0.5vw solid white;
   background: white;
-  margin: 1vw 0 2vw;
-  top: 1vw;
+  margin: 3vw 0 2vw;
   cursor: pointer;
 }
 #resume:hover {
@@ -383,18 +405,18 @@ hr {
   }
 
   .tb-img {
-    width: 12rem;
+    width: 10rem;
   }
 
   .gwc-img {
-    width: 20rem;
+    width: 18rem;
   }
 
   .ucsc-img {
     position: absolute;
     right: 0;
     top: 0;
-    width: 16rem;
+    width: 14rem;
   }
 
   #resume {
