@@ -34,6 +34,10 @@ body {
     @media (max-width: 768px) {
       font-size: 14px;
     }
+
+    @media (min-width: 1441px) {
+      font-size: 28px;
+    }
   }
 }
 
@@ -405,7 +409,7 @@ hr {
   }
 
   .tb-img {
-    width: 10rem;
+    width: 12rem;
   }
 
   .gwc-img {
@@ -416,7 +420,11 @@ hr {
     position: absolute;
     right: 0;
     top: 0;
-    width: 14rem;
+    width: 16rem;
+  }
+
+  .intu-img {
+    width: 11rem;
   }
 
   #resume {
