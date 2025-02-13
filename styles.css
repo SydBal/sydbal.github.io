@@ -225,6 +225,23 @@ address {
   /* transition: all 1s; */
 }
 
+.hover-section  .parent-filler {
+  background: transparent;
+  background-image: radial-gradient(rgb(0, 82, 117), rgba(0,0,0,0) 75%);
+  opacity: 0;
+  transition: all 1s;
+  z-index: -1;
+}
+
+.hover-section:hover  .parent-filler {
+  opacity: 1;
+}
+
+.inverse .hover-section  .parent-filler {
+  opacity: 1;
+  /* transition: all 1s; */
+}
+
 .row {
   display: flex;
 }
