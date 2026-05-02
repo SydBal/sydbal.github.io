@@ -10,6 +10,8 @@ app.use(express.static(path.join(__dirname)));
 
 // Ensure any path returns index.html (useful for single-page apps / dev server)
 app.get('*', (req, res) => {
+  // Log all possible data that can identify the user
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - ${req.ip} ${req.headers['user-agent']}`);
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 

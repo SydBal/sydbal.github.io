@@ -18,26 +18,48 @@ body {
   font-family: 'Ubuntu', sans-serif;
   font-size: 3vw;
   text-align: center;
-  color:white;
+  color: white;
+}
 
-  a {
-    padding: 0;
-  }
+a {
+  padding: 0;
+}
 
-  ul {
-    list-style-type: square;
-  }
+ul {
+  list-style-type: square;
+  padding-left: 1.5em;
+}
 
+.project-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.project-list li {
+  margin-bottom: 1.2vw;
+}
+
+.project-list li p {
+  margin: 0.5vw 0 0;
+  font-size: 1.4vw;
+  color: #ccc;
+}
+
+li {
+  font-size: 2vw;
+}
+
+@media (max-width: 768px) {
   li {
-    font-size: 2vw;
+    font-size: 14px;
+  }
+}
 
-    @media (max-width: 768px) {
-      font-size: 14px;
-    }
-
-    @media (min-width: 1441px) {
-      font-size: 28px;
-    }
+@media (min-width: 1441px) {
+  li {
+    font-size: 28px;
   }
 }
 
