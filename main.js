@@ -93,9 +93,9 @@
   if (!canvas || !canvas.getContext) return;
   var ctx = canvas.getContext('2d');
 
-  var CELL = 26;        // CSS px per cell
+  var CELL = 10;        // CSS px per cell — small, high-overhead look
   var TICK_MS = 220;    // ms per generation
-  var DENSITY = 0.10;   // initial live-cell probability
+  var DENSITY = 0.16;   // initial live-cell probability — dense enough to reach the edges
   var ALPHA = 0.06;     // cell opacity — keep it whisper-quiet
 
   var cols = 0, rows = 0, grid, scratch;
