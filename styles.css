@@ -189,7 +189,7 @@ main, .site-footer { position: relative; z-index: 1; }
 /* ---------- Layout ---------- */
 .container { max-width: 62rem; margin: 0 auto; padding: 0 1.25rem; }
 .section { padding: 4.5rem 0; }
-.section-alt { background: var(--bg-alt); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.section-alt { background: color-mix(in srgb, var(--bg-alt) 50%, transparent); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .section-intro { color: var(--muted); font-size: 1.1rem; max-width: 44rem; }
 .section h2::before {
   content: "";
