@@ -1,152 +1,214 @@
-<html>
-  <head>
-    <title>Dominic Balassone</title>
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="reboot.css">
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
-  </head>
-  <body class="hex-back">
-    <div class="outer">
-      <div class="main primary-box border-gradient-purple">
-        <h1>Dominic.Balass.one</h1>
-        <img src="avatar.png" alt="Photo of Dominic Balassone" class="avatar base">
-        <img src="avatar-alt.jpg" class="avatar over blink">
-        <img id="avatar-button" src="avatar-alt.jpg" class="avatar over hover">
-        <div class="parent-filler"></div>
-        <address><a href="mailto:dominic.balassone@gmail.com">dominic.balassone@gmail.com</a></address>
-        <address><a href="https://github.com/sydbal"  target="_blank">https://github.com/sydbal</a></address>
-        <a href="DominicBalassoneResume.pdf" target="_blank">
-          <button type="button" id="resume">
-            Résumé.pdf
-          </button>
-        </a>
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dominic Balassone — Senior Software Engineer</title>
+  <meta name="description" content="Dominic Balassone is a senior software engineer in the SF Bay Area with 10 years of experience building for the web — React, TypeScript, design systems, and applied AI. Previously at Intuit and Tailored Brands.">
+  <meta property="og:title" content="Dominic Balassone — Senior Software Engineer">
+  <meta property="og:description" content="10 years building for the web. React, TypeScript, design systems, applied AI. Previously Intuit, Tailored Brands.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dominic.balass.one/">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-brand" href="#top" aria-label="Dominic Balassone — home">DB</a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links" id="nav-links">
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
       </div>
-      <br>
-      <div id="workExperience" class="primary-box">
-        <h2>Work Experience</h2>
-        <div class="job tal hover-section">
-          <h3>Intuit</h3>
-          <p>Software Engineer 2, Fintech</p>
-          <p class="time-at-job">
-            <time datetime="2021-4-21">April 2021</time> – Present
-          </p>
-          <img src="intuit.png" alt="Intuit Logo" class="intu-img">
-          <ul>
-            <li>Built and maintained components in a microservice, design system, and plugin ecosystem
-            <li>Led the refactor of legacy React code, implementing efficient React hooks for state management and optimizing network requests
-            <li>Integrated observability and created custom alerts via Splunk and Amplitude to monitor feature performance
-            <li>Provided expert knowledge and experience to data analysts to help create A/B tests that properly captured user behavior at the right moments
-            <li>Collected and analyzed user feedback to iteratively improve product experiences, increasing customer satisfaction
-            <li>Mentored multiple interns and new hires, helping them transition to full-time roles
-          </ul>
-          <div class="parent-filler"></div>
-        </div>
-        <hr/>
-        <div class="job tal hover-section">
-          <h3>Tailored Brands</h3>
-          <p>Front-End Web Developer</p>
-          <p class="time-at-job">
-            <time datetime="2018-10-15">October 2018</time> – <time datetime="2021-4-20">April 2021</time>          </p>
-          <img src="tb.png" alt="Tailored Brands Logo" class="tb-img">
-          <ul>
-            <li>
-              Lead team of over 5 developers by facilitating daily stand ups, distributing workload, and administrating code reviews
-            <li>
-              Collaborated with engineering, business and creative teams, defining and gathering requirements for the form and function of new features, delivering in biweekly sprint cycles
-            <li>
-              To support analytics, programmed data gathering requirements into features and site experiences, created supporting dashboards and human readable debug messages to demonstrate their integrity
-              <br>
-              (Heap Analytics, Google Analytics, Tag Manager)
-            <li>
-              Designed and implemented A/B test experiments for the Men’s Wearhouse website, launching over 100 tests and generating over $50 million in projected incremental revenue within a single year
-          </ul>
-          <div class="parent-filler"></div>
-        </div>
-        <hr/>
-        <div class="job tal hover-section">
-          <h3>Girls Who Code</h3>
-          <p>Summer Immersion Program Instructor</p>
-          <p class="time-at-job">
-            <time datetime="2018-6-18">June 2018</time> – <time datetime="2018-8-18">August 2018</time>
-          </p>
-          <img src="gwc.png" alt="Girls Who Code Logo" class="gwc-img">
-          <ul>
-            <li>
-              Lead instruction during a 7-week summer course for high-school girls, with a focus on inspiring girls to explore computer science and technology
-            <li>
-              Curriculum included Scratch, Python, robotics (Arduino), data science, and web development
-          </ul>
-          <div class="parent-filler"></div>
-        </div>
-        <hr/>
-        <div class="job tal hover-section">
-          <h3>Nyentek</h3>
-          <p>Software Developer</p>
-          <p class="time-at-job">
-            <time datetime="2018-11-1">November 2016</time> – <time datetime="2018-4-20">April 2017</time>
-          </p>
-          <img src="nyentek.png" alt="Nyentek Logo" class="tb-img">
-          <ul>
-            <li>
-              Architected and implemented a webapp for court reporters to manage file distribution to their clients
-            <li>
-              Installed hardware and deployed application at client site
-            <li>
-              Built with React, Redux, Node.js, Express, MongoDB
-          </ul>
-          <div class="parent-filler"></div>
-        </div>
-        <hr/>
-        <div class="job tal hover-section">
-          <h3>Pure Storage</h3>
-          <p>Full Stack Web Development Intern</p>
-          <p class="time-at-job">
-            <time datetime="2016-1-1">January 2016</time> – <time datetime="2018-6-15">June 2016</time>
-          </p>
-          <img src="ps.png" alt="Pure Storage Logo" class="tb-img">
-          <ul>
-            <li>
-              Full-stack implementation of a web application for real-time monitoring server diagnostics
-            <li>
-              Created an interactive analytics heatmap updates up to thousands of times a minute based on database inserts
-            <li>
-              Built with Amazon Web Services (S3, Lambda), RethinkDB, Node.js, D3.js, Socket.io
-          </ul>
-          <div class="parent-filler"></div>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle light / dark theme">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero" id="top" aria-labelledby="hero-heading">
+      <div class="hero-inner">
+        <img src="avatar.png" alt="Portrait of Dominic Balassone" class="hero-avatar" width="160" height="160" fetchpriority="high">
+        <p class="hero-kicker">SF Bay Area · Senior Software Engineer</p>
+        <h1 id="hero-heading">Dominic Balassone</h1>
+        <p class="hero-lede">Ten years building for the web — design systems, product engineering, and applied AI. I care about interfaces that are fast, accessible, and genuinely pleasant to use.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="mailto:dominic.balassone@gmail.com">Get in touch</a>
+          <a class="btn" href="https://github.com/sydbal" target="_blank" rel="noopener">GitHub</a>
         </div>
       </div>
-      <br>
-      <div id="education" class="primary-box hover-section">
-        <h2>Education</h2>
-        <div class="school">
-          <h3>University of California, Santa Cruz</h3>
-          <p>Cognitive Science BS, Computer Science BA</p>
-          <img src="ucsc.png" alt="Tailored Brands Logo" class="ucsc-img">
-          <p class="time-at-job">
-            <time datetime="2013-9-1">Fall 2013</time> – <time datetime="2016-7-1">Summer 2016</time>
+    </section>
+
+    <!-- About -->
+    <section class="section" id="about" aria-labelledby="about-heading">
+      <div class="container">
+        <h2 id="about-heading">About</h2>
+        <div class="prose">
+          <p>
+            I'm a product-minded software engineer currently doing integration engineering at
+            <strong>Emcor</strong>. Before that I spent four years at <strong>Intuit</strong> as a
+            Software Engineer 2 on Payments — working across a microservice architecture, design
+            system, and plugin ecosystem — and two and a half years at <strong>Tailored Brands</strong>
+            leading front-end development, where A/B testing programs I designed generated over
+            <strong>$50&nbsp;million</strong> in projected incremental revenue in a single year.
           </p>
-          <ul>
-            <li>Contributed an event detection algorithm to Smart Energy Disaggregation Systems (SEADS), a NSF funded project</li>
-            <li>Designed camera equipment for lip tracking as a research assistant in Alan Kawamoto's linguistics lab</li>
-            <li>Webmaster for the Cognitive Science Student Association (CSSA)
-            </li>
-            <li>Completed upper division machine learning, artificial intelligence, and human-computer interaction courses</li>
-          </ul>
-          <div class="parent-filler"></div>
+          <p>
+            My background is a little unusual: dual degrees in <strong>Computer Science</strong> and
+            <strong>Cognitive Science</strong> from UC Santa Cruz, with upper-division coursework in
+            machine learning, AI, and human–computer interaction. I've been working with generative
+            models since the Deep Dream era — back when "neural style transfer" meant a Torch
+            script and a lot of patience.
+          </p>
+          <p>
+            I also care deeply about the details most people never notice: I maintain reference
+            sites for the <code>prefers-reduced-motion</code> and <code>prefers-color-scheme</code>
+            CSS media queries, because accessibility is a feature, not a checkbox. This very page
+            practices what I preach — semantic HTML, no frameworks, full keyboard support, and it
+            respects both your motion and color-scheme preferences.
+          </p>
+        </div>
+        <dl class="facts">
+          <div><dt>Location</dt><dd>San Francisco Bay Area</dd></div>
+          <div><dt>Experience</dt><dd>10 years (excl. university)</dd></div>
+          <div><dt>Focus</dt><dd>Web platforms · Applied AI · Accessibility</dd></div>
+          <div><dt>Languages</dt><dd>English · 日本語 (JLPT N4, studying toward N3)</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- Experience -->
+    <section class="section section-alt" id="experience" aria-labelledby="experience-heading">
+      <div class="container">
+        <h2 id="experience-heading">Experience</h2>
+        <ol class="timeline">
+          <li class="timeline-item">
+            <div class="timeline-meta">
+              <h3>Emcor</h3>
+              <p class="role">Integration Engineer</p>
+              <p class="dates"><time datetime="2026-03">Mar 2026</time> – Present</p>
+            </div>
+            <ul class="timeline-points">
+              <li>Systems integration engineering at EMCOR Group.</li>
+            </ul>
+          </li>
+          <li class="timeline-item">
+            <div class="timeline-meta">
+              <h3>Intuit</h3>
+              <p class="role">Software Engineer 2, Payments</p>
+              <p class="dates"><time datetime="2021-04">Apr 2021</time> – <time datetime="2025-06">Jun 2025</time></p>
+            </div>
+            <ul class="timeline-points">
+              <li>Built and maintained components across a microservice architecture, design system, and plugin ecosystem.</li>
+              <li>Led the refactor of legacy React code — hooks-based state management and optimized network requests.</li>
+              <li>Integrated observability with Splunk and Amplitude; created custom alerts to monitor feature performance.</li>
+              <li>Partnered with data analysts on A/B tests and turned user feedback into measurable product improvements (Customer Effort Score).</li>
+              <li>Mentored interns and new hires through to full-time roles.</li>
+            </ul>
+          </li>
+          <li class="timeline-item">
+            <div class="timeline-meta">
+              <h3>Tailored Brands</h3>
+              <p class="role">Lead Front-End Web Developer</p>
+              <p class="dates"><time datetime="2018-10">Oct 2018</time> – <time datetime="2021-04">Apr 2021</time></p>
+            </div>
+            <ul class="timeline-points">
+              <li>Led a team of 5+ developers — standups, workload distribution, and code reviews on biweekly sprint cycles.</li>
+              <li>Designed and launched 100+ A/B tests for Men's Wearhouse, generating $50M+ in projected incremental revenue in one year.</li>
+              <li>Built tracking and analytics features integrating Heap, Google Analytics, and Tag Manager.</li>
+              <li>Shipped clean, high-performance code balancing design fidelity with functionality.</li>
+            </ul>
+          </li>
+          <li class="timeline-item">
+            <div class="timeline-meta">
+              <h3>Girls Who Code</h3>
+              <p class="role">Summer Immersion Program Instructor</p>
+              <p class="dates"><time datetime="2018-06">Jun 2018</time> – <time datetime="2018-08">Aug 2018</time></p>
+            </div>
+            <ul class="timeline-points">
+              <li>Led a 7-week summer program for high-school students — Scratch, Python, Arduino robotics, data science, and web development.</li>
+            </ul>
+          </li>
+          <li class="timeline-item">
+            <div class="timeline-meta">
+              <h3>UC Santa Cruz</h3>
+              <p class="role">Cognitive Science BS · Computer Science BA</p>
+              <p class="dates"><time datetime="2013-09">2013</time> – <time datetime="2016-06">2016</time></p>
+            </div>
+            <ul class="timeline-points">
+              <li>Contributed an event-detection algorithm to SEADS, an NSF-funded research project.</li>
+              <li>Research assistant in a linguistics lab; webmaster for the Cognitive Science Student Association.</li>
+              <li>Upper-division coursework in machine learning, artificial intelligence, and HCI.</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section class="section" id="projects" aria-labelledby="projects-heading">
+      <div class="container">
+        <h2 id="projects-heading">Projects</h2>
+        <p class="section-intro">Things I've built and maintain, in my own time.</p>
+        <div class="cards">
+          <article class="card">
+            <h3><a href="https://classicscoundrel.com" target="_blank" rel="noopener">Classic Scoundrel</a></h3>
+            <p>A complete single-player card game for the browser — game logic, rendering, and interaction built with TypeScript and Canvas 2D. No engine, no frameworks; just the platform.</p>
+            <ul class="tags" aria-label="Technologies"><li>TypeScript</li><li>Canvas 2D</li><li>Game design</li></ul>
+          </article>
+          <article class="card">
+            <h3><a href="https://prefers-reduced-motion.com" target="_blank" rel="noopener">prefers-reduced-motion.com</a></h3>
+            <p>A reference site for the <code>prefers-reduced-motion</code> CSS media feature — what it is, how to honor it, and how to test it. Written for working developers who want to get accessibility details right.</p>
+            <ul class="tags" aria-label="Technologies"><li>CSS</li><li>Accessibility</li><li>Technical writing</li></ul>
+          </article>
+          <article class="card">
+            <h3><a href="https://prefers-color-scheme.com" target="_blank" rel="noopener">prefers-color-scheme.com</a></h3>
+            <p>Companion reference for the <code>prefers-color-scheme</code> media feature — the right way to build dark-mode-aware interfaces that respect user preference.</p>
+            <ul class="tags" aria-label="Technologies"><li>CSS</li><li>Accessibility</li><li>Technical writing</li></ul>
+          </article>
+          <article class="card">
+            <h3>Rogue Survivor</h3>
+            <p>A 2D roguelike survival game running on a bespoke game engine, including enemy AI. An exercise in building everything from the ground up — and in making bad decisions fun.</p>
+            <ul class="tags" aria-label="Technologies"><li>Game engine</li><li>Enemy AI</li></ul>
+          </article>
+          <article class="card">
+            <h3><a href="https://github.com/sydbal" target="_blank" rel="noopener">Neural style experiments</a></h3>
+            <p>Neural style transfer implemented in Torch/Lua during the Deep Dream era — my first hands-on work with generative models, years before they had product names.</p>
+            <ul class="tags" aria-label="Technologies"><li>Torch</li><li>Lua</li><li>Generative AI</li></ul>
+          </article>
         </div>
       </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="section section-alt" id="contact" aria-labelledby="contact-heading">
+      <div class="container contact">
+        <h2 id="contact-heading">Contact</h2>
+        <p class="section-intro">I'm currently exploring what's next. If you're building something interesting — especially at the intersection of the web and AI — I'd love to hear about it.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="mailto:dominic.balassone@gmail.com">dominic.balassone@gmail.com</a>
+          <a class="btn" href="https://github.com/sydbal" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="year">2026</span> Dominic Balassone · San Francisco Bay Area</p>
+      <p class="footer-note">Hand-built with semantic HTML and CSS. No frameworks, no trackers. Respects <code>prefers-reduced-motion</code> and <code>prefers-color-scheme</code>.</p>
     </div>
-    <script src="index.js"></script>
-    <script 
-      defer
-      data-project="692f98c20d25870d7e453b01"
-      data-host="tracking.balass.one"
-      data-port="443"
-      data-secure="true"
-      src="https://cdn.jsdelivr.net/npm/litlyx-js@latest/browser/litlyx.js">
-    </script>
-    <link rel="stylesheet" href="prefers-reduced-motion.css">
-  </body>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
 </html>
