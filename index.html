@@ -221,18 +221,19 @@
   <footer class="site-footer">
     <div class="container">
       <p>© <span id="year">2026</span> Dominic Balassone · San Francisco Bay Area</p>
-      <p class="footer-note">Hand-built with semantic HTML and CSS. No frameworks, privacy-friendly analytics. Respects <code>prefers-reduced-motion</code> and <code>prefers-color-scheme</code>.</p>
+      <p class="footer-note">Hand-built with semantic HTML and CSS. No frameworks. Analytics via Google Analytics. Respects <code>prefers-reduced-motion</code> and <code>prefers-color-scheme</code>.</p>
     </div>
   </footer>
 
   <script src="main.js" defer></script>
-  <script
-    defer
-    data-project="692f98c20d25870d7e453b01"
-    data-host="tracking.balass.one"
-    data-port="443"
-    data-secure="true"
-    src="https://cdn.jsdelivr.net/npm/litlyx-js@latest/browser/litlyx.js">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-C0DG17Z442');
   </script>
 </body>
 </html>
