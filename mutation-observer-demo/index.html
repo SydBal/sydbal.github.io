@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MutationObserver Playground</title>
+<meta name="description" content="Interactive playground for the MutationObserver DOM API.">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --fg: #c9d1d9;
+    --dim: #8b949e;
+    --purple: #bc8cff;
+    --red: #ff7b72;
+    --blue: #79c0ff;
+    --orange: #ffa657;
+    --green: #7ee787;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; border-radius: 0 !important; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 20px 60px; }
+  header h1 { font-size: 2rem; margin: 0 0 8px; color: #fff; }
+  header h1 .accent { color: var(--purple); }
+  header p { color: var(--dim); max-width: 640px; }
+  code, .mono { font-family: var(--mono); font-size: 0.9em; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin: 24px 0;
+  }
+  .panel h2 {
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+    color: var(--purple);
+    font-family: var(--mono);
+    font-weight: 600;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button {
+    background: #21262d;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--purple); color: #fff; }
+  button.danger:hover { border-color: var(--red); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* sandbox */
+  #sandbox {
+    border: 1px dashed var(--border);
+    min-height: 140px;
+    padding: 14px;
+    margin-top: 14px;
+    background: var(--bg);
+  }
+  #sandbox .node {
+    display: inline-block;
+    background: #1c2b3a;
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    margin: 4px;
+  }
+  #sandbox .node[data-active="true"] {
+    background: #2b1c3a;
+    border-color: var(--purple);
+    color: var(--purple);
+  }
+  #sandbox .textline {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--dim);
+    margin: 8px 4px;
+  }
+  /* config toggles */
+  .toggle { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 0.85rem; cursor: pointer; user-select: none; }
+  .toggle input { accent-color: var(--purple); width: 16px; height: 16px; cursor: pointer; }
+  .hint { color: var(--orange); font-family: var(--mono); font-size: 0.8rem; margin-top: 10px; display: none; }
+  /* log */
+  .logbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  #counter { font-family: var(--mono); font-size: 0.85rem; color: var(--dim); }
+  #counter b { color: var(--green); }
+  #log {
+    height: 280px;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+  }
+  #log .empty { color: var(--dim); }
+  .rec { padding: 8px 10px; border-left: 3px solid var(--purple); background: #131a24; margin-bottom: 8px; }
+  .rec .rtype { font-weight: bold; }
+  .rec.childList .rtype { color: var(--blue); }
+  .rec.attributes .rtype { color: var(--orange); }
+  .rec.characterData .rtype { color: var(--green); }
+  .rec .detail { color: var(--dim); }
+  .rec .detail b { color: var(--fg); font-weight: normal; }
+  pre.code {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 16px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+  .k { color: var(--red); } .s { color: var(--orange); } .f { color: var(--blue); }
+  .c { color: var(--green); } .p { color: var(--purple); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--dim); font-size: 0.85rem; }
+  footer a { color: var(--purple); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  @media (max-width: 600px) { .wrap { padding: 24px 12px 40px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1><span class="accent">MutationObserver</span> Playground</h1>
+    <p>
+      <code>MutationObserver</code> watches a DOM node and fires a callback with a
+      <em>batch</em> of <code>MutationRecord</code>s whenever it changes &mdash;
+      no polling required. Toggle the observer config below, poke the sandbox,
+      and watch the records roll in.
+    </p>
+  </header>
+
+  <section class="panel">
+    <h2>// 1. observer config</h2>
+    <div class="row">
+      <label class="toggle"><input type="checkbox" id="cfg-childList" checked> childList</label>
+      <label class="toggle"><input type="checkbox" id="cfg-attributes"> attributes</label>
+      <label class="toggle"><input type="checkbox" id="cfg-characterData"> characterData</label>
+      <label class="toggle"><input type="checkbox" id="cfg-subtree" checked> subtree</label>
+    </div>
+    <div class="hint" id="cfg-hint">at least one of childList / attributes / characterData must be on &mdash; observer paused</div>
+  </section>
+
+  <section class="panel">
+    <h2>// 2. dom sandbox</h2>
+    <div class="row">
+      <button id="btn-add">Add node</button>
+      <button id="btn-remove">Remove last node</button>
+      <button id="btn-attr">Toggle attribute</button>
+      <button id="btn-text">Edit text</button>
+    </div>
+    <div id="sandbox" aria-label="DOM sandbox"></div>
+  </section>
+
+  <section class="panel">
+    <h2>// 3. mutation log</h2>
+    <div class="logbar">
+      <span id="counter">records: <b>0</b></span>
+      <button id="btn-clear" class="danger">Clear log</button>
+    </div>
+    <div id="log" aria-live="polite"><div class="empty">No mutations yet. Poke the sandbox above.</div></div>
+  </section>
+
+  <section class="panel">
+    <h2>// 4. practical example: stop polling for third-party widgets</h2>
+    <p style="color:var(--dim); font-size:0.92rem;">
+      The classic use case: a chat widget, ad slot, or analytics script injects markup
+      <em>after</em> your code runs. Instead of a <code>setInterval</code> poll,
+      observe and react the moment it lands:
+    </p>
+<pre class="code"><span class="c">// polling: wasteful, races with the widget</span>
+<span class="k">const</span> timer = <span class="f">setInterval</span>(() =&gt; {
+  <span class="k">const</span> el = document.<span class="f">querySelector</span>(<span class="s">'#chat-widget'</span>);
+  <span class="k">if</span> (el) { <span class="f">clearInterval</span>(timer); <span class="f">initWidget</span>(el); }
+}, <span class="s">250</span>);
+
+<span class="c">// observer: exact, zero wasted work</span>
+<span class="k">const</span> obs = <span class="k">new</span> <span class="f">MutationObserver</span>(<span class="p">(</span>records<span class="p">)</span> =&gt; {
+  <span class="k">for</span> (<span class="k">const</span> m <span class="k">of</span> records) {
+    <span class="k">for</span> (<span class="k">const</span> n <span class="k">of</span> m.addedNodes) {
+      <span class="k">if</span> (n.id === <span class="s">'chat-widget'</span>) { obs.<span class="f">disconnect</span>(); <span class="f">initWidget</span>(n); }
+    }
+  }
+});
+obs.<span class="f">observe</span>(document.body, { childList: <span class="k">true</span>, subtree: <span class="k">true</span> });</pre>
+    <p style="color:var(--dim); font-size:0.92rem;">
+      One caution: <code>subtree: true</code> on a huge root like
+      <code>document.body</code> watches <em>everything</em>. Always observe the
+      narrowest node that contains what you care about.
+    </p>
+  </section>
+
+  <footer>
+    Built by <a href="https://dominic.balass.one">Dominic Balassone</a> &mdash;
+    a demo for the <code>MutationObserver</code> API.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var sandbox = document.getElementById('sandbox');
+  var log = document.getElementById('log');
+  var counterEl = document.getElementById('counter').querySelector('b');
+  var hint = document.getElementById('cfg-hint');
+  var nodeCount = 0;
+  var recordCount = 0;
+  var textNode = document.createTextNode('editable text line — press "Edit text"');
+  var textLine = document.createElement('div');
+  textLine.className = 'textline';
+  textLine.appendChild(textNode);
+  sandbox.appendChild(textLine);
+
+  function cfg() {
+    return {
+      childList: document.getElementById('cfg-childList').checked,
+      attributes: document.getElementById('cfg-attributes').checked,
+      characterData: document.getElementById('cfg-characterData').checked,
+      subtree: document.getElementById('cfg-subtree').checked
+    };
+  }
+
+  var observer = null;
+
+  function describeTarget(t) {
+    if (t.nodeType === 3) return '#text';
+    var s = t.tagName ? t.tagName.toLowerCase() : '?';
+    if (t.id) s += '#' + t.id;
+    else if (t.className && typeof t.className === 'string') s += '.' + t.className.trim().split(/\s+/)[0];
+    return s;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function addRecord(m) {
+    recordCount++;
+    counterEl.textContent = recordCount;
+    var empty = log.querySelector('.empty');
+    if (empty) empty.remove();
+
+    var detail = 'target <b>' + esc(describeTarget(m.target)) + '</b>';
+    if (m.type === 'childList') {
+      detail += ' &middot; added <b>' + m.addedNodes.length + '</b> / removed <b>' + m.removedNodes.length + '</b>';
+    } else if (m.type === 'attributes') {
+      detail += ' &middot; attribute <b>' + esc(m.attributeName) + '</b>';
+      detail += ' &middot; old value <b>' + esc(m.oldValue === null ? '(none)' : m.oldValue) + '</b>';
+    } else if (m.type === 'characterData') {
+      detail += ' &middot; old value <b>' + esc(m.oldValue) + '</b>';
+    }
+
+    var div = document.createElement('div');
+    div.className = 'rec ' + m.type;
+    div.innerHTML = '<span class="rtype">' + m.type + '</span><br><span class="detail">' + detail + '</span>';
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function startObserver() {
+    if (observer) { observer.disconnect(); observer = null; }
+    var c = cfg();
+    if (!c.childList && !c.attributes && !c.characterData) {
+      hint.style.display = 'block';
+      return;
+    }
+    hint.style.display = 'none';
+    observer = new MutationObserver(function (mutations) {
+      // the callback gets a BATCH of records, not one per mutation
+      for (var i = 0; i < mutations.length; i++) addRecord(mutations[i]);
+    });
+    observer.observe(sandbox, {
+      childList: c.childList,
+      attributes: c.attributes,
+      attributeOldValue: c.attributes,
+      characterData: c.characterData,
+      characterDataOldValue: c.characterData,
+      subtree: c.subtree
+    });
+  }
+
+  ['cfg-childList', 'cfg-attributes', 'cfg-characterData', 'cfg-subtree'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', startObserver);
+  });
+
+  document.getElementById('btn-add').addEventListener('click', function () {
+    nodeCount++;
+    var d = document.createElement('div');
+    d.className = 'node';
+    d.textContent = 'Node ' + nodeCount;
+    sandbox.appendChild(d);
+  });
+
+  document.getElementById('btn-remove').addEventListener('click', function () {
+    var nodes = sandbox.querySelectorAll('.node');
+    if (nodes.length) nodes[nodes.length - 1].remove();
+  });
+
+  document.getElementById('btn-attr').addEventListener('click', function () {
+    var cur = sandbox.getAttribute('data-active') === 'true';
+    sandbox.setAttribute('data-active', cur ? 'false' : 'true');
+  });
+
+  document.getElementById('btn-text').addEventListener('click', function () {
+    textNode.data = 'edited at ' + new Date().toLocaleTimeString();
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    log.innerHTML = '<div class="empty">No mutations yet. Poke the sandbox above.</div>';
+    recordCount = 0;
+    counterEl.textContent = '0';
+  });
+
+  startObserver();
+})();
+</script>
+</body>
+</html>
