@@ -82,6 +82,23 @@
   /* ---- Footer year ---- */
   var year = document.getElementById('year');
   if (year) { year.textContent = String(new Date().getFullYear()); }
+
+  /* ---- Years of experience, counted from 2016 ---- */
+  var expYears = new Date().getFullYear() - 2016;
+  var expSpans = document.querySelectorAll('[data-exp-years]');
+  for (var i = 0; i < expSpans.length; i++) {
+    expSpans[i].textContent = String(expYears);
+  }
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) {
+    metaDesc.setAttribute('content',
+      metaDesc.getAttribute('content').replace(/\d+ years/, expYears + ' years'));
+  }
+  var ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc) {
+    ogDesc.setAttribute('content',
+      ogDesc.getAttribute('content').replace(/\d+ years/, expYears + ' years'));
+  }
 })();
 
 /* ---- Cellular automaton backdrop (Game of Life) ----
