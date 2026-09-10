@@ -250,6 +250,8 @@ main, .site-footer { position: relative; z-index: 1; }
 .btn:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn-primary:hover { color: var(--accent-ink); filter: brightness(1.06); }
+.btn-dark { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.btn-dark:hover { color: var(--bg); filter: brightness(1.15); }
 
 /* ---------- About ---------- */
 .prose { max-width: 46rem; }
