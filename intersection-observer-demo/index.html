@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IntersectionObserver Playground</title>
+<meta name="description" content="Interactive playground for the IntersectionObserver API — including using viewport visibility to trigger precise A/B test enrollment.">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --fg: #c9d1d9;
+    --dim: #8b949e;
+    --purple: #bc8cff;
+    --red: #ff7b72;
+    --blue: #79c0ff;
+    --orange: #ffa657;
+    --green: #7ee787;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; border-radius: 0 !important; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 20px 60px; }
+  header h1 { font-size: 2rem; margin: 0 0 8px; color: #fff; }
+  header h1 .accent { color: var(--purple); }
+  header p { color: var(--dim); max-width: 680px; }
+  code, .mono { font-family: var(--mono); font-size: 0.9em; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin: 24px 0;
+  }
+  .panel h2 {
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+    color: var(--purple);
+    font-family: var(--mono);
+    font-weight: 600;
+  }
+  .panel h3 { color: #fff; font-size: 0.95rem; margin: 18px 0 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button {
+    background: #21262d;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--purple); color: #fff; }
+  button.primary { border-color: var(--purple); color: var(--purple); }
+  button.primary:hover { background: var(--purple); color: #0d1117; }
+  label { font-family: var(--mono); font-size: 0.85rem; color: var(--dim); }
+  input[type="range"] { accent-color: var(--purple); }
+  input[type="text"], input[type="number"] {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 6px 8px;
+    width: 110px;
+  }
+  input[type="checkbox"] { accent-color: var(--purple); }
+  /* ---- observed boxes ---- */
+  .spacer { height: 46vh; display: flex; align-items: center; justify-content: center; color: var(--dim); font-family: var(--mono); font-size: 0.8rem; }
+  .io-box {
+    border: 2px dashed var(--border);
+    padding: 34px 20px;
+    margin: 0 auto;
+    max-width: 520px;
+    text-align: center;
+    font-family: var(--mono);
+    color: var(--dim);
+    transition: border-color 0.25s, box-shadow 0.25s, color 0.25s;
+  }
+  .io-box .ratio { display: block; margin-top: 8px; font-size: 0.8rem; color: var(--blue); }
+  .io-box.in-view {
+    border-style: solid;
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 24px rgba(126, 231, 135, 0.25);
+  }
+  /* ---- log ---- */
+  #event-log {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    background: #0d1117;
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+  }
+  #event-log li { padding: 2px 0; border-bottom: 1px dotted #21262d; }
+  #event-log li:last-child { border-bottom: none; }
+  #event-log .t { color: var(--dim); }
+  #event-log .vis { color: var(--green); }
+  #event-log .hid { color: var(--red); }
+  #event-log .enroll { color: var(--purple); font-weight: bold; }
+  /* ---- A/B experiment ---- */
+  #experiment-zone {
+    border: 1px solid var(--border);
+    padding: 24px;
+    background: #0d1117;
+  }
+  #experiment-zone.enrolled { border-color: var(--purple); box-shadow: 0 0 24px rgba(188, 140, 255, 0.15); }
+  .variant-card { display: none; text-align: center; padding: 12px 0; }
+  .variant-card.active { display: block; }
+  .variant-card h3 { color: #fff; margin: 0 0 6px; }
+  .variant-card p.tag { font-family: var(--mono); font-size: 0.75rem; color: var(--orange); margin: 0 0 14px; }
+  .cta {
+    display: inline-block;
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .cta-a { background: var(--blue); color: #0d1117; }
+  .cta-b { background: var(--green); color: #0d1117; }
+  .enroll-banner {
+    display: none;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--purple);
+    border: 1px dashed var(--purple);
+    padding: 10px 12px;
+    margin-bottom: 16px;
+  }
+  .enroll-banner.show { display: block; }
+  table.stats { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.82rem; margin-top: 10px; }
+  table.stats th, table.stats td { border: 1px solid var(--border); padding: 8px 10px; text-align: right; }
+  table.stats th:first-child, table.stats td:first-child { text-align: left; }
+  table.stats th { color: var(--dim); font-weight: 600; background: #161b22; }
+  table.stats td.winner { color: var(--green); font-weight: bold; }
+  .bar { height: 8px; background: #21262d; margin-top: 4px; }
+  .bar > div { height: 100%; background: var(--purple); }
+  .takeaway {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--orange);
+    background: rgba(255, 166, 87, 0.06);
+    font-size: 0.9rem;
+  }
+  .takeaway strong { color: var(--orange); }
+  pre.snippet {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    padding: 16px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+  pre.snippet .k { color: var(--purple); }
+  pre.snippet .s { color: var(--green); }
+  pre.snippet .c { color: var(--dim); }
+  pre.snippet .f { color: var(--blue); }
+  footer { margin-top: 40px; color: var(--dim); font-size: 0.8rem; font-family: var(--mono); }
+  footer a { color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1><span class="accent">IntersectionObserver</span> Playground</h1>
+    <p>
+      The browser tells you, for free, when any element enters or leaves the viewport —
+      no scroll listeners, no layout thrash. Scroll down: the dashed boxes light up the
+      moment they cross your visibility threshold, and every crossing is logged.
+    </p>
+    <p>
+      Then try the <a href="#ab-test" style="color: var(--purple)">A/B test demo</a>:
+      it only enrolls you in the experiment <em>after</em> the test content scrolls into view —
+      which is how you stop counting people who never saw your variant.
+    </p>
+  </header>
+
+  <div class="panel">
+    <h2>// 1. the observer, live</h2>
+    <div class="row" style="gap: 18px;">
+      <label>threshold <input type="range" id="threshold" min="0" max="1" step="0.05" value="0.5"> <span id="threshold-val" class="mono">0.50</span></label>
+      <label>rootMargin <input type="text" id="rootmargin" value="0px"></label>
+      <button id="apply" class="primary">rebuild observer</button>
+    </div>
+    <div class="row" id="box-toggles" style="margin-top: 12px; gap: 14px;"></div>
+    <div id="observer-error" class="mono" style="color: var(--red); font-size: 0.8rem; margin-top: 8px;"></div>
+    <h3>event log</h3>
+    <ul id="event-log"><li><span class="t">--</span> observer armed. scroll down.</li></ul>
+  </div>
+
+  <div class="spacer">▼ scroll — box-1 is below ▼</div>
+  <div class="io-box" id="box-1" data-box="box-1">box-1<span class="ratio"></span></div>
+  <div class="spacer">▼ box-2 ▼</div>
+  <div class="io-box" id="box-2" data-box="box-2">box-2<span class="ratio"></span></div>
+  <div class="spacer">▼ box-3 ▼</div>
+  <div class="io-box" id="box-3" data-box="box-3">box-3<span class="ratio"></span></div>
+  <div class="spacer">▼ box-4, then the A/B test ▼</div>
+  <div class="io-box" id="box-4" data-box="box-4">box-4<span class="ratio"></span></div>
+
+  <div class="panel" id="ab-test" style="margin-top: 60px;">
+    <h2>// 2. honest A/B tests: enroll on visibility</h2>
+    <p style="color: var(--dim); font-size: 0.92rem;">
+      The classic A/B testing mistake: your variant lives halfway down the page, but you enroll
+      <em>every page load</em> into the test. Visitors who bounced before ever seeing the variant
+      count as non-converters — diluting your numbers and hiding real winners.
+      The fix is one observer: enroll a visitor only when the experiment zone actually enters
+      their viewport.
+    </p>
+
+    <h3>live enrollment</h3>
+    <div id="experiment-zone">
+      <div class="enroll-banner" id="enroll-banner"></div>
+      <div class="variant-card" id="variant-a">
+        <p class="tag">VARIANT A</p>
+        <h3>Try it free for 14 days</h3>
+        <button class="cta cta-a" data-convert>Start free trial</button>
+      </div>
+      <div class="variant-card" id="variant-b">
+        <p class="tag">VARIANT B</p>
+        <h3>Get started in 30 seconds</h3>
+        <button class="cta cta-b" data-convert>No card required — begin</button>
+      </div>
+      <p class="mono" id="zone-hint" style="color: var(--dim); font-size: 0.8rem; text-align: center;">
+        ↑ scroll this zone into view to get enrolled (threshold 0.5) ↑
+      </p>
+    </div>
+
+    <h3>your session</h3>
+    <table class="stats">
+      <tr><th>metric</th><th>value</th></tr>
+      <tr><td>assigned variant</td><td id="s-variant">— (not enrolled yet)</td></tr>
+      <tr><td>enrolled at</td><td id="s-time">—</td></tr>
+      <tr><td>conversions</td><td id="s-conv">0</td></tr>
+    </table>
+    <div class="row" style="margin-top: 10px;">
+      <button id="reset-session">reset session</button>
+    </div>
+
+    <h3>what visibility does to your measurements</h3>
+    <p style="color: var(--dim); font-size: 0.92rem;">
+      Simulate 10,000 visitors. True conversion rates: A&nbsp;=&nbsp;8%, B&nbsp;=&nbsp;12%
+      (B genuinely wins). But 40% of visitors never scroll far enough to see the experiment zone.
+      Compare measuring <strong style="color: var(--green)">only viewers</strong> (enrolled by
+      IntersectionObserver) against the <strong style="color: var(--red)">naive</strong> approach
+      (every page load counts).
+    </p>
+    <div class="row">
+      <button id="run-sim" class="primary">simulate 10,000 visitors</button>
+    </div>
+    <div id="sim-results" style="display: none;">
+      <table class="stats">
+        <tr><th>measurement</th><th>variant A rate</th><th>variant B rate</th><th>observed lift</th></tr>
+        <tr>
+          <td>viewers only (IntersectionObserver)</td>
+          <td id="r-a-viewers">—</td><td id="r-b-viewers" class="winner">—</td><td id="r-lift-viewers">—</td>
+        </tr>
+        <tr>
+          <td>naive (all page loads)</td>
+          <td id="r-a-naive">—</td><td id="r-b-naive">—</td><td id="r-lift-naive">—</td>
+        </tr>
+      </table>
+      <div class="takeaway" id="sim-takeaway"></div>
+      <p class="mono" style="color: var(--dim); font-size: 0.75rem; margin-top: 10px;">
+        sample-size estimate: n ≈ 7.84 · (p₁(1−p₁) + p₂(1−p₂)) / (p₂−p₁)² per variant
+        (two-proportion z-test, 95% confidence, 80% power)
+      </p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>// 3. the pattern in 10 lines</h2>
+    <pre class="snippet"><span class="c">// enroll a visitor only when the experiment zone is actually seen</span>
+<span class="k">const</span> io = <span class="k">new</span> <span class="f">IntersectionObserver</span>((entries) =&gt; {
+  <span class="k">for</span> (<span class="k">const</span> e <span class="k">of</span> entries) {
+    <span class="k">if</span> (e.isIntersecting) {
+      <span class="f">enrollInExperiment</span>(e.target.dataset.variant);
+      io.<span class="f">unobserve</span>(e.target); <span class="c">// count each visitor once</span>
+    }
+  }
+}, { threshold: <span class="s">0.5</span> });
+
+io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(<span class="s">'#experiment-zone'</span>));</pre>
+    <p style="color: var(--dim); font-size: 0.9rem;">
+      The callback runs off the main thread's layout work — unlike a scroll handler, it never
+      forces the browser to recalculate styles to answer "is this visible?". That's why it's
+      the right tool for lazy-loading images, infinite scroll, impression tracking, scroll-spy
+      navs — and gating experiment enrollment on actual visibility.
+    </p>
+  </div>
+
+  <footer>
+    built for a LinkedIn series on underused browser APIs ·
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver">MDN: IntersectionObserver</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  /* ============ 1. live observer playground ============ */
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.io-box'));
+  var logEl = document.getElementById('event-log');
+  var errEl = document.getElementById('observer-error');
+  var thresholdInput = document.getElementById('threshold');
+  var thresholdVal = document.getElementById('threshold-val');
+  var rootMarginInput = document.getElementById('rootmargin');
+  var togglesEl = document.getElementById('box-toggles');
+  var observer = null;
+
+  function now() {
+    return new Date().toLocaleTimeString('en-GB', { hour12: false });
+  }
+
+  function log(html, cls) {
+    var li = document.createElement('li');
+    if (cls) li.className = cls;
+    li.innerHTML = '<span class="t">[' + now() + ']</span> ' + html;
+    logEl.insertBefore(li, logEl.firstChild);
+    while (logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
+  }
+
+  // per-box observe toggles
+  var observeState = {};
+  boxes.forEach(function (box) {
+    var id = box.getAttribute('data-box');
+    observeState[id] = true;
+    var label = document.createElement('label');
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = true;
+    cb.addEventListener('change', function () {
+      observeState[id] = cb.checked;
+      buildObserver();
+      log('observation of <b>' + id + '</b> ' + (cb.checked ? 'enabled' : 'disabled') + '.');
+    });
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(' ' + id));
+    togglesEl.appendChild(label);
+  });
+
+  function buildObserver() {
+    if (observer) observer.disconnect();
+    errEl.textContent = '';
+    var threshold = parseFloat(thresholdInput.value);
+    var rootMargin = rootMarginInput.value.trim() || '0px';
+    try {
+      observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var id = e.target.getAttribute('data-box');
+          var ratio = e.intersectionRatio.toFixed(2);
+          e.target.querySelector('.ratio').textContent =
+            e.isIntersecting ? 'visible — ratio ' + ratio : '';
+          e.target.classList.toggle('in-view', e.isIntersecting);
+          log('<b>' + id + '</b> → ' +
+            (e.isIntersecting
+              ? '<span class="vis">visible</span> (ratio ' + ratio + ')'
+              : '<span class="hid">hidden</span> (ratio ' + ratio + ')'));
+        });
+      }, { threshold: threshold, rootMargin: rootMargin });
+    } catch (err) {
+      errEl.textContent = 'invalid observer options: ' + err.message;
+      return;
+    }
+    boxes.forEach(function (box) {
+      if (observeState[box.getAttribute('data-box')]) observer.observe(box);
+      else box.classList.remove('in-view');
+    });
+  }
+
+  thresholdInput.addEventListener('input', function () {
+    thresholdVal.textContent = parseFloat(thresholdInput.value).toFixed(2);
+  });
+  document.getElementById('apply').addEventListener('click', function () {
+    buildObserver();
+    log('observer rebuilt — threshold ' + parseFloat(thresholdInput.value).toFixed(2) +
+      ', rootMargin "' + (rootMarginInput.value.trim() || '0px') + '".');
+  });
+  buildObserver();
+
+  /* ============ 2. A/B test: enroll on visibility ============ */
+  var zone = document.getElementById('experiment-zone');
+  var banner = document.getElementById('enroll-banner');
+  var hint = document.getElementById('zone-hint');
+  var session = { variant: null, enrolledAt: null, conversions: 0 };
+
+  function renderSession() {
+    document.getElementById('s-variant').textContent =
+      session.variant ? 'Variant ' + session.variant : '— (not enrolled yet)';
+    document.getElementById('s-time').textContent = session.enrolledAt || '—';
+    document.getElementById('s-conv').textContent = session.conversions;
+  }
+
+  var enrollObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting || session.variant) return;
+      session.variant = Math.random() < 0.5 ? 'A' : 'B';
+      session.enrolledAt = now();
+      zone.classList.add('enrolled');
+      document.getElementById('variant-' + session.variant.toLowerCase()).classList.add('active');
+      hint.style.display = 'none';
+      banner.textContent = 'ENROLLED — you are seeing Variant ' + session.variant +
+        ' (assigned because this zone entered your viewport at ' + session.enrolledAt +
+        ', threshold 0.5). A page-load-based test would have enrolled you before you scrolled here.';
+      banner.classList.add('show');
+      log('<span class="enroll">enrolled in Variant ' + session.variant +
+        '</span> — experiment zone became visible.', 'enroll');
+      enrollObserver.unobserve(zone);
+      renderSession();
+    });
+  }, { threshold: 0.5 });
+  enrollObserver.observe(zone);
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-convert]'), function (btn) {
+    btn.addEventListener('click', function () {
+      if (!session.variant) return;
+      session.conversions++;
+      renderSession();
+      log('conversion recorded for <b>Variant ' + session.variant + '</b> (session total: ' +
+        session.conversions + ').');
+    });
+  });
+
+  document.getElementById('reset-session').addEventListener('click', function () {
+    session = { variant: null, enrolledAt: null, conversions: 0 };
+    zone.classList.remove('enrolled');
+    banner.classList.remove('show');
+    hint.style.display = '';
+    document.getElementById('variant-a').classList.remove('active');
+    document.getElementById('variant-b').classList.remove('active');
+    enrollObserver.observe(zone);
+    renderSession();
+    log('session reset — scroll the zone back into view to re-enroll.');
+  });
+
+  /* ============ 3. visitor simulation ============ */
+  function sampleSize(p1, p2) {
+    var d = p2 - p1;
+    return Math.ceil(7.84 * (p1 * (1 - p1) + p2 * (1 - p2)) / (d * d));
+  }
+
+  document.getElementById('run-sim').addEventListener('click', function () {
+    var N = 10000, TRUE_A = 0.08, TRUE_B = 0.12, VISIBLE = 0.60;
+    var viewersA = 0, viewersB = 0, convA = 0, convB = 0;
+    var naiveA = 0, naiveB = 0;
+    var naiveConvA = 0, naiveConvB = 0;
+    // conversions happen only among viewers; the naive test still divides by all page loads
+    for (var j = 0; j < N; j++) {
+      var v = Math.random() < 0.5 ? 'A' : 'B';
+      var s = Math.random() < VISIBLE;
+      if (v === 'A') {
+        naiveA++;
+        if (s) { viewersA++; if (Math.random() < TRUE_A) { convA++; naiveConvA++; } }
+      } else {
+        naiveB++;
+        if (s) { viewersB++; if (Math.random() < TRUE_B) { convB++; naiveConvB++; } }
+      }
+    }
+    var rAv = convA / viewersA, rBv = convB / viewersB;
+    var rAn = naiveConvA / naiveA, rBn = naiveConvB / naiveB;
+    function pct(x) { return (x * 100).toFixed(2) + '%'; }
+    document.getElementById('r-a-viewers').textContent = pct(rAv) + ' (' + convA + '/' + viewersA + ')';
+    document.getElementById('r-b-viewers').textContent = pct(rBv) + ' (' + convB + '/' + viewersB + ')';
+    document.getElementById('r-lift-viewers').textContent = '+' + ((rBv / rAv - 1) * 100).toFixed(1) + '%';
+    document.getElementById('r-a-naive').textContent = pct(rAn) + ' (' + naiveConvA + '/' + naiveA + ')';
+    document.getElementById('r-b-naive').textContent = pct(rBn) + ' (' + naiveConvB + '/' + naiveB + ')';
+    document.getElementById('r-lift-naive').textContent = '+' + ((rBn / rAn - 1) * 100).toFixed(1) + '%';
+    var nViewers = sampleSize(rAv, rBv);
+    var nNaive = sampleSize(rAn, rBn);
+    var ratio = (nNaive / nViewers).toFixed(1);
+    document.getElementById('sim-takeaway').innerHTML =
+      '<strong>Same visitors, same behavior — different measurement.</strong> ' +
+      'The viewers-only test recovers the true rates (~8% vs ~12%). The naive test dilutes both ' +
+      'toward zero because 40% of its "participants" never saw the variant. To detect the lift with ' +
+      '95% confidence you would need roughly <strong>' + nViewers.toLocaleString() +
+      ' visitors per variant</strong> measuring viewers, versus <strong>' +
+      nNaive.toLocaleString() + ' per variant</strong> measuring all page loads — about ' +
+      '<strong>' + ratio + '× the traffic</strong>.';
+    document.getElementById('sim-results').style.display = 'block';
+    log('simulation complete — 10,000 visitors, 60% visibility.');
+  });
+
+  renderSession();
+})();
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C0DG17Z442');
+</script>
+</body>
+</html>
