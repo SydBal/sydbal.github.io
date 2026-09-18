@@ -173,6 +173,48 @@
   pre.snippet .f { color: var(--blue); }
   footer { margin-top: 40px; color: var(--dim); font-size: 0.8rem; font-family: var(--mono); }
   footer a { color: var(--purple); }
+  /* ---- sticky live log ---- */
+  #live-feed {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    width: 330px;
+    max-width: calc(100vw - 32px);
+    background: rgba(13, 17, 23, 0.95);
+    border: 1px solid var(--purple);
+    z-index: 60;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  }
+  #live-feed.hidden { display: none; }
+  #live-feed .feed-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--purple);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+  }
+  #live-feed .feed-head button {
+    background: none;
+    border: none;
+    color: var(--dim);
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+  }
+  #live-feed .feed-head button:hover { color: #fff; border: none; }
+  #live-feed-entries { list-style: none; margin: 0; padding: 8px 10px; }
+  #live-feed-entries li { padding: 2px 0; border-bottom: 1px dotted #21262d; }
+  #live-feed-entries li:last-child { border-bottom: none; }
+  #live-feed-entries .t { color: var(--dim); }
+  #live-feed-entries .vis { color: var(--green); }
+  #live-feed-entries .hid { color: var(--red); }
+  #live-feed-entries .enroll { color: var(--purple); font-weight: bold; }
 </style>
 </head>
 <body>
@@ -195,10 +237,15 @@
   <div class="panel">
     <h2>// 1. the observer, live</h2>
     <div class="row" style="gap: 18px;">
-      <label>threshold <input type="range" id="threshold" min="0" max="1" step="0.05" value="0.5"> <span id="threshold-val" class="mono">0.50</span></label>
+      <label>visible before it counts <input type="range" id="threshold" min="0" max="1" step="0.05" value="0.5" aria-label="fraction of the element that must be visible"> <span id="threshold-val" class="mono">50%</span></label>
       <label>rootMargin <input type="text" id="rootmargin" value="0px"></label>
       <button id="apply" class="primary">rebuild observer</button>
     </div>
+    <p class="mono" style="color: var(--dim); font-size: 0.78rem; margin: 10px 0 0;">
+      threshold = how much of a box must be on screen before it counts as "seen":
+      0% fires the moment a single pixel appears, 100% only when the whole box is visible.
+      rootMargin grows or shrinks the watched area — try "-100px" to pull the edges inward.
+    </p>
     <div class="row" id="box-toggles" style="margin-top: 12px; gap: 14px;"></div>
     <div id="observer-error" class="mono" style="color: var(--red); font-size: 0.8rem; margin-top: 8px;"></div>
     <h3>event log</h3>
@@ -310,6 +357,12 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
     <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver">MDN: IntersectionObserver</a>
   </footer>
 </div>
+
+<div id="live-feed" aria-live="polite">
+  <div class="feed-head"><span>&#9679; LIVE LOG</span><button id="feed-hide" aria-label="hide live log">&times;</button></div>
+  <ul id="live-feed-entries"><li><span class="t">--</span> scroll &mdash; updates appear here.</li></ul>
+</div>
+
 <script>
 (function () {
   'use strict';
@@ -322,6 +375,7 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
   var thresholdVal = document.getElementById('threshold-val');
   var rootMarginInput = document.getElementById('rootmargin');
   var togglesEl = document.getElementById('box-toggles');
+  var feedEl = document.getElementById('live-feed-entries');
   var observer = null;
 
   function now() {
@@ -329,11 +383,20 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
   }
 
   function log(html, cls) {
+    var entry = '<span class="t">[' + now() + ']</span> ' + html;
     var li = document.createElement('li');
     if (cls) li.className = cls;
-    li.innerHTML = '<span class="t">[' + now() + ']</span> ' + html;
+    li.innerHTML = entry;
     logEl.insertBefore(li, logEl.firstChild);
     while (logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
+    // mirror the latest entries into the sticky live feed
+    if (feedEl) {
+      var fi = document.createElement('li');
+      if (cls) fi.className = cls;
+      fi.innerHTML = entry;
+      feedEl.insertBefore(fi, feedEl.firstChild);
+      while (feedEl.children.length > 5) feedEl.removeChild(feedEl.lastChild);
+    }
   }
 
   // per-box observe toggles
@@ -364,14 +427,14 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
       observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           var id = e.target.getAttribute('data-box');
-          var ratio = e.intersectionRatio.toFixed(2);
+          var ratio = Math.round(e.intersectionRatio * 100) + '%';
           e.target.querySelector('.ratio').textContent =
-            e.isIntersecting ? 'visible — ratio ' + ratio : '';
+            e.isIntersecting ? 'visible — ' + ratio + ' on screen' : '';
           e.target.classList.toggle('in-view', e.isIntersecting);
           log('<b>' + id + '</b> → ' +
             (e.isIntersecting
-              ? '<span class="vis">visible</span> (ratio ' + ratio + ')'
-              : '<span class="hid">hidden</span> (ratio ' + ratio + ')'));
+              ? '<span class="vis">visible</span> (' + ratio + ' on screen)'
+              : '<span class="hid">hidden</span>'));
         });
       }, { threshold: threshold, rootMargin: rootMargin });
     } catch (err) {
@@ -384,13 +447,18 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
     });
   }
 
+  function pctLabel(v) { return Math.round(parseFloat(v) * 100) + '%'; }
+
   thresholdInput.addEventListener('input', function () {
-    thresholdVal.textContent = parseFloat(thresholdInput.value).toFixed(2);
+    thresholdVal.textContent = pctLabel(thresholdInput.value);
   });
   document.getElementById('apply').addEventListener('click', function () {
     buildObserver();
-    log('observer rebuilt — threshold ' + parseFloat(thresholdInput.value).toFixed(2) +
-      ', rootMargin "' + (rootMarginInput.value.trim() || '0px') + '".');
+    log('observer rebuilt — counts as "seen" at ' + pctLabel(thresholdInput.value) +
+      ' visible, rootMargin "' + (rootMarginInput.value.trim() || '0px') + '".');
+  });
+  document.getElementById('feed-hide').addEventListener('click', function () {
+    document.getElementById('live-feed').classList.add('hidden');
   });
   buildObserver();
 
