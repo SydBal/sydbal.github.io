@@ -176,8 +176,8 @@
   /* ---- sticky live log ---- */
   #live-feed {
     position: fixed;
+    top: 16px;
     right: 16px;
-    bottom: 16px;
     width: 330px;
     max-width: calc(100vw - 32px);
     background: rgba(13, 17, 23, 0.95);
@@ -358,9 +358,9 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
   </footer>
 </div>
 
-<div id="live-feed" aria-live="polite">
+<div id="live-feed" class="hidden" aria-live="polite">
   <div class="feed-head"><span>&#9679; LIVE LOG</span><button id="feed-hide" aria-label="hide live log">&times;</button></div>
-  <ul id="live-feed-entries"><li><span class="t">--</span> scroll &mdash; updates appear here.</li></ul>
+  <ul id="live-feed-entries"><li><span class="t">--</span> tracking&hellip;</li></ul>
 </div>
 
 <script>
@@ -457,9 +457,22 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
     log('observer rebuilt — counts as "seen" at ' + pctLabel(thresholdInput.value) +
       ' visible, rootMargin "' + (rootMarginInput.value.trim() || '0px') + '".');
   });
+  var feedDismissed = false;
+  var feedBox = document.getElementById('live-feed');
   document.getElementById('feed-hide').addEventListener('click', function () {
-    document.getElementById('live-feed').classList.add('hidden');
+    feedDismissed = true;
+    feedBox.classList.add('hidden');
   });
+  // Show the sticky feed only once the full event-log panel has scrolled out of view.
+  var logPanel = document.getElementById('event-log').closest('.panel');
+  if ('IntersectionObserver' in window && logPanel) {
+    new IntersectionObserver(function (entries) {
+      if (feedDismissed) return;
+      feedBox.classList.toggle('hidden', entries[0].isIntersecting);
+    }, { threshold: 0 }).observe(logPanel);
+  } else {
+    feedBox.classList.remove('hidden');
+  }
   buildObserver();
 
   /* ============ 2. A/B test: enroll on visibility ============ */
