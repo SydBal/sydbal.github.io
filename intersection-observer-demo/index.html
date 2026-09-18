@@ -146,17 +146,8 @@
   table.stats th, table.stats td { border: 1px solid var(--border); padding: 8px 10px; text-align: right; }
   table.stats th:first-child, table.stats td:first-child { text-align: left; }
   table.stats th { color: var(--dim); font-weight: 600; background: #161b22; }
-  table.stats td.winner { color: var(--green); font-weight: bold; }
   .bar { height: 8px; background: #21262d; margin-top: 4px; }
   .bar > div { height: 100%; background: var(--purple); }
-  .takeaway {
-    margin-top: 14px;
-    padding: 12px 14px;
-    border-left: 3px solid var(--orange);
-    background: rgba(255, 166, 87, 0.06);
-    font-size: 0.9rem;
-  }
-  .takeaway strong { color: var(--orange); }
   pre.snippet {
     background: #0d1117;
     border: 1px solid var(--border);
@@ -298,36 +289,6 @@
     </table>
     <div class="row" style="margin-top: 10px;">
       <button id="reset-session">reset session</button>
-    </div>
-
-    <h3>what visibility does to your measurements</h3>
-    <p style="color: var(--dim); font-size: 0.92rem;">
-      Simulate 10,000 visitors. True conversion rates: A&nbsp;=&nbsp;8%, B&nbsp;=&nbsp;12%
-      (B genuinely wins). But 40% of visitors never scroll far enough to see the experiment zone.
-      Compare measuring <strong style="color: var(--green)">only viewers</strong> (enrolled by
-      IntersectionObserver) against the <strong style="color: var(--red)">naive</strong> approach
-      (every page load counts).
-    </p>
-    <div class="row">
-      <button id="run-sim" class="primary">simulate 10,000 visitors</button>
-    </div>
-    <div id="sim-results" style="display: none;">
-      <table class="stats">
-        <tr><th>measurement</th><th>variant A rate</th><th>variant B rate</th><th>observed lift</th></tr>
-        <tr>
-          <td>viewers only (IntersectionObserver)</td>
-          <td id="r-a-viewers">—</td><td id="r-b-viewers" class="winner">—</td><td id="r-lift-viewers">—</td>
-        </tr>
-        <tr>
-          <td>naive (all page loads)</td>
-          <td id="r-a-naive">—</td><td id="r-b-naive">—</td><td id="r-lift-naive">—</td>
-        </tr>
-      </table>
-      <div class="takeaway" id="sim-takeaway"></div>
-      <p class="mono" style="color: var(--dim); font-size: 0.75rem; margin-top: 10px;">
-        sample-size estimate: n ≈ 7.84 · (p₁(1−p₁) + p₂(1−p₂)) / (p₂−p₁)² per variant
-        (two-proportion z-test, 95% confidence, 80% power)
-      </p>
     </div>
   </div>
 
@@ -528,53 +489,6 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
     enrollObserver.observe(zone);
     renderSession();
     log('session reset — scroll the zone back into view to re-enroll.');
-  });
-
-  /* ============ 3. visitor simulation ============ */
-  function sampleSize(p1, p2) {
-    var d = p2 - p1;
-    return Math.ceil(7.84 * (p1 * (1 - p1) + p2 * (1 - p2)) / (d * d));
-  }
-
-  document.getElementById('run-sim').addEventListener('click', function () {
-    var N = 10000, TRUE_A = 0.08, TRUE_B = 0.12, VISIBLE = 0.60;
-    var viewersA = 0, viewersB = 0, convA = 0, convB = 0;
-    var naiveA = 0, naiveB = 0;
-    var naiveConvA = 0, naiveConvB = 0;
-    // conversions happen only among viewers; the naive test still divides by all page loads
-    for (var j = 0; j < N; j++) {
-      var v = Math.random() < 0.5 ? 'A' : 'B';
-      var s = Math.random() < VISIBLE;
-      if (v === 'A') {
-        naiveA++;
-        if (s) { viewersA++; if (Math.random() < TRUE_A) { convA++; naiveConvA++; } }
-      } else {
-        naiveB++;
-        if (s) { viewersB++; if (Math.random() < TRUE_B) { convB++; naiveConvB++; } }
-      }
-    }
-    var rAv = convA / viewersA, rBv = convB / viewersB;
-    var rAn = naiveConvA / naiveA, rBn = naiveConvB / naiveB;
-    function pct(x) { return (x * 100).toFixed(2) + '%'; }
-    document.getElementById('r-a-viewers').textContent = pct(rAv) + ' (' + convA + '/' + viewersA + ')';
-    document.getElementById('r-b-viewers').textContent = pct(rBv) + ' (' + convB + '/' + viewersB + ')';
-    document.getElementById('r-lift-viewers').textContent = '+' + ((rBv / rAv - 1) * 100).toFixed(1) + '%';
-    document.getElementById('r-a-naive').textContent = pct(rAn) + ' (' + naiveConvA + '/' + naiveA + ')';
-    document.getElementById('r-b-naive').textContent = pct(rBn) + ' (' + naiveConvB + '/' + naiveB + ')';
-    document.getElementById('r-lift-naive').textContent = '+' + ((rBn / rAn - 1) * 100).toFixed(1) + '%';
-    var nViewers = sampleSize(rAv, rBv);
-    var nNaive = sampleSize(rAn, rBn);
-    var ratio = (nNaive / nViewers).toFixed(1);
-    document.getElementById('sim-takeaway').innerHTML =
-      '<strong>Same visitors, same behavior — different measurement.</strong> ' +
-      'The viewers-only test recovers the true rates (~8% vs ~12%). The naive test dilutes both ' +
-      'toward zero because 40% of its "participants" never saw the variant. To detect the lift with ' +
-      '95% confidence you would need roughly <strong>' + nViewers.toLocaleString() +
-      ' visitors per variant</strong> measuring viewers, versus <strong>' +
-      nNaive.toLocaleString() + ' per variant</strong> measuring all page loads — about ' +
-      '<strong>' + ratio + '× the traffic</strong>.';
-    document.getElementById('sim-results').style.display = 'block';
-    log('simulation complete — 10,000 visitors, 60% visibility.');
   });
 
   renderSession();
