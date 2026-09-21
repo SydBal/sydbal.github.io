@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Basics and Focus Trap - Dominic Balassone</title>
+<meta name="description" content="An interactive demo of keyboard focus, :focus-visible, and how to trap focus inside a modal dialog the accessible way.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --border: #e4e4e7;
+    --code-bg: #1d1d26;
+    --code-ink: #eceaf6;
+    --good: #15803d;
+    --bad: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --border: #2c2c34;
+      --good: #4ade80;
+      --bad: #f87171;
+    }
+  }
+  * { border-radius: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  /* Visible focus for keyboard users, styled on :focus-visible so mouse
+     clicks do not get a ring nobody asked for. */
+  :focus-visible {
+    outline: 3px solid var(--purple);
+    outline-offset: 2px;
+  }
+  header.top {
+    border-bottom: 3px solid var(--purple);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  header.top strong { font-size: 1.05rem; }
+  header.top a { color: var(--purple); }
+  main { max-width: 44rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 0.5rem; }
+  h1 .marker { color: var(--purple); }
+  h2 { font-size: 1.4rem; margin: 0 0 0.75rem; }
+  section.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 5px 5px 0 rgba(124, 58, 237, 0.22);
+    padding: 1.5rem;
+    margin: 2.5rem 0;
+  }
+  .lede { color: var(--muted); font-size: 1.1rem; }
+  .playground {
+    border: 1px dashed var(--border);
+    padding: 1rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  button, .btn {
+    font: inherit;
+    cursor: pointer;
+    background: var(--purple);
+    color: #fff;
+    border: 1px solid var(--purple-deep);
+    padding: 0.55rem 1.1rem;
+  }
+  button:hover, .btn:hover { background: var(--purple-deep); }
+  button.secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  button.secondary:hover { border-color: var(--purple); color: var(--purple); }
+  /* Demo of :focus (always shows a ring) vs :focus-visible (keyboard only). */
+  .demo-focus:focus { outline: 3px solid var(--purple); outline-offset: 2px; }
+  input[type="text"], input[type="search"] {
+    font: inherit;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  a { color: var(--purple); }
+  .readout {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 0.9rem 1rem;
+    margin: 1rem 0;
+    min-height: 3.2rem;
+    overflow-wrap: anywhere;
+  }
+  .readout .label { display: block; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.25rem; }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  code.inline { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code-bg); color: var(--code-ink); padding: 0.1rem 0.35rem; font-size: 0.9em; }
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    margin-bottom: 0.75rem;
+    color: #fff;
+  }
+  .badge-broken { background: var(--bad); }
+  .badge-fixed { background: var(--good); }
+  .hint {
+    border-left: 4px solid var(--purple);
+    padding: 0.5rem 0.9rem;
+    margin: 1rem 0;
+    color: var(--muted);
+  }
+  ol.recipe li { margin-bottom: 0.5rem; }
+  /* Modal overlay */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+  }
+  .overlay[hidden] { display: none; }
+  .dialog {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    box-shadow: 8px 8px 0 rgba(124, 58, 237, 0.35);
+    max-width: 28rem;
+    width: 100%;
+    padding: 1.5rem;
+  }
+  .dialog h2 { margin-top: 0; }
+  .dialog .row { display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; }
+  .dialog label { display: block; margin-top: 1rem; }
+  .dialog input { width: 100%; margin-top: 0.35rem; }
+  .dialog .focusline { font-size: 0.85rem; color: var(--muted); margin-top: 1rem; }
+  .dialog .focusline code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+  footer.page {
+    border-top: 3px solid var(--purple);
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  footer.page a { color: var(--purple); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <strong>Focus Basics and Focus Trap</strong>
+  <a href="https://dominic.balass.one/">dominic.balass.one</a>
+</header>
+
+<main>
+  <h1><span class="marker">&#9632;</span> Focus basics and the focus trap</h1>
+  <p class="lede">Three short experiments. You only need a keyboard. Press <code class="inline">Tab</code> to move, <code class="inline">Shift+Tab</code> to move back, <code class="inline">Enter</code> to activate.</p>
+
+  <!-- 1. WHAT FOCUS IS -->
+  <section class="card" aria-labelledby="s1h">
+    <h2 id="s1h">1. What focus actually is</h2>
+    <p>Focus is the browser keeping track of which element is currently active. When you press <code class="inline">Tab</code>, focus moves from one interactive element to the next in page order. When you press <code class="inline">Enter</code>, the focused element activates.</p>
+    <p>Keyboard users and screen reader users navigate almost entirely through focus. If focus is invisible, or if it jumps somewhere unexpected, the page is unusable for them. Sighted mouse users rarely notice focus at all, which is exactly why it gets neglected.</p>
+    <div class="playground">
+      <button type="button">A button</button>
+      <a href="#s1h">A link</a>
+      <input type="text" id="demo-name" placeholder="A text input" aria-label="Demo text input">
+      <button type="button" class="secondary">Another button</button>
+    </div>
+    <div class="readout" aria-live="polite">
+      <span class="label">Element with focus right now</span>
+      <span class="focus-readout">body (nothing focused yet, press Tab)</span>
+    </div>
+    <h2 style="font-size:1.1rem; margin-top:1.5rem;">:focus vs :focus-visible</h2>
+    <p><code class="inline">:focus</code> matches any focused element, even right after a mouse click. <code class="inline">:focus-visible</code> only matches when the browser decides a visible indicator is needed, which is usually keyboard navigation. Best practice: style <code class="inline">:focus-visible</code> so mouse users never get a ring they did not ask for, while keyboard users always get one.</p>
+    <div class="playground">
+      <button type="button" class="demo-focus secondary">:focus ring (click me with the mouse)</button>
+      <button type="button" class="secondary">:focus-visible ring (click me with the mouse)</button>
+    </div>
+    <p class="hint">Click the first button with your mouse and you get a focus ring anyway. Click the second one and you do not. Now Tab to each of them with the keyboard: both show a ring. That is <code class="inline">:focus-visible</code> doing its job.</p>
+  </section>
+
+  <!-- 2. THE BROKEN MODAL -->
+  <section class="card" aria-labelledby="s2h">
+    <h2 id="s2h">2. The broken modal</h2>
+    <p><span class="badge badge-broken">Broken: no focus management</span></p>
+    <p>This dialog does nothing about focus. Open it, then press <code class="inline">Tab</code>. Focus stays on the button behind the overlay and Tab walks through the entire page behind the dialog. If you could not see the screen, you would have no idea a dialog is even open.</p>
+    <p><button type="button" id="open-broken">Open the broken dialog</button></p>
+    <p class="hint">This is what a large share of modals on the web do today. The overlay is visual only. Keyboard users are left behind it.</p>
+  </section>
+
+  <!-- 3. THE FIXED MODAL -->
+  <section class="card" aria-labelledby="s3h">
+    <h2 id="s3h">3. The fixed modal</h2>
+    <p><span class="badge badge-fixed">Fixed: proper focus trap</span></p>
+    <p>This dialog does three things: it moves focus inside when it opens, it keeps <code class="inline">Tab</code> cycling within it, and when it closes it returns focus to the button that opened it. <code class="inline">Escape</code> closes it too.</p>
+    <p><button type="button" id="open-fixed">Open the fixed dialog</button></p>
+    <p>The trap is a short <code class="inline">keydown</code> handler. When Tab would leave the last element, jump to the first. When Shift+Tab would leave the first, jump to the last:</p>
+<pre><code>function trapTab(event, dialog) {
+  const items = Array.from(
+    dialog.querySelectorAll(
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter(el => !el.disabled &amp;&amp; el.getClientRects().length &gt; 0);
+  if (items.length === 0) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (event.shiftKey &amp;&amp; document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey &amp;&amp; document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}</code></pre>
+    <p>And the open and close wiring:</p>
+<pre><code>let opener = null;
+function openDialog() {
+  opener = document.activeElement; // remember where we came from
+  overlay.hidden = false;
+  dialog.focus();                  // move focus inside
+}
+function closeDialog() {
+  overlay.hidden = true;
+  if (opener) opener.focus();      // put focus back where it was
+}</code></pre>
+  </section>
+
+  <!-- RECIPE -->
+  <section class="card" aria-labelledby="s4h">
+    <h2 id="s4h">The whole recipe</h2>
+    <ol class="recipe">
+      <li><strong>Move focus in</strong> when the dialog opens, so keyboard and screen reader users land inside it.</li>
+      <li><strong>Trap Tab</strong> so focus cycles within the dialog instead of escaping behind the overlay.</li>
+      <li><strong>Return focus</strong> to the element that opened the dialog when it closes, so nobody gets dropped at the top of the page.</li>
+    </ol>
+    <p class="hint">Bonus: <code class="inline">role="dialog"</code> with <code class="inline">aria-modal="true"</code> tells assistive technology that everything outside is inert while the dialog is open. That is the announcement layer on top of the focus behavior above.</p>
+  </section>
+</main>
+
+<!-- BROKEN DIALOG: no focus management at all -->
+<div class="overlay" id="broken-overlay" hidden>
+  <div class="dialog" id="broken-dialog">
+    <p><span class="badge badge-broken">Broken: no focus management</span></p>
+    <h2>Broken dialog</h2>
+    <p>Nothing moved focus here. Press Tab and watch where focus goes.</p>
+    <label for="broken-name">Your name
+      <input type="text" id="broken-name" autocomplete="off">
+    </label>
+    <div class="row">
+      <button type="button" id="broken-close">Close</button>
+    </div>
+    <p class="focusline">Focused now: <code class="focus-readout">?</code></p>
+  </div>
+</div>
+
+<!-- FIXED DIALOG: focus trap, Escape to close, focus restore -->
+<div class="overlay" id="fixed-overlay" hidden>
+  <div class="dialog" id="fixed-dialog" role="dialog" aria-modal="true" aria-labelledby="fixed-title" tabindex="-1">
+    <p><span class="badge badge-fixed">Fixed: proper focus trap</span></p>
+    <h2 id="fixed-title">Fixed dialog</h2>
+    <p>Focus moved here on open. Tab and Shift+Tab stay inside. Escape closes and returns focus.</p>
+    <label for="fixed-name">Your name
+      <input type="text" id="fixed-name" autocomplete="off">
+    </label>
+    <p><a href="#s3h" id="fixed-link">A link inside the dialog</a></p>
+    <div class="row">
+      <button type="button" id="fixed-submit">Submit</button>
+      <button type="button" class="secondary" id="fixed-close">Close</button>
+    </div>
+    <p class="focusline">Focused now: <code class="focus-readout">?</code></p>
+  </div>
+</div>
+
+<footer class="page">
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> as a companion to the LinkedIn accessibility series.
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var FOCUSABLE =
+    'a[href], button:not([disabled]), input:not([disabled]), ' +
+    'select:not([disabled]), textarea:not([disabled]), ' +
+    '[tabindex]:not([tabindex="-1"])';
+
+  // ---- Live readout: show document.activeElement everywhere ----
+  var readouts = document.querySelectorAll('.focus-readout');
+
+  function describeFocus(el) {
+    if (!el || el === document.body) return 'body (nothing focused)';
+    var s = el.tagName.toLowerCase();
+    if (el.id) s += '#' + el.id;
+    var label = (el.getAttribute('aria-label') || el.textContent || el.value || '')
+      .trim().replace(/\s+/g, ' ').slice(0, 42);
+    if (label) s += ' "' + label + '"';
+    return s;
+  }
+
+  document.addEventListener('focusin', function (e) {
+    var label = describeFocus(e.target);
+    for (var i = 0; i < readouts.length; i++) {
+      readouts[i].textContent = label;
+    }
+  });
+
+  // ---- The trap: the teaching point of this demo ----
+  function trapTab(event, dialog) {
+    var items = Array.prototype.filter.call(
+      dialog.querySelectorAll(FOCUSABLE),
+      function (el) { return el.getClientRects().length > 0; }
+    );
+    if (items.length === 0) return;
+    var first = items[0];
+    var last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  // ---- 2. Broken dialog: no focus management, on purpose ----
+  var brokenOverlay = document.getElementById('broken-overlay');
+
+  document.getElementById('open-broken').addEventListener('click', function () {
+    brokenOverlay.hidden = false;
+    // Deliberately NOT moving focus: this is the bug being demonstrated.
+  });
+
+  function closeBroken() {
+    brokenOverlay.hidden = true;
+    // Deliberately NOT restoring focus: the user is left wherever Tab took them.
+  }
+
+  document.getElementById('broken-close').addEventListener('click', closeBroken);
+  brokenOverlay.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeBroken();
+  });
+
+  // ---- 3. Fixed dialog: focus in, trap Tab, restore on close ----
+  var fixedOverlay = document.getElementById('fixed-overlay');
+  var fixedDialog = document.getElementById('fixed-dialog');
+  var opener = null;
+
+  function openFixed() {
+    opener = document.activeElement;
+    fixedOverlay.hidden = false;
+    fixedDialog.focus();
+  }
+
+  function closeFixed() {
+    fixedOverlay.hidden = true;
+    if (opener) opener.focus();
+  }
+
+  document.getElementById('open-fixed').addEventListener('click', openFixed);
+  document.getElementById('fixed-close').addEventListener('click', closeFixed);
+  document.getElementById('fixed-submit').addEventListener('click', closeFixed);
+  fixedOverlay.addEventListener('click', function (e) {
+    if (e.target === fixedOverlay) closeFixed();
+  });
+  fixedOverlay.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeFixed();
+    } else if (e.key === 'Tab') {
+      trapTab(e, fixedDialog);
+    }
+  });
+})();
+</script>
+</body>
+</html>
