@@ -60,6 +60,7 @@
   button.danger:hover { border-color: var(--red); }
   button:disabled { opacity: 0.4; cursor: not-allowed; }
   :focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   /* sandbox */
   #sandbox {
     border: 1px dashed var(--border);
@@ -132,7 +133,7 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
 
   <header>
     <h1><span class="accent">MutationObserver</span> Playground</h1>
@@ -172,6 +173,7 @@
       <span id="counter">records: <b>0</b></span>
       <button id="btn-clear" class="danger">Clear log</button>
     </div>
+    <p class="visually-hidden" role="status" id="clear-announcer"></p>
     <div id="log" role="log" aria-label="Mutation records" tabindex="0"><div class="empty">No mutations yet. Poke the sandbox above.</div></div>
   </section>
 
@@ -182,7 +184,7 @@
       <em>after</em> your code runs. Instead of a <code>setInterval</code> poll,
       observe and react the moment it lands:
     </p>
-<pre class="code"><span class="c">// polling: wasteful, races with the widget</span>
+<pre class="code" tabindex="0" role="region" aria-label="Polling versus observer code sample"><span class="c">// polling: wasteful, races with the widget</span>
 <span class="k">const</span> timer = <span class="f">setInterval</span>(() =&gt; {
   <span class="k">const</span> el = document.<span class="f">querySelector</span>(<span class="s">'#chat-widget'</span>);
   <span class="k">if</span> (el) { <span class="f">clearInterval</span>(timer); <span class="f">initWidget</span>(el); }
@@ -209,7 +211,7 @@ obs.<span class="f">observe</span>(document.body, { childList: <span class="k">t
     a demo for the <code>MutationObserver</code> API.
   </footer>
 
-</div>
+</main>
 
 <script>
 (function () {
@@ -324,6 +326,7 @@ obs.<span class="f">observe</span>(document.body, { childList: <span class="k">t
     log.innerHTML = '<div class="empty">No mutations yet. Poke the sandbox above.</div>';
     recordCount = 0;
     counterEl.textContent = '0';
+    document.getElementById('clear-announcer').textContent = 'Log cleared.';
   });
 
   startObserver();
