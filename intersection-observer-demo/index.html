@@ -60,6 +60,7 @@
   button:hover { border-color: var(--purple); color: #fff; }
   button.primary { border-color: var(--purple); color: var(--purple); }
   button.primary:hover { background: var(--purple); color: #0d1117; }
+  :focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
   label { font-family: var(--mono); font-size: 0.85rem; color: var(--dim); }
   input[type="range"] { accent-color: var(--purple); }
   input[type="text"], input[type="number"] {
@@ -228,7 +229,7 @@
   <div class="panel">
     <h2>// 1. the observer, live</h2>
     <div class="row" style="gap: 18px;">
-      <label>visible before it counts <input type="range" id="threshold" min="0" max="1" step="0.05" value="0.5" aria-label="fraction of the element that must be visible"> <span id="threshold-val" class="mono">50%</span></label>
+      <label>visible before it counts <input type="range" id="threshold" min="0" max="1" step="0.05" value="0.5"> <span id="threshold-val" class="mono">50%</span></label>
       <label>rootMargin <input type="text" id="rootmargin" value="0px"></label>
       <button id="apply" class="primary">rebuild observer</button>
     </div>
@@ -240,7 +241,7 @@
     <div class="row" id="box-toggles" style="margin-top: 12px; gap: 14px;"></div>
     <div id="observer-error" class="mono" style="color: var(--red); font-size: 0.8rem; margin-top: 8px;"></div>
     <h3>event log</h3>
-    <ul id="event-log"><li><span class="t">--</span> observer armed. scroll down.</li></ul>
+    <ul id="event-log" tabindex="0" aria-label="Observer event log"><li><span class="t">--</span> observer armed. scroll down.</li></ul>
   </div>
 
   <div class="spacer">▼ scroll — box-1 is below ▼</div>
@@ -264,7 +265,7 @@
 
     <h3>live enrollment</h3>
     <div id="experiment-zone">
-      <div class="enroll-banner" id="enroll-banner"></div>
+      <div class="enroll-banner" id="enroll-banner" role="status"></div>
       <div class="variant-card" id="variant-a">
         <p class="tag">VARIANT A</p>
         <h3>Try it free for 14 days</h3>
