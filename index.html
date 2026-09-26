@@ -36,7 +36,7 @@
     </nav>
   </header>
 
-  <main id="main">
+  <main id="main" tabindex="-1">
     <!-- Hero -->
     <section class="hero" id="top" aria-labelledby="hero-heading">
       <div class="hero-inner">
@@ -46,8 +46,8 @@
         <p class="hero-lede"><span data-exp-years>Ten</span> years building for the web — design systems, product engineering, and applied AI. I care about interfaces that are fast, accessible, and genuinely pleasant to use.</p>
         <div class="hero-actions">
           <div class="hero-actions-row">
-            <a class="btn btn-dark" href="DominicBalassoneResume.pdf" target="_blank" rel="noopener">Resume</a>
-            <a class="btn btn-dark" href="https://github.com/sydbal" target="_blank" rel="noopener">GitHub</a>
+            <a class="btn btn-dark" href="DominicBalassoneResume.pdf" target="_blank" rel="noopener">Resume<span class="sr-only"> (PDF, opens in new tab)</span></a>
+            <a class="btn btn-dark" href="https://github.com/sydbal" target="_blank" rel="noopener">GitHub<span class="sr-only"> (opens in new tab)</span></a>
           </div>
           <div class="hero-actions-row">
             <a class="btn btn-primary" href="mailto:dominic.balassone@gmail.com">Get in touch</a>
@@ -195,17 +195,17 @@
         <p class="section-intro">Things I've built and maintain, in my own time.</p>
         <div class="cards">
           <article class="card">
-            <h3><a href="https://classicscoundrel.com" target="_blank" rel="noopener">Classic Scoundrel</a></h3>
+            <h3><a href="https://classicscoundrel.com" target="_blank" rel="noopener">Classic Scoundrel<span class="sr-only"> (opens in new tab)</span></a></h3>
             <p>A complete single-player card game for the browser — game logic, rendering, and interaction built with TypeScript and Canvas 2D. No engine, no frameworks; just the platform.</p>
             <ul class="tags" aria-label="Technologies"><li>TypeScript</li><li>Canvas 2D</li><li>Game design</li></ul>
           </article>
           <article class="card">
-            <h3><a href="https://prefers-reduced-motion.com" target="_blank" rel="noopener">prefers-reduced-motion.com</a></h3>
+            <h3><a href="https://prefers-reduced-motion.com" target="_blank" rel="noopener">prefers-reduced-motion.com<span class="sr-only"> (opens in new tab)</span></a></h3>
             <p>A reference site for the <code>prefers-reduced-motion</code> CSS media feature — what it is, how to honor it, and how to test it. Written for working developers who want to get accessibility details right.</p>
             <ul class="tags" aria-label="Technologies"><li>CSS</li><li>Accessibility</li><li>Technical writing</li></ul>
           </article>
           <article class="card">
-            <h3><a href="https://prefers-color-scheme.com" target="_blank" rel="noopener">prefers-color-scheme.com</a></h3>
+            <h3><a href="https://prefers-color-scheme.com" target="_blank" rel="noopener">prefers-color-scheme.com<span class="sr-only"> (opens in new tab)</span></a></h3>
             <p>Companion reference for the <code>prefers-color-scheme</code> media feature — the right way to build dark-mode-aware interfaces that respect user preference.</p>
             <ul class="tags" aria-label="Technologies"><li>CSS</li><li>Accessibility</li><li>Technical writing</li></ul>
           </article>
@@ -225,17 +225,17 @@
         <p class="section-intro">Interactive demos from my twice-weekly LinkedIn series — web accessibility features on Mondays, underused browser features on Fridays.</p>
         <div class="cards">
           <article class="card">
-            <h3><a href="https://dominic.balass.one/mutation-observer-demo/" target="_blank" rel="noopener">MutationObserver Playground</a></h3>
+            <h3><a href="https://dominic.balass.one/mutation-observer-demo/" target="_blank" rel="noopener">MutationObserver Playground<span class="sr-only"> (opens in new tab)</span></a></h3>
             <p>Poke a live DOM sandbox and watch mutation records stream in as they happen. Toggle the observer config (<code>childList</code>, <code>attributes</code>, <code>characterData</code>, <code>subtree</code>) and see exactly what each option captures — plus a polling-vs-observer comparison for detecting third-party widgets.</p>
             <ul class="tags" aria-label="Technologies"><li>JavaScript</li><li>DOM APIs</li><li>Interactive demo</li></ul>
           </article>
           <article class="card">
-            <h3><a href="https://dominic.balass.one/intersection-observer-demo/" target="_blank" rel="noopener">IntersectionObserver Playground</a></h3>
+            <h3><a href="https://dominic.balass.one/intersection-observer-demo/" target="_blank" rel="noopener">IntersectionObserver Playground<span class="sr-only"> (opens in new tab)</span></a></h3>
             <p>Watch elements light up as they cross your visibility threshold, tune <code>threshold</code> and <code>rootMargin</code> live, then see the killer use case: enrolling visitors in an A/B test only when the experiment zone actually enters their viewport — so your measurements count viewers, not page loads.</p>
             <ul class="tags" aria-label="Technologies"><li>JavaScript</li><li>DOM APIs</li><li>Interactive demo</li></ul>
           </article>
           <article class="card">
-            <h3><a href="https://dominic.balass.one/focus-trap-demo/" target="_blank" rel="noopener">Focus Trap Demo</a></h3>
+            <h3><a href="https://dominic.balass.one/focus-trap-demo/" target="_blank" rel="noopener">Focus Trap Demo<span class="sr-only"> (opens in new tab)</span></a></h3>
             <p>Feel the difference with your own keyboard: a broken modal that lets focus wander off behind the overlay, next to a fixed one that moves focus in, traps <code>Tab</code> inside, and returns focus on close — plus a live <code>document.activeElement</code> readout and a <code>:focus-visible</code> comparison.</p>
             <ul class="tags" aria-label="Technologies"><li>JavaScript</li><li>Accessibility</li><li>Interactive demo</li></ul>
           </article>
@@ -250,9 +250,9 @@
         <p class="section-intro">I'm currently exploring what's next. If you're building something interesting — especially at the intersection of the web and AI — I'd love to hear about it.</p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="mailto:dominic.balassone@gmail.com">dominic.balassone@gmail.com</a>
-          <a class="btn" href="https://github.com/sydbal" target="_blank" rel="noopener">GitHub</a>
-          <a class="btn" href="https://www.linkedin.com/in/dominic-balassone-1991aa38" target="_blank" rel="noopener">LinkedIn</a>
-          <a class="btn" href="DominicBalassoneResume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a class="btn" href="https://github.com/sydbal" target="_blank" rel="noopener">GitHub<span class="sr-only"> (opens in new tab)</span></a>
+          <a class="btn" href="https://www.linkedin.com/in/dominic-balassone-1991aa38" target="_blank" rel="noopener">LinkedIn<span class="sr-only"> (opens in new tab)</span></a>
+          <a class="btn" href="DominicBalassoneResume.pdf" target="_blank" rel="noopener">Resume<span class="sr-only"> (PDF, opens in new tab)</span></a>
         </div>
       </div>
     </section>
