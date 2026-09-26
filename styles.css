@@ -351,6 +351,10 @@ main, .site-footer { position: relative; z-index: 1; }
 /* ---------- Focus ---------- */
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 0; }
 
+/* Skip-link target: never in the tab order (tabindex="-1"), so a ring
+   around all of <main> after skip-link activation is just noise. */
+#main:focus { outline: none; }
+
 /* Screen-reader-only text (e.g. "opens in new tab" notes) */
 .sr-only {
   position: absolute;
@@ -364,10 +368,24 @@ main, .site-footer { position: relative; z-index: 1; }
   border: 0;
 }
 
+/* ---------- Forced colors (Windows High Contrast) ---------- */
+@media (forced-colors: active) {
+  /* Tag pills and the solid primary button lose their background
+     distinction here; borders keep them readable as controls. */
+  .tag { border: 1px solid currentColor; }
+  .btn-primary { border: 2px solid ButtonText; }
+  .nav-links a.active { text-decoration-thickness: 3px; }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
-  .nav-toggle { display: block; }
-  .nav-links {
+  /* The toggle only works with JS, so the collapsed menu only exists
+     when JS is running. Without JS the toggle stays hidden and the
+     links simply wrap in the normal flow. */
+  .nav-toggle { display: none; }
+  .js .nav-toggle { display: block; }
+  .nav-links { flex-wrap: wrap; }
+  .js .nav-links {
     display: none;
     position: absolute;
     top: 100%;
@@ -378,7 +396,7 @@ main, .site-footer { position: relative; z-index: 1; }
     border-bottom: 1px solid var(--line);
     padding: 0.5rem 1.25rem 1rem;
   }
-  .nav-links.open { display: flex; }
+  .js .nav-links.open { display: flex; }
   .nav { position: relative; }
   .theme-toggle { margin-left: 0; }
   .nav-links { margin-left: 0; }
