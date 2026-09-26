@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   var root = document.documentElement;
+  root.classList.add('js');
 
   /* ---- Theme toggle: auto -> light -> dark -> auto ---- */
   var toggle = document.getElementById('theme-toggle');
