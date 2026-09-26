@@ -33,6 +33,8 @@
       --ink: #f1f0f5;
       --muted: #b6b6c0;
       --border: #2c2c34;
+      --purple: #bc8cff;
+      --purple-deep: #a78bfa;
       --good: #4ade80;
       --bad: #f87171;
     }
@@ -98,6 +100,10 @@
     border: 1px solid var(--border);
   }
   button.secondary:hover { border-color: var(--purple); color: var(--purple); }
+  @media (prefers-color-scheme: dark) {
+    /* --purple is lightened in dark mode, so solid buttons need dark text */
+    button:not(.secondary) { color: #101014; }
+  }
   /* Demo of :focus (always shows a ring) vs :focus-visible (keyboard only). */
   .demo-focus:focus { outline: 3px solid var(--purple); outline-offset: 2px; }
   input[type="text"], input[type="search"] {
@@ -178,6 +184,9 @@
   .dialog input { width: 100%; margin-top: 0.35rem; }
   .dialog .focusline { font-size: 0.85rem; color: var(--muted); margin-top: 1rem; }
   .dialog .focusline code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+  /* Focus lands on the dialog container programmatically on open; it is not
+     an interactive target itself, so skip the full-dialog ring. */
+  #fixed-dialog:focus { outline: none; }
   footer.page {
     border-top: 3px solid var(--purple);
     padding: 1.5rem;
@@ -214,7 +223,7 @@
       <span class="label">Element with focus right now</span>
       <span class="focus-readout">body (nothing focused yet, press Tab)</span>
     </div>
-    <h2 style="font-size:1.1rem; margin-top:1.5rem;">:focus vs :focus-visible</h2>
+    <h3 style="font-size:1.1rem; margin-top:1.5rem;">:focus vs :focus-visible</h3>
     <p><code class="inline">:focus</code> matches any focused element, even right after a mouse click. <code class="inline">:focus-visible</code> only matches when the browser decides a visible indicator is needed, which is usually keyboard navigation. Best practice: style <code class="inline">:focus-visible</code> so mouse users never get a ring they did not ask for, while keyboard users always get one.</p>
     <div class="playground">
       <button type="button" class="demo-focus secondary">:focus ring (click me with the mouse)</button>
