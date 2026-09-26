@@ -139,6 +139,11 @@
   }
   .badge-broken { background: var(--bad); }
   .badge-fixed { background: var(--good); }
+  @media (prefers-color-scheme: dark) {
+    /* White text fails contrast on the lightened dark-mode badge
+       backgrounds; dark text passes. */
+    .badge { color: #101014; }
+  }
   .hint {
     border-left: 4px solid var(--purple);
     padding: 0.5rem 0.9rem;
@@ -205,7 +210,7 @@
       <input type="text" id="demo-name" placeholder="A text input" aria-label="Demo text input">
       <button type="button" class="secondary">Another button</button>
     </div>
-    <div class="readout" aria-live="polite">
+    <div class="readout">
       <span class="label">Element with focus right now</span>
       <span class="focus-readout">body (nothing focused yet, press Tab)</span>
     </div>
@@ -384,13 +389,29 @@ function closeDialog() {
   var fixedDialog = document.getElementById('fixed-dialog');
   var opener = null;
 
+  // aria-modal alone doesn't hide the background from assistive tech in
+  // every browser; inert does. The broken dialog above deliberately skips this.
+  var pageChrome = [
+    document.querySelector('header.top'),
+    document.querySelector('main'),
+    document.querySelector('footer.page')
+  ];
+
+  function setBackgroundInert(on) {
+    for (var i = 0; i < pageChrome.length; i++) {
+      if (pageChrome[i]) pageChrome[i].inert = on;
+    }
+  }
+
   function openFixed() {
     opener = document.activeElement;
+    setBackgroundInert(true);
     fixedOverlay.hidden = false;
     fixedDialog.focus();
   }
 
   function closeFixed() {
+    setBackgroundInert(false);
     fixedOverlay.hidden = true;
     if (opener) opener.focus();
   }
