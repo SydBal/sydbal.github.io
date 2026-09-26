@@ -92,6 +92,9 @@
     color: var(--green);
     box-shadow: 0 0 24px rgba(126, 231, 135, 0.25);
   }
+  @media (prefers-reduced-motion: reduce) {
+    .io-box { transition: none; }
+  }
   /* ---- log ---- */
   #event-log {
     list-style: none;
@@ -210,7 +213,7 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
 
   <header>
     <h1><span class="accent">IntersectionObserver</span> Playground</h1>
@@ -239,7 +242,7 @@
       rootMargin grows or shrinks the watched area — try "-100px" to pull the edges inward.
     </p>
     <div class="row" id="box-toggles" style="margin-top: 12px; gap: 14px;"></div>
-    <div id="observer-error" class="mono" style="color: var(--red); font-size: 0.8rem; margin-top: 8px;"></div>
+    <div id="observer-error" class="mono" role="alert" style="color: var(--red); font-size: 0.8rem; margin-top: 8px;"></div>
     <h3>event log</h3>
     <ul id="event-log" tabindex="0" aria-label="Observer event log"><li><span class="t">--</span> observer armed. scroll down.</li></ul>
   </div>
@@ -295,7 +298,7 @@
 
   <div class="panel">
     <h2>// 3. the pattern in 10 lines</h2>
-    <pre class="snippet"><span class="c">// enroll a visitor only when the experiment zone is actually seen</span>
+    <pre class="snippet" tabindex="0" role="region" aria-label="IntersectionObserver enrollment code sample"><span class="c">// enroll a visitor only when the experiment zone is actually seen</span>
 <span class="k">const</span> io = <span class="k">new</span> <span class="f">IntersectionObserver</span>((entries) =&gt; {
   <span class="k">for</span> (<span class="k">const</span> e <span class="k">of</span> entries) {
     <span class="k">if</span> (e.isIntersecting) {
@@ -318,7 +321,7 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
     built for a LinkedIn series on underused browser APIs ·
     <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver">MDN: IntersectionObserver</a>
   </footer>
-</div>
+</main>
 
 <div id="live-feed" class="hidden" aria-live="polite">
   <div class="feed-head"><span>&#9679; LIVE LOG</span><button id="feed-hide" aria-label="hide live log">&times;</button></div>
@@ -344,15 +347,16 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
     return new Date().toLocaleTimeString('en-GB', { hour12: false });
   }
 
-  function log(html, cls) {
+  function log(html, cls, noFeed) {
     var entry = '<span class="t">[' + now() + ']</span> ' + html;
     var li = document.createElement('li');
     if (cls) li.className = cls;
     li.innerHTML = entry;
     logEl.insertBefore(li, logEl.firstChild);
     while (logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
-    // mirror the latest entries into the sticky live feed
-    if (feedEl) {
+    // mirror the latest entries into the sticky live feed, unless the caller
+    // already announced this event through its own live region
+    if (feedEl && !noFeed) {
       var fi = document.createElement('li');
       if (cls) fi.className = cls;
       fi.innerHTML = entry;
@@ -463,7 +467,7 @@ io.<span class="f">observe</span>(document.<span class="f">querySelector</span>(
         ', threshold 0.5). A page-load-based test would have enrolled you before you scrolled here.';
       banner.classList.add('show');
       log('<span class="enroll">enrolled in Variant ' + session.variant +
-        '</span> — experiment zone became visible.', 'enroll');
+        '</span> — experiment zone became visible.', 'enroll', true);
       enrollObserver.unobserve(zone);
       renderSession();
     });
