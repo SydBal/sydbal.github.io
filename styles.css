@@ -351,6 +351,19 @@ main, .site-footer { position: relative; z-index: 1; }
 /* ---------- Focus ---------- */
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 0; }
 
+/* Screen-reader-only text (e.g. "opens in new tab" notes) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
   .nav-toggle { display: block; }
