@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prefers-reduced-data Playground</title>
+<meta name="description" content="An interactive demo of the prefers-reduced-data media query: serve lite assets when the user is trying to save data.">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #faf9fc;
+    --card: #ffffff;
+    --ink: #1a1a1f;
+    --muted: #55555e;
+    --border: #e2e0ea;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --good: #15803d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --border: #2c2c34;
+      --purple: #bc8cff;
+      --purple-deep: #a78bfa;
+      --good: #4ade80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    background: var(--purple);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    z-index: 10;
+  }
+  .skip-link:focus { top: 1rem; color: #fff; }
+  @media (prefers-color-scheme: dark) {
+    .skip-link { color: #101014; }
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 0 1.25rem 4rem; }
+  header.top { border-bottom: 3px solid var(--purple); padding: 2.5rem 0 1.5rem; margin-bottom: 2rem; }
+  header.top .kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--purple-deep);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  h1 { font-size: 2rem; margin: 0 0 0.75rem; line-height: 1.2; }
+  .lede { color: var(--muted); font-size: 1.05rem; max-width: 38rem; }
+  .lede code, p code, li code {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+  }
+  section.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  section.card h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
+  section.card h2 .num { color: var(--purple); margin-right: 0.4rem; }
+  .readout {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+  }
+  .readout .yes { color: var(--good); font-weight: 700; }
+  .readout .no { color: var(--muted); font-weight: 700; }
+  .note { font-size: 0.9rem; color: var(--muted); }
+  fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem 1rem 1rem; margin: 1rem 0 0; }
+  legend { font-weight: 700; padding: 0 0.4rem; }
+  fieldset label { display: block; margin: 0.4rem 0; cursor: pointer; }
+  fieldset input { margin-right: 0.5rem; accent-color: var(--purple); }
+  figure.hero { margin: 1rem 0 0; }
+  figure.hero .frame {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    min-height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  figure.hero img { display: block; max-width: 100%; height: auto; }
+  figure.hero figcaption { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; }
+  .bytes { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9rem; }
+  .bytes strong { color: var(--good); }
+  ul.gate { padding-left: 1.25rem; margin: 0.5rem 0 0; }
+  ul.gate li { margin: 0.45rem 0; }
+  pre.snippet {
+    background: #14141a;
+    color: #e8e6f0;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    margin: 0.75rem 0 0;
+  }
+  pre.snippet .c { color: #8b8b98; }
+  pre.snippet .k { color: #c4a5ff; }
+  pre.snippet .s { color: #9fe8b3; }
+  pre.snippet .f { color: #8fd3ff; }
+  :focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  footer.page { border-top: 1px solid var(--border); padding: 1.5rem 0; color: var(--muted); font-size: 0.9rem; }
+  footer.page a { color: var(--purple); }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="wrap">
+
+  <header class="top">
+    <span class="kicker">LinkedIn series demo</span>
+    <h1><code>prefers-reduced-data</code> Playground</h1>
+    <p class="lede">Some users browse on metered connections and ask the web to go easy on their data plan. This media query is how the browser tells you. This page listens, then serves a 19&nbsp;KB hero image instead of a 592&nbsp;KB one.</p>
+  </header>
+
+  <main id="main" tabindex="-1">
+
+    <section class="card" aria-labelledby="h-report">
+      <h2 id="h-report"><span class="num">1.</span>What your browser reports</h2>
+      <p class="readout" id="browser-report" role="status">Checking&hellip;</p>
+      <p class="note">Honest caveat: support is thin. Chrome and Edge have this behind the experimental-web-platform-features flag, and Firefox and Safari don't report it at all. So the line above will say <em>no preference</em> for almost everyone. The override below lets you try both paths anyway.</p>
+      <fieldset>
+        <legend>Data-saver override (demo only)</legend>
+        <label><input type="radio" name="override" value="auto" checked> Follow the system setting</label>
+        <label><input type="radio" name="override" value="reduce"> Pretend data saver is <strong>on</strong></label>
+        <label><input type="radio" name="override" value="full"> Pretend data saver is <strong>off</strong></label>
+      </fieldset>
+    </section>
+
+    <section class="card" aria-labelledby="h-demo">
+      <h2 id="h-demo"><span class="num">2.</span>The demo: one hero, two weights</h2>
+      <p class="readout" id="effective-line" role="status">Serving: &hellip;</p>
+      <figure class="hero">
+        <div class="frame">
+          <img id="hero-img" width="1920" height="1280" alt="Alpine lake at sunrise with snow-capped peaks and pine forest">
+        </div>
+        <figcaption>Same scene, two files. Only the chosen one is ever requested &mdash; open the Network tab and confirm the other never loads.</figcaption>
+      </figure>
+      <p class="bytes" id="bytes-line"></p>
+    </section>
+
+    <section class="card" aria-labelledby="h-gate">
+      <h2 id="h-gate"><span class="num">3.</span>What else to gate when data is precious</h2>
+      <ul class="gate">
+        <li><strong>Hero and inline images</strong> &mdash; serve a lite variant or a smaller responsive size (this demo).</li>
+        <li><strong>Autoplay video</strong> &mdash; show the poster frame; play only on tap.</li>
+        <li><strong>Web fonts</strong> &mdash; fall back to the system stack instead of downloading hundreds of KB.</li>
+        <li><strong>Heavy animation libraries</strong> &mdash; skip them and keep the page static.</li>
+        <li><strong>Prefetch / preload</strong> of below-the-fold resources &mdash; drop it.</li>
+        <li><strong>Server-side:</strong> check the <code>Save-Data</code> request header for the same signal.</li>
+      </ul>
+    </section>
+
+    <section class="card" aria-labelledby="h-pattern">
+      <h2 id="h-pattern"><span class="num">4.</span>The pattern</h2>
+      <pre class="snippet" tabindex="0" role="region" aria-label="prefers-reduced-data detection code sample"><span class="c">// respect the user's data-saver preference</span>
+<span class="k">const</span> reduceData = window.<span class="f">matchMedia</span>(<span class="s">'(prefers-reduced-data: reduce)'</span>);
+
+<span class="k">function</span> <span class="f">chooseHero</span>() {
+  <span class="c">// only the chosen file is ever requested</span>
+  heroImg.src = reduceData.matches ? <span class="s">'hero-lite.jpg'</span> : <span class="s">'hero-heavy.jpg'</span>;
+}
+
+reduceData.<span class="f">addEventListener</span>(<span class="s">'change'</span>, chooseHero);
+<span class="f">chooseHero</span>();</pre>
+      <pre class="snippet" tabindex="0" role="region" aria-label="prefers-reduced-data CSS code sample"><span class="c">/* the CSS-only version: hide the heavy stuff */</span>
+@media (prefers-reduced-data: reduce) {
+  .hero-video { <span class="k">display</span>: none; } <span class="c">/* poster image shows instead */</span>
+}</pre>
+    </section>
+
+  </main>
+
+  <footer class="page">
+    Built by <a href="https://dominic.balass.one">Dominic Balassone</a> &mdash;
+    a demo for the <code>prefers-reduced-data</code> media query.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var mq = window.matchMedia('(prefers-reduced-data: reduce)');
+  var override = 'auto';
+  var heroImg = document.getElementById('hero-img');
+  var browserReport = document.getElementById('browser-report');
+  var effectiveLine = document.getElementById('effective-line');
+  var bytesLine = document.getElementById('bytes-line');
+
+  var HEAVY = { file: 'hero-heavy.jpg', label: '591.5 KB' };
+  var LITE = { file: 'hero-lite.jpg', label: '19.2 KB' };
+  var SAVED = '572.4 KB';
+
+  function effectiveReduce() {
+    if (override === 'reduce') return true;
+    if (override === 'full') return false;
+    return mq.matches;
+  }
+
+  function render() {
+    var reported = mq.matches;
+    browserReport.innerHTML =
+      "matchMedia('(prefers-reduced-data: reduce)').matches &rarr; " +
+      (reported
+        ? '<span class="yes">true</span> &mdash; your browser reports: <strong>reduce</strong>'
+        : '<span class="no">false</span> &mdash; your browser reports: <strong>no preference</strong>');
+
+    var reduce = effectiveReduce();
+    var asset = reduce ? LITE : HEAVY;
+    // Only the chosen asset is ever requested.
+    if (heroImg.getAttribute('src') !== asset.file) {
+      heroImg.setAttribute('src', asset.file);
+    }
+    effectiveLine.innerHTML = 'Serving: ' + (reduce
+      ? '<span class="yes">reduced assets</span> (data saver respected)'
+      : '<span class="no">full assets</span>');
+    bytesLine.innerHTML = reduce
+      ? 'Hero image transferred: <strong>' + LITE.label + '</strong> &mdash; you saved <strong>' + SAVED + '</strong> on this image alone.'
+      : 'Hero image transferred: <strong>' + HEAVY.label + '</strong> &mdash; flip the override to <em>data saver on</em> and watch it drop.';
+  }
+
+  var radios = document.querySelectorAll('input[name="override"]');
+  for (var i = 0; i < radios.length; i++) {
+    radios[i].addEventListener('change', function (e) {
+      override = e.target.value;
+      render();
+    });
+  }
+  if (typeof mq.addEventListener === 'function') {
+    mq.addEventListener('change', render);
+  }
+  render();
+})();
+</script>
+</body>
+</html>
