@@ -71,6 +71,7 @@
   header.top h1 { font-size: 1.25rem; margin: 0; }
   header.top a { color: var(--purple); font-weight: 600; }
   main { max-width: 72rem; margin: 0 auto; padding: 1.5rem; }
+  main a { color: var(--purple); font-weight: 600; }
   .lede { font-size: 1.1rem; max-width: 60rem; }
   .lede code, p code, li code {
     background: var(--purple-soft);
@@ -401,7 +402,7 @@ function update(fn) {
   </section>
 
   <section class="block" aria-labelledby="notes-h">
-    <h2 id="notes-h">Honest notes</h2>
+    <h2 id="notes-h">Important notes</h2>
     <ul class="notes">
       <li><strong>The fallback is doing nothing.</strong> A browser without the API runs your update
         function directly and the user sees an instant cut. No polyfill needed; you are adding
