@@ -354,6 +354,21 @@
     <div class="wander" id="wander"></div>
   </section>
 
+  <section class="block" aria-labelledby="preset-h">
+    <h2 id="preset-h">data-vt-preset values</h2>
+    <p>The demo picks its panel animation by setting a <code>data-vt-preset</code> attribute on
+      the <code>&lt;html&gt;</code> element just before each transition. The CSS keys each
+      animation off that attribute, so only the matching
+      <code>::view-transition-old/new</code> rules apply. Valid values:</p>
+    <ul class="notes">
+      <li><code>(absent)</code> — default crossfade, with the photo and title morphing as shared elements (Auto preset).</li>
+      <li><code>slide-fwd</code> — panel slides right-to-left (forward navigation).</li>
+      <li><code>slide-back</code> — panel slides left-to-right (back navigation).</li>
+      <li><code>zoom</code> — panel scales and fades.</li>
+    </ul>
+    <p class="demo-note">Live: <code>&lt;html&gt;</code> currently has <code id="preset-now">(absent)</code></p>
+  </section>
+
   <section class="block" aria-labelledby="why-h">
     <h2 id="why-h">Why not just CSS?</h2>
     <p>CSS can animate an element. It cannot animate a <em>change</em>. The moment you swap
@@ -562,6 +577,7 @@ function update(fn) {
     });
   }
   refreshBadges();
+  refreshPresetNow();
 
   function canTransition() {
     return transitionsOn && supportsVT && !motionQuery.matches;
@@ -574,6 +590,12 @@ function update(fn) {
     } else if (preset === 'zoom') {
       document.documentElement.dataset.vtPreset = 'zoom';
     }
+    refreshPresetNow();
+  }
+
+  function refreshPresetNow() {
+    var v = document.documentElement.getAttribute('data-vt-preset');
+    document.getElementById('preset-now').textContent = v === null ? '(absent)' : '"' + v + '"';
   }
 
   function clearNames() {
