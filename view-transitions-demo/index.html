@@ -201,25 +201,30 @@
   }
   footer a { color: var(--purple); font-weight: 600; }
 
-  /* ---- View-transition presets (applied at document level) ---- */
+  /* ---- View-transition presets (scoped to the VT panel, not the page) ---- */
+  #app-vt { view-transition-name: vt-panel; }
   @media (prefers-reduced-motion: no-preference) {
-    html[data-vt-preset="slide"]::view-transition-old(root) {
-      animation: vt-slide-out 320ms ease-in both;
+    html[data-vt-preset="slide"]::view-transition-old(vt-panel) {
+      animation: vt-slide-out 350ms cubic-bezier(0.55, 0, 1, 0.45) both;
+      z-index: 1;
     }
-    html[data-vt-preset="slide"]::view-transition-new(root) {
-      animation: vt-slide-in 320ms ease-out both;
+    html[data-vt-preset="slide"]::view-transition-new(vt-panel) {
+      animation: vt-slide-in 350ms cubic-bezier(0.25, 1, 0.5, 1) both;
+      z-index: 2;
     }
-    html[data-vt-preset="zoom"]::view-transition-old(root) {
-      animation: vt-zoom-out 280ms ease-in both;
+    html[data-vt-preset="zoom"]::view-transition-old(vt-panel) {
+      animation: vt-zoom-out 300ms ease-in both;
+      z-index: 1;
     }
-    html[data-vt-preset="zoom"]::view-transition-new(root) {
-      animation: vt-zoom-in 280ms ease-out both;
+    html[data-vt-preset="zoom"]::view-transition-new(vt-panel) {
+      animation: vt-zoom-in 300ms ease-out both;
+      z-index: 2;
     }
   }
-  @keyframes vt-slide-out { to { transform: translateX(-48px); opacity: 0; } }
-  @keyframes vt-slide-in { from { transform: translateX(48px); opacity: 0; } }
-  @keyframes vt-zoom-out { to { transform: scale(0.92); opacity: 0; } }
-  @keyframes vt-zoom-in { from { transform: scale(1.06); opacity: 0; } }
+  @keyframes vt-slide-out { to { transform: translateX(-72px); opacity: 0; } }
+  @keyframes vt-slide-in { from { transform: translateX(72px); opacity: 0; } }
+  @keyframes vt-zoom-out { to { transform: scale(0.9); opacity: 0; } }
+  @keyframes vt-zoom-in { from { transform: scale(1.08); opacity: 0; } }
 </style>
 </head>
 <body>
@@ -253,8 +258,9 @@
     <h2 id="play-h">The playground</h2>
     <p style="margin-top: 0;">
       Two identical mini-galleries. On the right, the clicked card <em>morphs</em> into the
-      detail hero because both share one <code>view-transition-name</code>.
-      It works in reverse too: hit "Back to gallery" and watch it fly home.
+      detail hero because both share one <code>view-transition-name</code> (default preset).
+      Switch presets to animate the whole panel instead: a slide or a zoom.
+      It works in reverse too: hit &ldquo;Back to gallery&rdquo; and watch it fly home.
     </p>
     <div class="panels">
       <div class="panel">
@@ -333,6 +339,11 @@ function update(fn) {
       <li><strong>Reduced motion.</strong> View transitions are motion. If the user asked for less
         of it, skip the transition. This demo checks
         <code>prefers-reduced-motion</code> live and swaps instantly when it is set to reduce.</li>
+      <li><strong>Real use, on my own site.</strong> The theme toggle on
+        <a href="https://dominic.balass.one/">dominic.balass.one</a> wraps its
+        <code>data-theme</code> swap in <code>document.startViewTransition()</code>, so the whole
+        page crossfades between themes instead of snapping. Four lines, feature-detected,
+        skipped for reduced motion.</li>
     </ul>
   </section>
 </main>
@@ -443,14 +454,14 @@ function update(fn) {
     }
   }
 
-  function renderDetail(appEl, itemId, useVT) {
+  function renderDetail(appEl, itemId, useVT, morph) {
     clearNames(appEl);
     var item = null;
     for (var i = 0; i < ITEMS.length; i++) {
       if (ITEMS[i].id === itemId) item = ITEMS[i];
     }
     if (!item) { renderGallery(appEl, useVT, null); return; }
-    var heroAttrs = useVT
+    var heroAttrs = morph
       ? ' data-vt-named="1" style="view-transition-name: ' + VT_NAME + '; background:' + item.grad + ';"'
       : ' style="background:' + item.grad + ';"';
     appEl.innerHTML =
@@ -466,26 +477,32 @@ function update(fn) {
   }
 
   function goDetail(appEl, itemId, useVT) {
+    // The shared-element morph only runs on the default preset: on slide/zoom
+    // the panel itself is the animated element, and a morph would fight it.
+    var morph = useVT && currentPreset === 'default';
     if (useVT && canTransition()) {
-      var art = appEl.querySelector('[data-card="' + itemId + '"] .art');
-      if (art) tagName(art);
+      if (morph) {
+        var art = appEl.querySelector('[data-card="' + itemId + '"] .art');
+        if (art) tagName(art);
+      }
       applyPreset();
       var t = document.startViewTransition(function () {
-        renderDetail(appEl, itemId, true);
+        renderDetail(appEl, itemId, true, morph);
       });
       t.finished.then(function () { clearNames(appEl); }, function () { clearNames(appEl); });
     } else {
-      renderDetail(appEl, itemId, useVT);
+      renderDetail(appEl, itemId, useVT, false);
     }
   }
 
   function goGallery(appEl, returnId, useVT) {
+    var morph = useVT && currentPreset === 'default';
     if (useVT && canTransition()) {
       applyPreset();
       var t = document.startViewTransition(function () {
         // the returning card carries the name in the NEW snapshot,
         // so the hero morphs back into its gallery slot
-        renderGallery(appEl, true, returnId);
+        renderGallery(appEl, true, morph ? returnId : null);
       });
       t.finished.then(function () { clearNames(appEl); }, function () { clearNames(appEl); });
     } else {
