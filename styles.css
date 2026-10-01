@@ -168,13 +168,12 @@ code {
   flex-shrink: 0;
 }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-.icon-moon { display: none; }
-:root[data-theme="dark"] .icon-sun { display: none; }
+.icon-sun, .icon-moon { display: none; }
+.icon-auto { display: block; }
+:root[data-theme="light"] .icon-auto { display: none; }
+:root[data-theme="light"] .icon-sun { display: block; }
+:root[data-theme="dark"] .icon-auto { display: none; }
 :root[data-theme="dark"] .icon-moon { display: block; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .icon-sun { display: none; }
-  :root:not([data-theme="light"]) .icon-moon { display: block; }
-}
 
 /* ---------- Cellular automaton backdrop ---------- */
 #ca-bg {
