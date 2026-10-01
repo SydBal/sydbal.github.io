@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>View Transitions Playground - Dominic Balassone</title>
+<meta name="description" content="An interactive demo of the View Transitions API: compare a plain DOM swap against animated view transitions, with shared-element morphs and custom presets.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+    --code-bg: #1d1d26;
+    --code-ink: #eceaf6;
+    --good: #15803d;
+    --good-bg: #dcfce7;
+    --bad: #b91c1c;
+    --bad-bg: #fee2e2;
+    --warn: #b45309;
+    --warn-bg: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --purple-soft: #2e1a5e;
+      --border: #2c2c34;
+      --good: #4ade80;
+      --good-bg: #14532d;
+      --bad: #f87171;
+      --bad-bg: #7f1d1d;
+      --warn: #fbbf24;
+      --warn-bg: #78350f;
+    }
+  }
+  * { border-radius: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--purple);
+    outline-offset: 2px;
+  }
+  header.top {
+    border-bottom: 3px solid var(--purple);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  header.top h1 { font-size: 1.25rem; margin: 0; }
+  header.top a { color: var(--purple); font-weight: 600; }
+  main { max-width: 72rem; margin: 0 auto; padding: 1.5rem; }
+  .lede { font-size: 1.1rem; max-width: 60rem; }
+  .lede code, p code, li code {
+    background: var(--purple-soft);
+    padding: 0.1em 0.35em;
+    font-size: 0.9em;
+  }
+  section.block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  section.block h2 { margin-top: 0; }
+  .badges { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1rem 0; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .badge .dot { width: 0.7rem; height: 0.7rem; display: inline-block; }
+  .badge.ok { background: var(--good-bg); color: var(--good); border-color: var(--good); }
+  .badge.ok .dot { background: var(--good); }
+  .badge.no { background: var(--bad-bg); color: var(--bad); border-color: var(--bad); }
+  .badge.no .dot { background: var(--bad); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
+  .badge.warn .dot { background: var(--warn); }
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 60rem) { .panels { grid-template-columns: 1fr; } }
+  .panel {
+    border: 1px solid var(--border);
+    padding: 1rem;
+    background: var(--bg);
+  }
+  .panel h3 { margin: 0 0 0.25rem; }
+  .panel .sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem; min-height: 2.6em; }
+  .app {
+    border: 1px solid var(--border);
+    background: var(--card);
+    min-height: 22rem;
+    padding: 1rem;
+  }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    display: block;
+    width: 100%;
+  }
+  .card:hover { border-color: var(--purple); }
+  .card .art {
+    height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+  }
+  .card .label { padding: 0.5rem 0.75rem; font-weight: 600; font-size: 0.95rem; }
+  .detail .hero {
+    height: 11rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+  }
+  .detail h4 { margin: 0.9rem 0 0.3rem; font-size: 1.15rem; }
+  .detail p { color: var(--muted); margin: 0 0 1rem; font-size: 0.95rem; }
+  .btn {
+    font: inherit;
+    font-weight: 600;
+    padding: 0.55rem 1.1rem;
+    border: 2px solid var(--purple);
+    background: var(--purple);
+    color: #fff;
+    cursor: pointer;
+  }
+  .btn.ghost { background: transparent; color: var(--purple); }
+  .btn:hover { background: var(--purple-deep); border-color: var(--purple-deep); color: #fff; }
+  .presets { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .presets legend, .presets .lbl { font-weight: 600; font-size: 0.9rem; }
+  .presets label {
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  .presets input { accent-color: var(--purple); }
+  .presets label:has(input:checked) { border-color: var(--purple); background: var(--purple-soft); }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    border: 1px solid var(--border);
+  }
+  pre:focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  .snippet-cap { font-weight: 600; margin: 1.4rem 0 0.4rem; }
+  .snippet-cap:first-of-type { margin-top: 0.6rem; }
+  ul.notes { padding-left: 1.3rem; }
+  ul.notes li { margin-bottom: 0.6rem; }
+  footer {
+    border-top: 3px solid var(--purple);
+    padding: 1.2rem 1.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  footer a { color: var(--purple); font-weight: 600; }
+
+  /* ---- View-transition presets (applied at document level) ---- */
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-vt-preset="slide"]::view-transition-old(root) {
+      animation: vt-slide-out 320ms ease-in both;
+    }
+    html[data-vt-preset="slide"]::view-transition-new(root) {
+      animation: vt-slide-in 320ms ease-out both;
+    }
+    html[data-vt-preset="zoom"]::view-transition-old(root) {
+      animation: vt-zoom-out 280ms ease-in both;
+    }
+    html[data-vt-preset="zoom"]::view-transition-new(root) {
+      animation: vt-zoom-in 280ms ease-out both;
+    }
+  }
+  @keyframes vt-slide-out { to { transform: translateX(-48px); opacity: 0; } }
+  @keyframes vt-slide-in { from { transform: translateX(48px); opacity: 0; } }
+  @keyframes vt-zoom-out { to { transform: scale(0.92); opacity: 0; } }
+  @keyframes vt-zoom-in { from { transform: scale(1.06); opacity: 0; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>View Transitions Playground</h1>
+  <a href="https://dominic.balass.one/">dominic.balass.one</a>
+</header>
+<main>
+  <p class="lede">
+    The <strong>View Transitions API</strong> turns a hard DOM swap into an animated transition
+    with one function call: <code>document.startViewTransition(() =&gt; { /* your DOM update */ })</code>.
+    The browser snapshots the before and after states and tweens between them.
+    Click a card in each panel below and compare the plain swap against the transitioned one.
+  </p>
+
+  <section class="block" aria-labelledby="support-h">
+    <h2 id="support-h">Support check (live)</h2>
+    <div class="badges">
+      <span class="badge" id="badge-vt"><span class="dot"></span><span class="txt">checking&hellip;</span></span>
+      <span class="badge" id="badge-motion"><span class="dot"></span><span class="txt">checking&hellip;</span></span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 0;">
+      Same-document transitions are Baseline: Chrome/Edge 111+, Safari 18+, Firefox 138+.
+      Cross-document transitions (<code>@view-transition { navigation: auto; }</code>) are newer:
+      Chromium 126+, Safari 18.2+, Firefox still trailing. This demo uses the same-document API,
+      and it skips transitions entirely when you prefer reduced motion.
+    </p>
+  </section>
+
+  <section class="block" aria-labelledby="play-h">
+    <h2 id="play-h">The playground</h2>
+    <p style="margin-top: 0;">
+      Two identical mini-galleries. On the right, the clicked card <em>morphs</em> into the
+      detail hero because both share one <code>view-transition-name</code>.
+      It works in reverse too: hit "Back to gallery" and watch it fly home.
+    </p>
+    <div class="panels">
+      <div class="panel">
+        <h3>Plain DOM swap</h3>
+        <p class="sub">No API. The view just cuts from one state to the other.</p>
+        <div class="app" id="app-plain"></div>
+      </div>
+      <div class="panel">
+        <h3>With view transitions</h3>
+        <p class="sub" id="vt-sub">Wrapped in <code>document.startViewTransition()</code>, with a shared-element morph.</p>
+        <div class="app" id="app-vt"></div>
+        <fieldset class="presets" style="border: none; padding: 0; margin-top: 1rem;">
+          <legend class="lbl">Animation preset:</legend>
+          <label><input type="radio" name="preset" value="default" checked> Default crossfade</label>
+          <label><input type="radio" name="preset" value="slide"> Slide</label>
+          <label><input type="radio" name="preset" value="zoom"> Zoom</label>
+        </fieldset>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="code-h">
+    <h2 id="code-h">The code</h2>
+
+    <p class="snippet-cap">1. The whole basic API</p>
+    <pre tabindex="0"><code>document.startViewTransition(() => {
+  // any DOM update: swap views, re-render a list, toggle a class
+  showDetail(item);
+});</code></pre>
+
+    <p class="snippet-cap">2. Shared-element morph (thumbnail becomes the hero)</p>
+    <pre tabindex="0"><code>// give both ends the SAME name; it must be unique per snapshot
+thumb.style.viewTransitionName = 'hero';
+hero.style.viewTransitionName = 'hero';
+
+const t = document.startViewTransition(() => showDetail(item));
+t.finished.finally(() => {
+  thumb.style.viewTransitionName = '';
+  hero.style.viewTransitionName = '';
+});</code></pre>
+
+    <p class="snippet-cap">3. Custom animation, pure CSS</p>
+    <pre tabindex="0"><code>::view-transition-old(root) {
+  animation: slide-out 320ms ease-in both;
+}
+::view-transition-new(root) {
+  animation: slide-in 320ms ease-out both;
+}
+@keyframes slide-out { to { transform: translateX(-48px); opacity: 0; } }
+@keyframes slide-in { from { transform: translateX(48px); opacity: 0; } }</code></pre>
+
+    <p class="snippet-cap">4. Feature-detect and respect reduced motion</p>
+    <pre tabindex="0"><code>const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function update(fn) {
+  if (document.startViewTransition && !reduce) {
+    document.startViewTransition(fn);
+  } else {
+    fn(); // plain instant swap: the free fallback
+  }
+}</code></pre>
+  </section>
+
+  <section class="block" aria-labelledby="notes-h">
+    <h2 id="notes-h">Honest notes</h2>
+    <ul class="notes">
+      <li><strong>The fallback is doing nothing.</strong> A browser without the API runs your update
+        function directly and the user sees an instant cut. No polyfill needed; you are adding
+        polish, not a dependency.</li>
+      <li><strong>Names must be unique.</strong> Two visible elements sharing one
+        <code>view-transition-name</code> in the same snapshot abort the transition. Generate
+        names per item if several could be on screen.</li>
+      <li><strong>Same-document vs cross-document.</strong> This page demos same-document
+        transitions. For classic multi-page sites, <code>@view-transition { navigation: auto; }</code>
+        gives you crossfades between full page loads with zero JavaScript, where supported.</li>
+      <li><strong>Reduced motion.</strong> View transitions are motion. If the user asked for less
+        of it, skip the transition. This demo checks
+        <code>prefers-reduced-motion</code> live and swaps instantly when it is set to reduce.</li>
+    </ul>
+  </section>
+</main>
+<footer>
+  <span>Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> for a LinkedIn series on underused browser features.</span>
+  <span>Analytics via Google Analytics.</span>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var ITEMS = [
+    { id: 'nebula', title: 'Nebula', emoji: '\u{1F30C}',
+      grad: 'linear-gradient(135deg, #7c3aed, #2563eb)',
+      blurb: 'A star-forming cloud, rendered here as a suspiciously smooth gradient.' },
+    { id: 'desert', title: 'Desert', emoji: '\u{1F3DC}\uFE0F',
+      grad: 'linear-gradient(135deg, #f59e0b, #b45309)',
+      blurb: 'Miles of sand. No water. The gradient is doing a lot of heavy lifting.' },
+    { id: 'forest', title: 'Forest', emoji: '\u{1F332}',
+      grad: 'linear-gradient(135deg, #16a34a, #14532d)',
+      blurb: 'Dense canopy, dappled light, zero mosquitoes in this rendering.' },
+    { id: 'ocean', title: 'Ocean', emoji: '\u{1F30A}',
+      grad: 'linear-gradient(135deg, #06b6d4, #1e3a8a)',
+      blurb: 'Deep water with strong opinions about your screen time.' }
+  ];
+
+  var VT_NAME = 'vt-hero';
+  var supportsVT = typeof document.startViewTransition === 'function';
+  var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var currentPreset = 'default';
+
+  var appPlain = document.getElementById('app-plain');
+  var appVT = document.getElementById('app-vt');
+  var badgeVT = document.getElementById('badge-vt');
+  var badgeMotion = document.getElementById('badge-motion');
+  var vtSub = document.getElementById('vt-sub');
+
+  function setBadge(el, kind, text) {
+    el.className = 'badge ' + kind;
+    el.querySelector('.txt').textContent = text;
+  }
+
+  function refreshBadges() {
+    if (supportsVT) {
+      setBadge(badgeVT, 'ok', 'document.startViewTransition: supported');
+    } else {
+      setBadge(badgeVT, 'no', 'document.startViewTransition: not supported');
+    }
+    if (motionQuery.matches) {
+      setBadge(badgeMotion, 'warn', 'prefers-reduced-motion: reduce (transitions auto-skipped)');
+    } else {
+      setBadge(badgeMotion, 'ok', 'prefers-reduced-motion: no-preference');
+    }
+    if (!supportsVT) {
+      vtSub.textContent = 'Your browser does not support the API, so this panel behaves like the plain one.';
+    } else if (motionQuery.matches) {
+      vtSub.textContent = 'Reduced motion is on, so transitions are skipped and this panel behaves like the plain one.';
+    } else {
+      vtSub.innerHTML = 'Wrapped in <code>document.startViewTransition()</code>, with a shared-element morph.';
+    }
+  }
+  motionQuery.addEventListener('change', refreshBadges);
+  refreshBadges();
+
+  function canTransition() {
+    return supportsVT && !motionQuery.matches;
+  }
+
+  function applyPreset() {
+    if (currentPreset === 'default') {
+      delete document.documentElement.dataset.vtPreset;
+    } else {
+      document.documentElement.dataset.vtPreset = currentPreset;
+    }
+  }
+
+  function clearNames(appEl) {
+    var named = appEl.querySelectorAll('[data-vt-named]');
+    for (var i = 0; i < named.length; i++) {
+      named[i].style.viewTransitionName = '';
+      named[i].removeAttribute('data-vt-named');
+    }
+  }
+
+  function tagName(el) {
+    el.style.viewTransitionName = VT_NAME;
+    el.setAttribute('data-vt-named', '1');
+  }
+
+  function renderGallery(appEl, useVT, namedId) {
+    clearNames(appEl);
+    var html = '<div class="gallery">';
+    for (var i = 0; i < ITEMS.length; i++) {
+      var item = ITEMS[i];
+      html += '<button class="card" data-card="' + item.id + '">' +
+        '<span class="art"' + (useVT && namedId === item.id ? ' data-vt-named="1" style="view-transition-name: ' + VT_NAME + '; background:' + item.grad + ';"' : ' style="background:' + item.grad + ';"') + '>' +
+        item.emoji + '</span>' +
+        '<span class="label">' + item.title + '</span></button>';
+    }
+    html += '</div>';
+    appEl.innerHTML = html;
+    var cards = appEl.querySelectorAll('.card');
+    for (var j = 0; j < cards.length; j++) {
+      cards[j].addEventListener('click', function () {
+        goDetail(appEl, this.getAttribute('data-card'), useVT);
+      });
+    }
+  }
+
+  function renderDetail(appEl, itemId, useVT) {
+    clearNames(appEl);
+    var item = null;
+    for (var i = 0; i < ITEMS.length; i++) {
+      if (ITEMS[i].id === itemId) item = ITEMS[i];
+    }
+    if (!item) { renderGallery(appEl, useVT, null); return; }
+    var heroAttrs = useVT
+      ? ' data-vt-named="1" style="view-transition-name: ' + VT_NAME + '; background:' + item.grad + ';"'
+      : ' style="background:' + item.grad + ';"';
+    appEl.innerHTML =
+      '<div class="detail">' +
+        '<div class="hero"' + heroAttrs + '>' + item.emoji + '</div>' +
+        '<h4>' + item.title + '</h4>' +
+        '<p>' + item.blurb + '</p>' +
+        '<button class="btn ghost" data-back>Back to gallery</button>' +
+      '</div>';
+    appEl.querySelector('[data-back]').addEventListener('click', function () {
+      goGallery(appEl, itemId, useVT);
+    });
+  }
+
+  function goDetail(appEl, itemId, useVT) {
+    if (useVT && canTransition()) {
+      var art = appEl.querySelector('[data-card="' + itemId + '"] .art');
+      if (art) tagName(art);
+      applyPreset();
+      var t = document.startViewTransition(function () {
+        renderDetail(appEl, itemId, true);
+      });
+      t.finished.then(function () { clearNames(appEl); }, function () { clearNames(appEl); });
+    } else {
+      renderDetail(appEl, itemId, useVT);
+    }
+  }
+
+  function goGallery(appEl, returnId, useVT) {
+    if (useVT && canTransition()) {
+      applyPreset();
+      var t = document.startViewTransition(function () {
+        // the returning card carries the name in the NEW snapshot,
+        // so the hero morphs back into its gallery slot
+        renderGallery(appEl, true, returnId);
+      });
+      t.finished.then(function () { clearNames(appEl); }, function () { clearNames(appEl); });
+    } else {
+      renderGallery(appEl, useVT, null);
+    }
+  }
+
+  var presetInputs = document.querySelectorAll('input[name="preset"]');
+  for (var k = 0; k < presetInputs.length; k++) {
+    presetInputs[k].addEventListener('change', function () {
+      currentPreset = this.value;
+    });
+  }
+
+  renderGallery(appPlain, false, null);
+  renderGallery(appVT, true, null);
+})();
+</script>
+</body>
+</html>
