@@ -245,6 +245,15 @@
     border: 1px solid var(--border);
   }
   pre:focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  pre.live { border: 2px solid var(--purple); box-shadow: 0 0 0 3px var(--purple-soft); }
+  .snippet-cap.live-cap::after { content: " · in play"; color: var(--purple); }
+  .code-state {
+    font-size: 0.92rem;
+    background: var(--purple-soft);
+    border-left: 3px solid var(--purple);
+    padding: 0.6rem 0.9rem;
+    margin: 0.5rem 0 1rem;
+  }
   .snippet-cap { font-weight: 600; margin: 1.4rem 0 0.4rem; }
   .snippet-cap:first-of-type { margin-top: 0.6rem; }
   ul.notes { padding-left: 1.3rem; }
@@ -337,6 +346,7 @@
       </fieldset>
     </div>
     <p class="demo-note" id="demo-note"></p>
+    <p class="code-state" id="code-state" aria-live="polite"></p>
     <div class="demo-appbar">
       <span class="brand">Wander<em>.</em></span>
       <span class="tag">a tiny travel journal</span>
@@ -362,14 +372,14 @@
   <section class="block" aria-labelledby="code-h">
     <h2 id="code-h">The code</h2>
 
-    <p class="snippet-cap">1. The whole basic API</p>
-    <pre tabindex="0"><code>document.startViewTransition(() => {
+    <p class="snippet-cap" id="cap-1">1. The whole basic API</p>
+    <pre tabindex="0" id="snippet-1"><code>document.startViewTransition(() => {
   // any DOM update: swap views, re-render a list, toggle a class
   showDetail(place);
 });</code></pre>
 
-    <p class="snippet-cap">2. Shared-element morph (photo and title fly into place)</p>
-    <pre tabindex="0"><code>// give both ends the SAME name; each name must be unique per snapshot
+    <p class="snippet-cap" id="cap-2">2. Shared-element morph (photo and title fly into place)</p>
+    <pre tabindex="0" id="snippet-2"><code>// give both ends the SAME name; each name must be unique per snapshot
 thumbImg.style.viewTransitionName = 'wander-img-amalfi';
 titleEl.style.viewTransitionName = 'wander-title-amalfi';
 // ...render the detail view with the same two names...
@@ -379,8 +389,8 @@ t.finished.finally(() => {
   titleEl.style.viewTransitionName = '';
 });</code></pre>
 
-    <p class="snippet-cap">3. Custom animation, pure CSS</p>
-    <pre tabindex="0"><code>::view-transition-old(wander) {
+    <p class="snippet-cap" id="cap-3">3. Custom animation, pure CSS</p>
+    <pre tabindex="0" id="snippet-3"><code>::view-transition-old(wander) {
   animation: slide-out 380ms ease-in both;
 }
 ::view-transition-new(wander) {
@@ -389,8 +399,8 @@ t.finished.finally(() => {
 @keyframes slide-out { to { transform: translateX(-72px); opacity: 0; } }
 @keyframes slide-in { from { transform: translateX(72px); } }</code></pre>
 
-    <p class="snippet-cap">4. Feature-detect and respect reduced motion</p>
-    <pre tabindex="0"><code>const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    <p class="snippet-cap" id="cap-4">4. Feature-detect and respect reduced motion</p>
+    <pre tabindex="0" id="snippet-4"><code>const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function update(fn) {
   if (document.startViewTransition && !reduce) {
@@ -477,6 +487,7 @@ function update(fn) {
   var badgeVT = document.getElementById('badge-vt');
   var badgeMotion = document.getElementById('badge-motion');
   var demoNote = document.getElementById('demo-note');
+  var codeStateEl = document.getElementById('code-state');
   var toggleInput = document.getElementById('vt-enabled');
 
   function setBadge(el, kind, text) {
@@ -511,6 +522,31 @@ function update(fn) {
       msg = 'Zoom preset: the journal scales and fades between views.';
     }
     demoNote.textContent = msg;
+    refreshCodeState();
+  }
+
+  function refreshCodeState() {
+    var ids = ['snippet-1', 'snippet-2', 'snippet-3', 'snippet-4'];
+    var live, msg;
+    if (!canTransition()) {
+      live = ['snippet-4'];
+      msg = 'Next click runs update() directly: an instant cut. That is the fallback branch of snippet 4.';
+    } else if (preset === 'auto') {
+      live = ['snippet-1', 'snippet-2'];
+      msg = 'Next click runs document.startViewTransition(update) with shared view-transition-names. Snippets 1 and 2 are in play; no data-vt-preset is set on the html element.';
+    } else if (preset === 'slide') {
+      live = ['snippet-1', 'snippet-3'];
+      msg = 'Next click runs document.startViewTransition(update) and sets data-vt-preset="slide-fwd" (forward) or "slide-back" (back) on the html element. Snippets 1 and 3 are in play.';
+    } else {
+      live = ['snippet-1', 'snippet-3'];
+      msg = 'Next click runs document.startViewTransition(update) and sets data-vt-preset="zoom" on the html element. Snippets 1 and 3 are in play.';
+    }
+    for (var i = 0; i < ids.length; i++) {
+      var on = live.indexOf(ids[i]) !== -1;
+      document.getElementById(ids[i]).classList.toggle('live', on);
+      document.getElementById('cap-' + (i + 1)).classList.toggle('live-cap', on);
+    }
+    codeStateEl.textContent = msg;
   }
 
   motionQuery.addEventListener('change', refreshBadges);
