@@ -7,6 +7,7 @@
   /* ---- Theme toggle: auto -> light -> dark -> auto ---- */
   var toggle = document.getElementById('theme-toggle');
   var ORDER = ['auto', 'light', 'dark'];
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   function current() { return root.getAttribute('data-theme') || 'auto'; }
   function apply(theme) {
     if (theme === 'auto') {
@@ -27,7 +28,14 @@
     apply(current() === 'auto' ? 'auto' : current());
     toggle.addEventListener('click', function () {
       var next = ORDER[(ORDER.indexOf(current()) + 1) % ORDER.length];
-      apply(next);
+      // Real use case for the View Transitions API: crossfade the whole
+      // page on theme switch instead of snapping. Feature-detected, and
+      // skipped entirely when the user prefers reduced motion.
+      if (typeof document.startViewTransition === 'function' && !reduceMotion.matches) {
+        document.startViewTransition(function () { apply(next); });
+      } else {
+        apply(next);
+      }
     });
   }
 
