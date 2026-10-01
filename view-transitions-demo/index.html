@@ -288,9 +288,9 @@
     }
   }
   @keyframes w-s-out-l { to { transform: translateX(-72px); opacity: 0; } }
-  @keyframes w-s-in-r { from { transform: translateX(72px); opacity: 0; } }
+  @keyframes w-s-in-r { from { transform: translateX(72px); } }
   @keyframes w-s-out-r { to { transform: translateX(72px); opacity: 0; } }
-  @keyframes w-s-in-l { from { transform: translateX(-72px); opacity: 0; } }
+  @keyframes w-s-in-l { from { transform: translateX(-72px); } }
   @keyframes w-z-out { to { transform: scale(0.9); opacity: 0; } }
   @keyframes w-z-in { from { transform: scale(1.08); opacity: 0; } }
 </style>
@@ -371,7 +371,7 @@ t.finished.finally(() => {
   animation: slide-in 380ms ease-out both;
 }
 @keyframes slide-out { to { transform: translateX(-72px); opacity: 0; } }
-@keyframes slide-in { from { transform: translateX(72px); opacity: 0; } }</code></pre>
+@keyframes slide-in { from { transform: translateX(72px); } }</code></pre>
 
     <p class="snippet-cap">4. Feature-detect and respect reduced motion</p>
     <pre tabindex="0"><code>const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
