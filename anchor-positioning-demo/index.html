@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anchor Positioning Playground - Dominic Balassone</title>
+<meta name="description" content="An interactive demo of CSS anchor positioning: a tooltip glued to a draggable anchor with zero positioning JavaScript, plus automatic flip fallbacks.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+    --code-bg: #1d1d26;
+    --code-ink: #eceaf6;
+    --good: #15803d;
+    --good-bg: #dcfce7;
+    --bad: #b91c1c;
+    --bad-bg: #fee2e2;
+    --warn: #b45309;
+    --warn-bg: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --purple-soft: #2e1a5e;
+      --border: #2c2c34;
+      --good: #4ade80;
+      --good-bg: #14532d;
+      --bad: #f87171;
+      --bad-bg: #7f1d1d;
+      --warn: #fbbf24;
+      --warn-bg: #78350f;
+    }
+  }
+  * { border-radius: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--purple);
+    outline-offset: 2px;
+  }
+  a { color: var(--purple-deep); font-weight: 600; }
+  @media (prefers-color-scheme: dark) { a { color: var(--purple); } }
+  header.top {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 0.5rem;
+  }
+  header.top .back { font-size: 0.9rem; }
+  h1 { font-size: 2.2rem; margin: 0.5rem 0 0.25rem; line-height: 1.2; }
+  .lede { color: var(--muted); font-size: 1.1rem; max-width: 60ch; }
+  main { max-width: 880px; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+  section { margin-top: 2.5rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  p { max-width: 70ch; }
+
+  /* ---------- Playground ---------- */
+  .stage {
+    position: relative;
+    height: 380px;
+    background: var(--card);
+    border: 2px dashed var(--border);
+    overflow: hidden;
+    touch-action: none;
+  }
+  .anchor-btn {
+    position: absolute;
+    anchor-name: --play-anchor;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: grab;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .anchor-btn:active { cursor: grabbing; }
+  .tooltip {
+    position: absolute;
+    position-anchor: --play-anchor;
+    margin: 0;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+    max-width: 240px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .tooltip.tip-bottom { top: anchor(bottom); left: anchor(center); translate: -50% 0; margin-top: 10px; }
+  .tooltip.tip-top { bottom: anchor(top); left: anchor(center); translate: -50% 0; margin-bottom: 10px; }
+  .tooltip.tip-left { right: anchor(left); top: anchor(center); translate: 0 -50%; margin-right: 10px; }
+  .tooltip.tip-right { left: anchor(right); top: anchor(center); translate: 0 -50%; margin-left: 10px; }
+  .tooltip.fallbacks { position-try-fallbacks: flip-block, flip-inline; }
+  .tooltip.no-anchor-support { display: none; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2rem;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 1rem 1.25rem;
+  }
+  .controls fieldset { border: none; padding: 0; margin: 0; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .controls legend { font-weight: 700; font-size: 0.9rem; padding: 0; margin-right: 0.25rem; }
+  .controls label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.95rem; cursor: pointer; }
+  .readout {
+    background: var(--purple-soft);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 0.9rem 1.25rem;
+    font-size: 0.92rem;
+  }
+  .readout code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .readout .row { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; }
+  .pill {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .pill.bad { background: var(--bad-bg); color: var(--bad); }
+  .hint { color: var(--muted); font-size: 0.95rem; margin-top: 0.75rem; }
+
+  /* ---------- Code snippets ---------- */
+  .code-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem; }
+  @media (min-width: 720px) { .code-grid { grid-template-columns: 1fr 1fr; } }
+  .code-card { background: var(--card); border: 1px solid var(--border); }
+  .code-card h3 { margin: 0; padding: 0.7rem 1rem; font-size: 1rem; border-bottom: 1px solid var(--border); }
+  .code-card h3 .tag { font-weight: 400; font-size: 0.8rem; color: var(--muted); }
+  pre {
+    margin: 0;
+    padding: 1rem;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .note {
+    border-left: 4px solid var(--purple);
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    margin-top: 1rem;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  ul.tight li { margin-bottom: 0.4rem; max-width: 70ch; }
+  footer {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 1.25rem 2.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="https://dominic.balass.one/">&larr; dominic.balass.one</a>
+  <h1>Anchor Positioning Playground</h1>
+  <p class="lede">Tether any element to any other element in pure CSS. Drag the purple button around: the tooltip stays glued to it with <strong>zero</strong> positioning JavaScript. No scroll listeners, no resize listeners, no flip math.</p>
+</header>
+<main>
+  <section aria-label="Playground">
+    <h2>Try it</h2>
+    <div class="stage" id="stage">
+      <button class="anchor-btn" id="anchor" aria-describedby="tip">Drag me</button>
+      <div class="tooltip tip-bottom fallbacks" id="tip" role="tooltip">I follow the anchor. No script moves me.</div>
+    </div>
+    <div class="controls">
+      <fieldset>
+        <legend>Placement</legend>
+        <label><input type="radio" name="place" value="tip-bottom" checked> Bottom</label>
+        <label><input type="radio" name="place" value="tip-top"> Top</label>
+        <label><input type="radio" name="place" value="tip-left"> Left</label>
+        <label><input type="radio" name="place" value="tip-right"> Right</label>
+      </fieldset>
+      <label><input type="checkbox" id="flipToggle" checked> Auto-flip near edges <code>position-try-fallbacks</code></label>
+    </div>
+    <div class="readout" aria-live="off">
+      <div class="row">
+        <span>Support: <span class="pill good" id="supportPill">checking&hellip;</span></span>
+        <span>Anchor: <code id="anchorPos">&mdash;</code></span>
+        <span>Tooltip: <code id="tipPos">&mdash;</code></span>
+        <span>Active side: <code id="activeSide">&mdash;</code></span>
+      </div>
+    </div>
+    <p class="hint">Drag the button near an edge with auto-flip on and watch the tooltip flip sides by itself. Scroll this page or resize the window: it stays glued. The button also moves with arrow keys when focused. The script below only moves the anchor; the tooltip's position is computed entirely by CSS.</p>
+  </section>
+
+  <section>
+    <h2>Why not just JavaScript?</h2>
+    <p>The old way works, but you own every edge case: measuring, scroll, resize, zoom, and the flip math when the tooltip would overflow. Anchor positioning hands all of that to the browser.</p>
+    <div class="code-grid">
+      <div class="code-card">
+        <h3>The old way <span class="tag">JS you maintain</span></h3>
+<pre>function placeTip() {
+  const a = anchor.getBoundingClientRect();
+  const t = tip.getBoundingClientRect();
+  let top = a.bottom + 10;
+  let left = a.left + a.width / 2 - t.width / 2;
+  // flip when overflowing, by hand
+  if (top + t.height &gt; innerHeight)
+    top = a.top - t.height - 10;
+  if (left &lt; 0) left = 8;
+  if (left + t.width &gt; innerWidth)
+    left = innerWidth - t.width - 8;
+  tip.style.transform =
+    `translate(${left}px, ${top}px)`;
+}
+addEventListener('scroll', placeTip,
+  { passive: true });
+addEventListener('resize', placeTip);
+new ResizeObserver(placeTip)
+  .observe(document.body);
+placeTip();</pre>
+      </div>
+      <div class="code-card">
+        <h3>Anchor positioning <span class="tag">the browser owns it</span></h3>
+<pre>#anchor { anchor-name: --tip; }
+
+#tip {
+  position: absolute;
+  position-anchor: --tip;
+  top: anchor(bottom);
+  left: anchor(center);
+  translate: -50% 0;
+  margin-top: 10px;
+  /* flip automatically near edges */
+  position-try-fallbacks:
+    flip-block, flip-inline;
+}</pre>
+      </div>
+    </div>
+    <div class="note">
+      <strong>The flip is the part people underestimate.</strong> Hand-rolled flip logic breaks on zoom, on nested scrollers, and on rapid resizes. <code>position-try-fallbacks: flip-block, flip-inline</code> re-runs inside the browser's layout pass, so it can never go stale.
+    </div>
+  </section>
+
+  <section>
+    <h2>Honest notes</h2>
+    <ul class="tight">
+      <li><strong>Support:</strong> Chrome/Edge 125+, Safari 26+, Firefox 147+. The core (<code>anchor-name</code>, <code>position-anchor</code>, <code>anchor()</code>, <code>position-try-fallbacks</code>) is Baseline 2026. Your browser: <span class="pill good" id="supportPill2">checking&hellip;</span></li>
+      <li><strong>Guard it anyway.</strong> Wrap anchor styles in <code>@supports (anchor-name: --a)</code> and ship a static fallback (e.g. the tooltip hidden, or plainly placed) for older browsers.</li>
+      <li><strong>Sub-features diverge.</strong> Newer pieces like <code>position-visibility: anchor-visible</code> and <code>position-anchor: normal</code> are still rolling out per engine. The core shown here is the safe set.</li>
+      <li><strong>JavaScript still wins</strong> when the anchor isn't in the DOM (virtual lists) or lives in a different shadow tree. For everything else, this is the default I'd reach for over a positioning library.</li>
+    </ul>
+    <div class="note warn">
+      <strong>One gotcha:</strong> the anchor and the positioned element must be in the same shadow tree, and the positioned element needs <code>position: absolute</code> (or <code>fixed</code>). Also note this demo uses explicit <code>anchor()</code> insets rather than the <code>position-area</code> shorthand: same result, wider support (the shorthand was renamed from <code>inset-area</code> mid-rollout).
+    </div>
+  </section>
+</main>
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> &middot; CSS Anchor Positioning demo
+</footer>
+<script>
+(function () {
+  'use strict';
+  var stage = document.getElementById('stage');
+  var anchor = document.getElementById('anchor');
+  var tip = document.getElementById('tip');
+  var anchorPos = document.getElementById('anchorPos');
+  var tipPos = document.getElementById('tipPos');
+  var activeSide = document.getElementById('activeSide');
+
+  // ---- Support readout ----
+  var core = false, flips = false;
+  try {
+    core = CSS.supports('anchor-name: --x');
+    flips = CSS.supports('position-try-fallbacks: flip-block');
+  } catch (e) { /* CSS.supports missing: very old browser */ }
+  var ok = core && flips;
+  var pill1 = document.getElementById('supportPill');
+  var pill2 = document.getElementById('supportPill2');
+  [pill1, pill2].forEach(function (p) {
+    p.textContent = ok ? 'supported' : 'not supported';
+    p.className = 'pill ' + (ok ? 'good' : 'bad');
+  });
+  if (!ok) tip.classList.add('no-anchor-support');
+
+  // ---- Drag the anchor (the ONLY thing JS moves) ----
+  var ax = 0.5, ay = 0.5; // anchor center as fraction of stage
+  function render() {
+    var r = stage.getBoundingClientRect();
+    var half = anchor.offsetWidth / 2;
+    var x = ax * r.width, y = ay * r.height;
+    x = Math.max(half, Math.min(r.width - half, x));
+    y = Math.max(20, Math.min(r.height - 20, y));
+    anchor.style.left = x + 'px';
+    anchor.style.top = y + 'px';
+    anchor.style.transform = 'translate(-50%, -50%)';
+  }
+  var dragging = false;
+  anchor.addEventListener('pointerdown', function (e) {
+    dragging = true;
+    anchor.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  anchor.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var r = stage.getBoundingClientRect();
+    ax = (e.clientX - r.left) / r.width;
+    ay = (e.clientY - r.top) / r.height;
+    render();
+  });
+  anchor.addEventListener('pointerup', function () { dragging = false; });
+  anchor.addEventListener('pointercancel', function () { dragging = false; });
+  anchor.addEventListener('keydown', function (e) {
+    var step = 0.04, moved = true;
+    if (e.key === 'ArrowLeft') ax -= step;
+    else if (e.key === 'ArrowRight') ax += step;
+    else if (e.key === 'ArrowUp') ay -= step;
+    else if (e.key === 'ArrowDown') ay += step;
+    else moved = false;
+    if (moved) { e.preventDefault(); render(); }
+  });
+
+  // ---- Controls ----
+  var radios = document.querySelectorAll('input[name="place"]');
+  radios.forEach(function (r) {
+    r.addEventListener('change', function () {
+      tip.classList.remove('tip-top', 'tip-bottom', 'tip-left', 'tip-right');
+      tip.classList.add(r.value);
+    });
+  });
+  document.getElementById('flipToggle').addEventListener('change', function (e) {
+    tip.classList.toggle('fallbacks', e.target.checked);
+  });
+
+  // ---- Live readout (rAF; observes only, never positions the tip) ----
+  function fmt(n) { return Math.round(n) + 'px'; }
+  function tick() {
+    var s = stage.getBoundingClientRect();
+    var a = anchor.getBoundingClientRect();
+    var t = tip.getBoundingClientRect();
+    anchorPos.textContent = fmt(a.left - s.left) + ', ' + fmt(a.top - s.top);
+    tipPos.textContent = fmt(t.left - s.left) + ', ' + fmt(t.top - s.top);
+    var side = '?';
+    if (t.top >= a.bottom - 2) side = 'bottom';
+    else if (t.bottom <= a.top + 2) side = 'top';
+    else if (t.left >= a.right - 2) side = 'right';
+    else if (t.right <= a.left + 2) side = 'left';
+    activeSide.textContent = side;
+    requestAnimationFrame(tick);
+  }
+  render();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
