@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The &lt;picture&gt; Element, Done Right - Dominic Balassone</title>
+<meta name="description" content="A bulletproof <picture> example covering art direction, modern image formats, and resolution switching, with a live readout of which file your browser actually picks.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+    --code-bg: #1d1d26;
+    --code-ink: #eceaf6;
+    --good: #15803d;
+    --good-bg: #dcfce7;
+    --bad: #b91c1c;
+    --bad-bg: #fee2e2;
+    --warn: #b45309;
+    --warn-bg: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --purple-soft: #2e1a5e;
+      --border: #2c2c34;
+      --good: #4ade80;
+      --good-bg: #14532d;
+      --bad: #f87171;
+      --bad-bg: #7f1d1d;
+      --warn: #fbbf24;
+      --warn-bg: #78350f;
+    }
+  }
+  * { border-radius: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--purple);
+    outline-offset: 2px;
+  }
+  a { color: var(--purple-deep); font-weight: 600; }
+  @media (prefers-color-scheme: dark) { a { color: var(--purple); } }
+  header.top {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 0.5rem;
+  }
+  header.top .back { font-size: 0.9rem; }
+  h1 { font-size: 2.2rem; margin: 0.5rem 0 0.25rem; line-height: 1.2; }
+  .lede { color: var(--muted); font-size: 1.1rem; max-width: 60ch; }
+  main { max-width: 880px; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+  section { margin-top: 2.5rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  p { max-width: 70ch; }
+
+  pre {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    border: 1px solid var(--border);
+  }
+  .snippet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: 0.6rem 1rem;
+  }
+  .snippet-head strong { font-size: 0.95rem; }
+  .copy-btn {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .copy-btn.copied { background: var(--good); }
+
+  figure.demo { margin: 1.5rem 0 0; max-width: 900px; }
+  figure.demo picture img { display: block; width: 100%; height: auto; }
+  .readout {
+    background: var(--purple-soft);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 0.9rem 1.25rem;
+    font-size: 0.92rem;
+  }
+  .readout .row { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; }
+  .readout code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+  .pill {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .pill.bad { background: var(--bad-bg); color: var(--bad); }
+  .hint { color: var(--muted); font-size: 0.95rem; margin-top: 0.75rem; }
+
+  .jobs { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem; }
+  @media (min-width: 720px) { .jobs { grid-template-columns: 1fr 1fr 1fr; } }
+  .job { background: var(--card); border: 1px solid var(--border); padding: 1rem 1.1rem; }
+  .job h3 { margin: 0 0 0.4rem; font-size: 1.02rem; }
+  .job h3 code { font-size: 0.9em; }
+  .job p { font-size: 0.92rem; margin: 0; color: var(--muted); }
+  .job p code { color: var(--ink); }
+
+  .note {
+    border-left: 4px solid var(--purple);
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    margin-top: 1rem;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  ul.tight li { margin-bottom: 0.45rem; max-width: 70ch; }
+  table.spec { border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+  table.spec th, table.spec td { border: 1px solid var(--border); padding: 0.45rem 0.7rem; text-align: left; }
+  table.spec th { background: var(--card); }
+  footer {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 1.25rem 2.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="https://dominic.balass.one/">&larr; dominic.balass.one</a>
+  <h1>The <code>&lt;picture&gt;</code> element, done right</h1>
+  <p class="lede">One image, three jobs: serve a different crop on small screens, pick the smallest modern format the browser understands, and never download more pixels than the layout needs. Below is the snippet I actually reuse, then a live demo proving which file your browser picks.</p>
+</header>
+<main>
+  <section>
+    <h2>The bulletproof snippet</h2>
+    <p>Copy this. It handles art direction, format fallback, and resolution switching in one block. The browser takes the <strong>first</strong> <code>&lt;source&gt;</code> whose <code>media</code> matches <em>and</em> whose <code>type</code> it supports, then picks the best width from that <code>srcset</code>.</p>
+    <div class="snippet-head">
+      <strong>picture-bulletproof.html</strong>
+      <button class="copy-btn" id="copyBtn" type="button">Copy</button>
+    </div>
+<pre id="snippet">&lt;picture&gt;
+  &lt;!-- 1. ART DIRECTION: square crop on narrow screens --&gt;
+  &lt;source media="(max-width: 640px)"
+          type="image/avif"
+          srcset="hero-square-480.avif 480w,
+                  hero-square-960.avif 960w"
+          sizes="100vw"&gt;
+  &lt;source media="(max-width: 640px)"
+          type="image/webp"
+          srcset="hero-square-480.webp 480w,
+                  hero-square-960.webp 960w"
+          sizes="100vw"&gt;
+  &lt;source media="(max-width: 640px)"
+          srcset="hero-square-480.jpg 480w,
+                  hero-square-960.jpg 960w"
+          sizes="100vw"&gt;
+
+  &lt;!-- 2. WIDE CROP: best format the browser supports --&gt;
+  &lt;source type="image/avif"
+          srcset="hero-wide-640.avif 640w,
+                  hero-wide-1280.avif 1280w"
+          sizes="(max-width: 900px) 100vw, 900px"&gt;
+  &lt;source type="image/webp"
+          srcset="hero-wide-640.webp 640w,
+                  hero-wide-1280.webp 1280w"
+          sizes="(max-width: 900px) 100vw, 900px"&gt;
+
+  &lt;!-- 3. FALLBACK: plain &lt;img&gt; for ancient browsers --&gt;
+  &lt;img src="hero-wide-640.jpg"
+       srcset="hero-wide-640.jpg 640w,
+               hero-wide-1280.jpg 1280w"
+       sizes="(max-width: 900px) 100vw, 900px"
+       alt="Lighthouse on a coastal cliff at golden hour"
+       width="1280" height="549"
+       loading="lazy" decoding="async"&gt;
+&lt;/picture&gt;</pre>
+    <div class="note">
+      <strong>Why this order matters.</strong> Media-constrained sources go first, most capable format first within each group. The typeless JPEG <code>&lt;source&gt;</code> catches browsers that understand <code>&lt;picture&gt;</code> but neither AVIF nor WebP. The <code>&lt;img&gt;</code> catches browsers that predate <code>&lt;picture&gt;</code> entirely. Every path serves <em>something</em>.
+    </div>
+  </section>
+
+  <section>
+    <h2>Watch it work</h2>
+    <p>The exact markup above, live. Resize your window across 640px and watch the crop change. The readout shows the file your browser actually chose.</p>
+    <figure class="demo">
+      <picture>
+        <source media="(max-width: 640px)" type="image/avif"
+                srcset="hero-square-480.avif 480w, hero-square-960.avif 960w" sizes="100vw">
+        <source media="(max-width: 640px)" type="image/webp"
+                srcset="hero-square-480.webp 480w, hero-square-960.webp 960w" sizes="100vw">
+        <source media="(max-width: 640px)"
+                srcset="hero-square-480.jpg 480w, hero-square-960.jpg 960w" sizes="100vw">
+        <source type="image/avif"
+                srcset="hero-wide-640.avif 640w, hero-wide-1280.avif 1280w"
+                sizes="(max-width: 900px) 100vw, 900px">
+        <source type="image/webp"
+                srcset="hero-wide-640.webp 640w, hero-wide-1280.webp 1280w"
+                sizes="(max-width: 900px) 100vw, 900px">
+        <img id="demoImg" src="hero-wide-640.jpg"
+             srcset="hero-wide-640.jpg 640w, hero-wide-1280.jpg 1280w"
+             sizes="(max-width: 900px) 100vw, 900px"
+             alt="Lighthouse on a coastal cliff at golden hour"
+             width="1280" height="549" loading="eager" decoding="async">
+      </picture>
+    </figure>
+    <div class="readout" aria-live="off">
+      <div class="row">
+        <span>Chosen file: <code id="chosenFile">&mdash;</code></span>
+        <span>Viewport: <code id="vpWidth">&mdash;</code></span>
+        <span>DPR: <code id="dpr">&mdash;</code></span>
+        <span>Crop: <code id="cropMode">&mdash;</code></span>
+      </div>
+      <div class="row" style="margin-top:0.4rem">
+        <span>AVIF: <span class="pill" id="avifPill">&hellip;</span></span>
+        <span>WebP: <span class="pill" id="webpPill">&hellip;</span></span>
+      </div>
+    </div>
+    <p class="hint">On a phone-width viewport you get the square crop; on desktop, the wide one. On a 2x display the browser reaches for the larger file in the winning <code>srcset</code>. Shrink this window and watch the chosen file change.</p>
+    <table class="spec" aria-label="File sizes for this demo's assets">
+      <tr><th>File</th><th>Size</th><th>File</th><th>Size</th></tr>
+      <tr><td><code>hero-wide-1280.jpg</code></td><td>166 KB</td><td><code>hero-wide-1280.avif</code></td><td>92 KB</td></tr>
+      <tr><td><code>hero-wide-640.jpg</code></td><td>48 KB</td><td><code>hero-wide-640.avif</code></td><td>27 KB</td></tr>
+      <tr><td><code>hero-square-960.jpg</code></td><td>161 KB</td><td><code>hero-square-960.avif</code></td><td>84 KB</td></tr>
+      <tr><td><code>hero-square-480.jpg</code></td><td>51 KB</td><td><code>hero-square-480.avif</code></td><td>29 KB</td></tr>
+    </table>
+    <p class="hint">Same pixels, roughly 45% smaller. That is the entire format argument.</p>
+  </section>
+
+  <section>
+    <h2>The three jobs</h2>
+    <div class="jobs">
+      <div class="job">
+        <h3>1. Art direction <code>media</code></h3>
+        <p>A wide landscape squeezed to phone width becomes a smear. <code>media="(max-width: 640px)"</code> swaps in a tighter square crop instead. Different image, same subject.</p>
+      </div>
+      <div class="job">
+        <h3>2. Format switching <code>type</code></h3>
+        <p>List AVIF first, WebP second, then a typeless JPEG source. The browser takes the first format it can decode. Modern browsers get half the bytes; nobody gets a broken image.</p>
+      </div>
+      <div class="job">
+        <h3>3. Resolution switching <code>srcset</code> + <code>sizes</code></h3>
+        <p><code>w</code> descriptors say how wide each file is; <code>sizes</code> tells the browser how wide the slot is in your layout. It multiplies by DPR and picks. <code>sizes</code> must mirror your CSS or it downloads the wrong file.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Honest notes</h2>
+    <ul class="tight">
+      <li><strong>You do not always need <code>&lt;picture&gt;</code>.</strong> If there is no art direction and you are fine serving one format family, <code>&lt;img srcset&gt;</code> alone does resolution switching with less markup.</li>
+      <li><strong><code>sizes</code> is a promise about your layout.</strong> Lie about it and the browser fetches too much or too little. When in doubt, measure the rendered slot and write that down.</li>
+      <li><strong>Keep <code>width</code> and <code>height</code> on the <code>&lt;img&gt;</code>.</strong> They reserve space and prevent layout shift. Note the trade-off: art-directed crops change aspect ratio, so pair this with a CSS <code>aspect-ratio</code> per breakpoint if CLS matters to you.</li>
+      <li><strong>The <code>&lt;img&gt;</code> fallback is not optional.</strong> It is what ancient browsers render, it carries the <code>alt</code> text, and it is where <code>loading</code> and <code>decoding</code> live.</li>
+      <li><strong>AVIF encodes slowly.</strong> Fine at build time, painful on the fly. If you generate variants per request, WebP is the pragmatic default and AVIF is the build-step upgrade.</li>
+    </ul>
+    <div class="note warn">
+      <strong>Common mistake:</strong> putting the <code>media</code> sources <em>after</em> the format sources. The browser takes the first matching source, so a media-less AVIF source placed first would win on mobile and serve the wide crop. Order is: art-directed groups first, formats best-first inside each group, <code>&lt;img&gt;</code> last.
+    </div>
+  </section>
+</main>
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> &middot; <code>&lt;picture&gt;</code> demo
+</footer>
+<script>
+(function () {
+  'use strict';
+
+  // ---- Copy button ----
+  var copyBtn = document.getElementById('copyBtn');
+  var snippet = document.getElementById('snippet');
+  copyBtn.addEventListener('click', function () {
+    var text = snippet.textContent;
+    function done() {
+      copyBtn.textContent = 'Copied';
+      copyBtn.classList.add('copied');
+      setTimeout(function () {
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('copied');
+      }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+  });
+
+  // ---- Live readout ----
+  var img = document.getElementById('demoImg');
+  var chosenFile = document.getElementById('chosenFile');
+  var vpWidth = document.getElementById('vpWidth');
+  var dprEl = document.getElementById('dpr');
+  var cropMode = document.getElementById('cropMode');
+  var narrow = window.matchMedia('(max-width: 640px)');
+
+  function fileName(url) {
+    try { return decodeURIComponent(new URL(url, location.href).pathname.split('/').pop()); }
+    catch (e) { return url; }
+  }
+  function tick() {
+    chosenFile.textContent = fileName(img.currentSrc || img.src);
+    vpWidth.textContent = window.innerWidth + 'px';
+    dprEl.textContent = String(window.devicePixelRatio || 1);
+    cropMode.textContent = narrow.matches ? 'square (art-directed)' : 'wide';
+  }
+  window.addEventListener('resize', tick);
+  if (narrow.addEventListener) narrow.addEventListener('change', tick);
+  tick();
+
+  // ---- Format support probes (tiny real decodes of our own assets) ----
+  function probe(url, pillId) {
+    var pill = document.getElementById(pillId);
+    var t = new Image();
+    t.onload = function () { pill.textContent = 'supported'; pill.className = 'pill good'; };
+    t.onerror = function () { pill.textContent = 'not supported'; pill.className = 'pill bad'; };
+    t.src = url;
+  }
+  probe('hero-wide-640.avif', 'avifPill');
+  probe('hero-wide-640.webp', 'webpPill');
+})();
+</script>
+</body>
+</html>
