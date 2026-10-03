@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rogue Survivor: Real Menus</title>
+<meta name="description" content="Week 2 of the Rogue Survivor build log: real buttons, containers, and modals on canvas, with keyboard focus navigation and a one-scale-factor layout system. Playable demo included.">
+<link rel="canonical" href="https://dominic.balass.one/rogue-survivor-ui/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/rogue-survivor-ui/">
+<meta property="og:title" content="Rogue Survivor: Real Menus">
+<meta property="og:description" content="Buttons, containers, modals, and keyboard focus on canvas — plus a one-scale-factor layout system. Playable demo included.">
+<meta property="og:image" content="https://dominic.balass.one/rogue-survivor-ui/start-menu.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rogue Survivor: Real Menus">
+<meta name="twitter:description" content="Buttons, containers, modals, and keyboard focus on canvas — plus a one-scale-factor layout system. Playable demo included.">
+<meta name="twitter:image" content="https://dominic.balass.one/rogue-survivor-ui/start-menu.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #0b0b10;
+    --panel: #14141c;
+    --ink: #e8e8f0;
+    --muted: #9a9ab0;
+    --purple: #a855f7;
+    --green: #4ade80;
+    --line: #262633;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+  header.hero { padding: 64px 0 32px; }
+  .kicker {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 12px; line-height: 1.15; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 720px; }
+  .lede strong { color: var(--ink); }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 32px 0;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat .num { font-size: 30px; font-weight: 700; color: var(--purple); }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  h2 { font-size: 26px; margin: 56px 0 8px; }
+  .section-sub { color: var(--muted); margin: 0 0 24px; max-width: 720px; }
+  .game-frame {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+  .game-frame iframe {
+    display: block;
+    width: 100%;
+    height: 70vh;
+    min-height: 420px;
+    border: 0;
+    background: #000;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .shots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 8px 0 8px;
+  }
+  @media (max-width: 760px) { .shots { grid-template-columns: 1fr; } }
+  .shots figure { margin: 0; }
+  .shots img {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #000;
+  }
+  .shots figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .comp { margin: 0 0 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .comp-head { padding: 20px 20px 4px; }
+  .comp-head h3 { margin: 0 0 6px; font-size: 18px; }
+  .comp-head h3 code { color: var(--purple); font-size: 17px; }
+  .comp-head p { margin: 0 0 4px; color: var(--muted); font-size: 15px; max-width: 760px; }
+  .comp pre {
+    margin: 16px 20px 20px;
+    background: #0a0a0f;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .note {
+    background: rgba(168,85,247,.08);
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 12px 0 36px;
+    font-size: 15px;
+  }
+  .note strong { color: var(--purple); }
+  footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+  footer a { color: var(--purple); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .btn {
+    display: inline-block;
+    background: var(--purple);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 999px;
+  }
+  .btn.ghost { background: transparent; border: 1px solid var(--purple); color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker">Rogue Survivor · Build Log · Week 2</span>
+    <h1>Real Menus</h1>
+    <p class="lede">
+      Week 1 was the AI cleanup. This week the game got a real UI:
+      <strong>SurvivorButton</strong>, <strong>SurvivorContainer</strong>,
+      <strong>SurvivorModal</strong>, and a focus manager for keyboard navigation.
+      Plain boxes, no cropped corners, hard offset shadows like this site.
+      The playable build is up top.
+    </p>
+    <div class="btn-row">
+      <a class="btn" href="https://dominic.balass.one/rogue-survivor/w2/">Play the week 2 build</a>
+      <a class="btn ghost" href="https://github.com/SydBal/rogue-survivor">Source on GitHub</a>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num">4</div><div class="lbl">UI components, all canvas-drawn</div></div>
+    <div class="stat"><div class="num">16</div><div class="lbl">Playwright UI tests passing</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">scale factor for every menu length</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">fixed pixel widths</div></div>
+  </div>
+
+  <h2>Play it</h2>
+  <p class="section-sub">The week 2 build, frozen in time. Tab through the menus, open How to Play, pause mid-run. Same game underneath.</p>
+  <div class="game-frame">
+    <iframe src="https://dominic.balass.one/rogue-survivor/w2/" title="Rogue Survivor (week 2 UI build)"></iframe>
+  </div>
+  <p class="hint">Click the game once so it captures your keyboard. Tab / arrows move focus, Enter activates, Escape backs out.</p>
+
+  <h2>The components</h2>
+  <p class="section-sub">Everything lives in <code>survivor-ui.js</code>, drawn with the same Canvas 2D the game uses. No DOM, no framework.</p>
+
+  <div class="comp">
+    <div class="comp-head">
+      <h3><code>SurvivorButton</code></h3>
+      <p>A plain box with a hard offset shadow. Five states: default, hovered, focused, pressed, disabled. Pressed buttons shift down-right and their shadow shrinks, like being pushed in. Focus gets the purple border, the keyboard-focus indicator.</p>
+    </div>
+<pre><code>// Pressed buttons shift down-right, shadow shrinks: pushed in.
+canvasContext.fillStyle = t.shadow
+if (pressed) canvasContext.fillRect(x + 2, y + 2, w, h)
+else canvasContext.fillRect(x + s, y + s, w, h)   // s = scaled 6px</code></pre>
+  </div>
+
+  <div class="comp">
+    <div class="comp-head">
+      <h3><code>SurvivorContainer</code></h3>
+      <p>A panel with an optional title. Content draws through a callback that receives the padded content bounds, so callers never do box math by hand.</p>
+    </div>
+<pre><code>this.container.draw((content) =&gt; {
+  // content: { x, y, width, height } inside the padding
+  this.buttons.forEach((b) =&gt; b.draw())
+})</code></pre>
+  </div>
+
+  <div class="comp">
+    <div class="comp-head">
+      <h3><code>SurvivorModal</code></h3>
+      <p>Dim backdrop, centered container, body lines, button stack. Opening registers the modal's buttons and traps focus inside; closing unregisters them and restores whatever was focused before.</p>
+    </div>
+<pre><code>open(focusManager) {
+  focusManager.registerAll(this.buttons)
+  focusManager.enterModalMode(this.buttons, 0)  // trap
+  this.visible = true
+}
+close() {
+  this.buttons.forEach((b) =&gt; this.focusManager.unregister(b.id))
+  this.focusManager.exitModalMode()             // restore focus
+  this.visible = false
+}</code></pre>
+  </div>
+
+  <div class="comp">
+    <div class="comp-head">
+      <h3><code>SurvivorFocusManager</code></h3>
+      <p>Ported from Classic Scoundrel's <code>FocusManager</code>: a registry of focusables, Tab and arrow cycling with wraparound, Enter / Space activation, disabled skipping, modal trapping. Gamepads get the same treatment: d-pad moves focus, A activates, B is Escape.</p>
+    </div>
+<pre><code>handleKeyDown(event) {
+  if (event.key === 'Tab') { this.focusNext(); return true }
+  if (event.key === 'ArrowDown') { this.focusNext(); return true }
+  if (event.key === 'Enter' &amp;&amp; !event.repeat) {
+    this.getCurrentFocus()?.activate()
+    return true
+  }
+  return false  // unhandled: the game's own keys run
+}</code></pre>
+  </div>
+
+  <h2>One scale factor</h2>
+  <p class="section-sub">The design decision worth calling out. My first pass mixed game-scaled fonts with fixed 440px panels. On an ultrawide monitor the title spilled right out of its box. Classic Scoundrel solves this with Dymensions: lay out UI in a virtual resolution, map it onto the canvas with a single scale. I did the same with the game's own scale: every menu length is a fraction of <code>gameSize</code>, and panels measure their own text with <code>measureText</code> to size themselves. Zero fixed pixels, on phones and ultrawides alike.</p>
+  <div class="comp">
+    <div class="comp-head">
+      <h3><code>SurvivorDimensions</code></h3>
+      <p>Every value is a fraction of <code>gameSize</code>, the same unit the game world is drawn in. Menus and game can never drift apart.</p>
+    </div>
+<pre><code>const SurvivorDimensions = {
+  fontBase: 0.02,   // the game's own base font fraction
+  buttonHMul: 1.9,  // button height = fontBase * 1.9
+  shadow: 0.006,    // hard offset shadow, like the site
+  // ...no fixed-pixel widths anywhere.
+}
+
+const fitPanelWidth = ({ title, titlePx, lines, linePx,
+                         buttonLabels, labelPx }) =&gt; {
+  let need = 0
+  if (title) need = Math.max(need, measureTextWidth(title, titlePx))
+  lines.forEach((l) =&gt; need = Math.max(need, measureTextWidth(l, linePx)))
+  buttonLabels.forEach((l) =&gt;
+    need = Math.max(need, measureTextWidth(l, labelPx) / 0.62))
+  return clamp(need + padding, minW, maxW)
+}</code></pre>
+  </div>
+
+  <h2>In the game</h2>
+  <p class="section-sub">Start menu, How to Play modal, pause panel, game over panel. All screenshots from the real build.</p>
+  <div class="shots">
+    <figure>
+      <img src="start-menu.png" alt="Rogue Survivor start menu: a titled panel with Start Game and How to Play buttons">
+      <figcaption>Start menu. Start Game is focused by default.</figcaption>
+    </figure>
+    <figure>
+      <img src="how-to-modal.png" alt="How to Play modal with controls text and a Close button">
+      <figcaption>How to Play modal. Focus is trapped on Close until it closes.</figcaption>
+    </figure>
+    <figure>
+      <img src="pause-menu.png" alt="Pause panel with Resume and Restart buttons over the dimmed frozen game">
+      <figcaption>Pause panel over the frozen game. Resume or Restart.</figcaption>
+    </figure>
+    <figure>
+      <img src="game-over-menu.png" alt="Game over panel showing score, time, level reached, and a Play Again button">
+      <figcaption>Game over panel with run stats and Play Again.</figcaption>
+    </figure>
+  </div>
+
+  <div class="note">
+    <strong>Still no win condition.</strong> You survive until you don't. Oh my.
+    That changes in a coming week.
+  </div>
+
+  <footer>
+    Rogue Survivor is hand-built in vanilla JavaScript and Canvas 2D.
+    Week 2 build frozen at <a href="https://dominic.balass.one/rogue-survivor/w2/">/rogue-survivor/w2/</a>.
+    Source: <a href="https://github.com/SydBal/rogue-survivor">SydBal/rogue-survivor</a> ·
+    <a href="https://dominic.balass.one/">dominic.balass.one</a>
+  </footer>
+
+</div>
+</body>
+</html>
