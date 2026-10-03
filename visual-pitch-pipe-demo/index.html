@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visual Pitch Pipe — a tuner you read instead of hear</title>
+<meta name="description" content="I sing in a choir and kept needing my exact pitch from the sheet music in front of me. So I built a pitch pipe you read: match what you see, hear your note.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/visual-pitch-pipe-demo/">
+<meta property="og:title" content="Visual Pitch Pipe — a tuner you read instead of hear">
+<meta property="og:description" content="Built for my own choir rehearsals: match the note you see on the page, hear your exact pitch. Camera mode is coming next.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Visual Pitch Pipe — a tuner you read instead of hear">
+<meta name="twitter:description" content="Built for my own choir rehearsals: match the note you see on the page, hear your exact pitch. Camera mode is coming next.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --purple-soft: #2e1a5e;
+      --border: #2c2c34;
+    }
+  }
+  * { border-radius: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  :focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  a { color: var(--purple-deep); font-weight: 600; }
+  @media (prefers-color-scheme: dark) { a { color: var(--purple); } }
+  header.top { max-width: 880px; margin: 0 auto; padding: 2.5rem 1.25rem 0.5rem; }
+  header.top .back { font-size: 0.9rem; }
+  h1 { font-size: 2.2rem; margin: 0.5rem 0 0.25rem; line-height: 1.2; }
+  .lede { color: var(--muted); font-size: 1.1rem; max-width: 60ch; }
+  main { max-width: 880px; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+  section { margin-top: 2.5rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  p { max-width: 70ch; }
+  .steps { list-style: none; padding: 0; margin: 1rem 0; }
+  .steps li {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--purple);
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.6rem;
+    max-width: 70ch;
+  }
+  .steps li strong { display: block; margin-bottom: 0.15rem; }
+  figure.app { margin: 1.5rem 0 0; }
+  figure.app iframe {
+    display: block;
+    width: 100%;
+    height: 720px;
+    border: 1px solid var(--border);
+    background: #fff;
+  }
+  figcaption { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+  .teaser {
+    background: var(--purple-soft);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .teaser h2 { margin-top: 0; }
+  .states { list-style: none; padding: 0; margin: 1rem 0 0; counter-reset: state; }
+  .states li { counter-increment: state; margin-bottom: 0.9rem; max-width: 70ch; padding-left: 2.2rem; position: relative; }
+  .states li::before {
+    content: counter(state);
+    position: absolute; left: 0; top: 0.1rem;
+    width: 1.6rem; height: 1.6rem;
+    background: var(--purple); color: #fff;
+    font-weight: 700; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  footer { max-width: 880px; margin: 0 auto; padding: 0 1.25rem 3rem; color: var(--muted); font-size: 0.9rem; }
+  @media (max-width: 640px) { figure.app iframe { height: 560px; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="https://dominic.balass.one/">&larr; dominic.balass.one</a>
+  <h1>Visual Pitch Pipe</h1>
+  <p class="lede">A tuner you read instead of hear. I built it for my own choir rehearsals, where I kept needing my exact pitch from the sheet music in front of me.</p>
+</header>
+<main>
+  <section aria-labelledby="why">
+    <h2 id="why">Why I built it</h2>
+    <p>I sing in a choir. In rehearsal the director gives a starting pitch, the section scatters, and I need <em>my</em> note, from the ink on my page, fast. I'd find my starting note on the staff and then guess. Hum around until it sounded right. It wasted time and I never trusted it.</p>
+    <p>I wanted the reverse of a tuner. A tuner listens to what you sing. I wanted something that reads what I see: this note, in this key, in my clef, just play it. Hence the name. A visual pitch pipe. You match the music with your eyes; it gives you the pitch.</p>
+  </section>
+  <section aria-labelledby="how">
+    <h2 id="how">How it works</h2>
+    <ul class="steps">
+      <li><strong>Pick your clef.</strong> Treble, bass, alto, tenor. I sing wherever the section needs me, so all four are in.</li>
+      <li><strong>Set the key signature.</strong> Up to 7 sharps or 7 flats, rendered on a real staff with VexFlow.</li>
+      <li><strong>Slide the note.</strong> Move the note to the line or space that matches your music. Add a per-note accidental if the measure calls for one.</li>
+      <li><strong>Play pitch.</strong> Web Audio plays the exact pitch. Underneath it's a small pipeline: clef plus staff position gives a note name, the key signature plus accidental adjusts it, and MIDI math turns it into a frequency.</li>
+    </ul>
+  </section>
+  <section aria-labelledby="try">
+    <h2 id="try">Try it</h2>
+    <p>This is the live app, running below. Set the clef, key, and note to match your music, then play your pitch.</p>
+    <figure class="app">
+      <iframe src="https://pitchpipe.balass.one/" title="Visual Pitch Pipe app" loading="lazy"></iframe>
+      <figcaption>Live build at <a href="https://pitchpipe.balass.one/">pitchpipe.balass.one</a>. Opens full-screen there if you'd rather.</figcaption>
+    </figure>
+  </section>
+  <section aria-labelledby="next" class="teaser">
+    <h2 id="next">Coming next: camera mode</h2>
+    <p>Setting all of that by hand works, but it's slow when the music is already in your hands. The next version skips the form entirely: point your phone camera at your sheet music and tap the note. Same pitch engine underneath. The camera just replaces the typing.</p>
+    <ol class="states">
+      <li><strong>Looking for key signature.</strong> The app finds your staff in the frame, reads the sharps or flats at the start of the line, and locks in the key.</li>
+      <li><strong>Ready for note tap.</strong> Tap any note on the page. The app maps where you tapped to a line or space on the staff and works out the pitch.</li>
+      <li><strong>Playing note.</strong> It sounds your pitch, with a one-tap nudge if the read was off by a line.</li>
+    </ol>
+    <p>Tap, hear, tap, hear. Eyes on the music the whole time.</p>
+  </section>
+</main>
+<footer>
+  <p>Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>. React, TypeScript, Vite, VexFlow, Web Audio.</p>
+</footer>
+</body>
+</html>
