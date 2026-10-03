@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rogue Survivor: The AI Cleanup</title>
+<meta name="description" content="I hand-built a game engine in vanilla JS. Then I let AI refactor it. Here is every real improvement it made, shown as before/after diffs, with the playable result.">
+<link rel="canonical" href="https://dominic.balass.one/rogue-survivor-ai-cleanup/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/rogue-survivor-ai-cleanup/">
+<meta property="og:title" content="Rogue Survivor: The AI Cleanup">
+<meta property="og:description" content="Hand-built game engine, AI-refactored. Every real improvement shown as before/after diffs, with the playable result.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rogue Survivor: The AI Cleanup">
+<meta name="twitter:description" content="Hand-built game engine, AI-refactored. Every real improvement shown as before/after diffs, with the playable result.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #0b0b10;
+    --panel: #14141c;
+    --ink: #e8e8f0;
+    --muted: #9a9ab0;
+    --purple: #a855f7;
+    --green: #4ade80;
+    --red: #f87171;
+    --line: #262633;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+  header.hero { padding: 64px 0 32px; }
+  .kicker {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 12px; line-height: 1.15; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 720px; }
+  .lede strong { color: var(--ink); }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 32px 0;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat .num { font-size: 30px; font-weight: 700; color: var(--purple); }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  h2 { font-size: 26px; margin: 56px 0 8px; }
+  .section-sub { color: var(--muted); margin: 0 0 24px; max-width: 720px; }
+  .game-frame {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+  .game-frame iframe {
+    display: block;
+    width: 100%;
+    height: 70vh;
+    min-height: 420px;
+    border: 0;
+    background: #000;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .diff { margin: 0 0 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .diff-head { padding: 16px 20px 0; }
+  .diff-head h3 { margin: 0 0 6px; font-size: 18px; }
+  .diff-head p { margin: 0 0 4px; color: var(--muted); font-size: 15px; }
+  .diff-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 760px) { .diff-grid { grid-template-columns: 1fr; } }
+  .pane { padding: 16px 20px 20px; }
+  .pane + .pane { border-left: 1px solid var(--line); }
+  @media (max-width: 760px) { .pane + .pane { border-left: 0; border-top: 1px solid var(--line); } }
+  .pane .tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .pane.before .tag { background: rgba(248,113,113,.12); color: var(--red); }
+  .pane.after .tag { background: rgba(74,222,128,.12); color: var(--green); }
+  pre {
+    margin: 0;
+    background: #0a0a0f;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .hl-del { color: var(--red); }
+  .hl-add { color: var(--green); }
+  .note {
+    background: rgba(168,85,247,.08);
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 12px 0 36px;
+    font-size: 15px;
+  }
+  .note strong { color: var(--purple); }
+  footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+  footer a { color: var(--purple); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .btn {
+    display: inline-block;
+    background: var(--purple);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 999px;
+  }
+  .btn.ghost { background: transparent; border: 1px solid var(--purple); color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker">Rogue Survivor · Build Log</span>
+    <h1>The AI Cleanup</h1>
+    <p class="lede">
+      I hand-built this game engine myself: no frameworks, no AI assistance.
+      Then I pointed AI at the code and asked one question:
+      <strong>make it cleaner without changing how it plays.</strong>
+      Here is everything it actually improved, shown as before/after diffs,
+      with the playable result up top.
+    </p>
+    <div class="btn-row">
+      <a class="btn" href="https://dominic.balass.one/rogue-survivor/">Play the cleaned build</a>
+      <a class="btn ghost" href="https://github.com/SydBal/rogue-survivor">Source on GitHub</a>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num">4</div><div class="lbl">real bugs fixed</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">typo silently breaking a debug view</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">implicit globals eliminated</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">new input method: touch</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">gameplay behavior changes</div></div>
+  </div>
+
+  <h2>Play it</h2>
+  <p class="section-sub">The cleaned build, running live. Same game, same rules, same suffering.</p>
+  <div class="game-frame">
+    <iframe src="https://dominic.balass.one/rogue-survivor/" title="Rogue Survivor (AI-cleaned build)"></iframe>
+  </div>
+  <p class="hint">Click the game once so it captures your keyboard. WASD / arrows, mouse drag, touch, or gamepad.</p>
+
+  <h2>What the AI improved</h2>
+  <p class="section-sub">Every diff below is real, taken from the actual refactor. Nothing is staged.</p>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>1. It found a typo that silently broke a debug view</h3>
+      <p><code>canvas.heigh</code> is <code>undefined</code>, so the reticle's first line was drawn at <code>NaN</code>. No error, no warning. Just a quietly broken line.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code>canvasContext.moveTo(
+  canvas.width / 2 - 10,
+  <span class="hl-del">canvas.heigh / 2</span>   // undefined → NaN
+)</code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code>canvasContext.moveTo(
+  canvas.width / 2 - 10,
+  <span class="hl-add">canvas.height / 2</span>  // AI fix flagged in a comment
+)</code></pre></div>
+    </div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>2. It stopped the code from leaking globals</h3>
+      <p>Three assignments had no declaration at all: <code>relativeX</code>, <code>relativeY</code>, and <code>gameOver</code> itself. In sloppy mode they silently became globals. Plus a dozen game-state variables the original never declared.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code>// inside gamepad movement:
+<span class="hl-del">relativeX</span> = player.controller.x + player.x
+<span class="hl-del">relativeY</span> = player.controller.y + player.y
+
+// at the bottom of the file:
+<span class="hl-del">gameOver</span> = () =&gt; { ... }</code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code><span class="hl-add">const relativeX</span> = player.x + x
+<span class="hl-add">const relativeY</span> = player.y + y
+
+<span class="hl-add">const gameOver</span> = () =&gt; { ... }</code></pre></div>
+    </div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>3. It fixed the gamepad reading the wrong controller</h3>
+      <p>The connect handler carefully stored <code>event.gamepad.index</code>. Then the poll loop ignored it and always read controller <code>[0]</code>. Second controller plugged in? Too bad.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code>const currentGamepad =
+  <span class="hl-del">navigator.getGamepads()[0]</span></code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code>const currentGamepad =
+  <span class="hl-add">navigator.getGamepads()[gamepadController.index]</span></code></pre></div>
+    </div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>4. It caught a "closest enemy" check that went stale</h3>
+      <p>The original cached <code>distanceToPlayer</code> onto each enemy object with <code>||</code>, so it computed once and never again. The attract-mode AI was fleeing from ghosts.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code>enemies.reduce((enemyA, enemyB) =&gt; {
+  <span class="hl-del">enemyA.distanceToPlayer =
+    enemyA.distanceToPlayer || getDistance(...)</span>
+  ...
+})</code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code>enemies.reduce((closest, enemy) =&gt;
+  <span class="hl-add">getDistance(player, enemy) &lt; getDistance(player, closest)</span>
+    ? enemy : closest)</code></pre></div>
+    </div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>5. It gave every magic number a name</h3>
+      <p>Player HP, speeds, sizes, spawn caps, deadzones, colors: all inline literals before. Now they live in one <code>CONFIG</code> block, which is also where tuning the game happens.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code>this.health = props.health <span class="hl-del">|| 10</span>
+this.speed = <span class="hl-del">0.005</span>
+this.color = `hsl(<span class="hl-del">${12 * this.health}</span> 100% 50%)`
+// what is 12? what is 0.005? good luck.</code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code>this.health = props.health
+  <span class="hl-add">|| CONFIG.player.health</span>      // 10
+this.speed = <span class="hl-add">CONFIG.player.speed</span>   // 0.005
+this.color = `hsl(<span class="hl-add">${CONFIG.player.huePerHealth
+  * this.health}</span> 100% 50%)`</code></pre></div>
+    </div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>6. It collapsed the copy-pasted menu logic</h3>
+      <p>Start and Game Over menus each had the same normalized click-zone check and the same controls text. One helper each now.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code><span class="hl-del">if (
+  mouseController &amp;&amp; mouseController.clicking
+  &amp;&amp; .4 &lt; mouseController.x &amp;&amp; mouseController.x &lt; .6
+  &amp;&amp; .4 &lt; mouseController.y &amp;&amp; mouseController.y &lt; .6
+) newGame()</span>
+// …duplicated verbatim in EndGameMenu</code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code><span class="hl-add">const clickedInCenterBox = (controller) =&gt; { ... }</span>
+
+// StartMenu.update — and EndGameMenu.update:
+<span class="hl-add">if (clickedInCenterBox(mouseController)) newGame()</span></code></pre></div>
+    </div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>7. It added touch input</h3>
+      <p>Phones used to rely on emulated mouse events. Now <code>touchstart</code> / <code>touchmove</code> / <code>touchend</code> drive the same pointer controller directly. This one is new capability, not just cleanup.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code><span class="hl-del">// nothing — touch was emulated mouse events
+// and crossed fingers</span></code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code><span class="hl-add">document.addEventListener('touchstart', (event) =&gt; {
+  if (event.touches.length)
+    setPointerFromTouch(event.touches[0])
+}, { passive: true })</span>
+// + touchmove, touchend</code></pre></div>
+    </div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <h3>8. It documented the weirdest design decision instead of "fixing" it</h3>
+      <p>The keyboard handler looks inverted: pressing right moves enemies <em>left</em>. A naive refactor would "correct" this into a bug. The AI recognized the actual design: the player stays centered and input shifts the world around them.</p>
+    </div>
+    <div class="diff-grid">
+      <div class="pane before"><span class="tag">Before</span><pre><code>entity.x += (keysController.right
+  ? <span class="hl-del">-player.speed</span> : 0)  // inverted?!
+  + (keysController.left ? player.speed : 0)</code></pre></div>
+      <div class="pane after"><span class="tag">After</span><pre><code><span class="hl-add">// The player stays near screen center; input
+// shifts the world around them. Pressing right
+// moves every enemy left — reading as the
+// player moving right.</span>
+if (keysController.right) enemy.x -= player.speed</code></pre></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>What the AI didn't touch:</strong> the architecture. Entity → Ball → PlayerBall / EnemyBall,
+    the three input controllers, the menu class hierarchy, the wave spawner: all mine, all intact.
+    The refactor renamed, extracted, and documented. It never redesigned. That was the deal, and honestly,
+    it is the correct use of the tool: I made the decisions, it did the tidying.
+  </div>
+
+  <footer>
+    Rogue Survivor is hand-built in vanilla JavaScript and Canvas 2D.
+    Source: <a href="https://github.com/SydBal/rogue-survivor">SydBal/rogue-survivor</a> ·
+    <a href="https://dominic.balass.one/">dominic.balass.one</a>
+  </footer>
+
+</div>
+</body>
+</html>
