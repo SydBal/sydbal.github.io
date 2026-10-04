@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The inert attribute - Dominic Balassone</title>
+<meta name="description" content="An interactive demo of the HTML inert attribute: how one attribute keeps keyboard and screen-reader users inside your modal dialog.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --border: #e4e4e7;
+    --code-bg: #1d1d26;
+    --code-ink: #eceaf6;
+    --good: #15803d;
+    --bad: #b91c1c;
+    --warn-bg: #fef2f2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131318;
+      --card: #1d1d24;
+      --ink: #f0eef7;
+      --muted: #a5a5b3;
+      --border: #33333d;
+      --warn-bg: #2a1518;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.02em; }
+  h1 code { color: var(--purple-deep); font-size: 0.85em; }
+  @media (prefers-color-scheme: dark) { h1 code { color: #b79bff; } }
+  .lede { color: var(--muted); font-size: 1.05rem; max-width: 620px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin: 28px 0;
+  }
+  .card h2 { margin: 0 0 12px; font-size: 1.25rem; }
+  .card p { margin: 0 0 12px; }
+  .card p:last-child { margin-bottom: 0; }
+  code.inline {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--code-bg); color: var(--code-ink);
+    padding: 2px 7px; border-radius: 6px; font-size: 0.88em;
+  }
+  pre {
+    background: var(--code-bg); color: var(--code-ink);
+    padding: 16px 18px; border-radius: 10px; overflow-x: auto;
+    font-size: 0.9rem; line-height: 1.55;
+  }
+  pre .c { color: #8b8b9e; }
+
+  /* ---- demo app chrome ---- */
+  .demo-app { border: 2px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .demo-nav {
+    display: flex; gap: 4px; align-items: center;
+    background: var(--code-bg); padding: 10px 16px;
+  }
+  .demo-nav a { color: #cfc9ea; text-decoration: none; font-size: 0.9rem; padding: 6px 10px; border-radius: 6px; }
+  .demo-nav a:hover { text-decoration: underline; }
+  .demo-nav a:focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  .demo-body { padding: 20px; display: grid; gap: 16px; }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  button, .btn {
+    font: inherit; cursor: pointer; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--card); color: var(--ink);
+    padding: 9px 16px;
+  }
+  button:hover { border-color: var(--purple); }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 3px solid var(--purple); outline-offset: 2px;
+  }
+  .btn-primary {
+    background: var(--purple); border-color: var(--purple-deep); color: #fff; font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--purple-deep); border-color: var(--purple-deep); }
+  input[type="text"], select {
+    font: inherit; padding: 9px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--card); color: var(--ink);
+  }
+  .toggle-row {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  }
+  .toggle-row input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--purple); flex: none; }
+  .toggle-row label { font-weight: 600; }
+  .toggle-row small { display: block; font-weight: 400; color: var(--muted); }
+
+  /* ---- modal ---- */
+  .backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+  }
+  .backdrop.open { display: flex; }
+  .modal {
+    background: var(--card); color: var(--ink); border-radius: 14px;
+    border: 1px solid var(--border); max-width: 420px; width: 100%;
+    padding: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+  }
+  .modal h3 { margin: 0 0 8px; font-size: 1.2rem; }
+  .modal p { color: var(--muted); font-size: 0.95rem; margin: 0 0 16px; }
+  .modal .field { margin-bottom: 14px; }
+  .modal .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  .modal .field input { width: 100%; }
+  .modal .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  /* ---- focus log ---- */
+  .log {
+    margin-top: 18px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg); max-height: 220px; overflow-y: auto; padding: 10px 14px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.82rem;
+  }
+  .log .entry { padding: 5px 0; border-bottom: 1px dashed var(--border); }
+  .log .entry:last-child { border-bottom: 0; }
+  .log .tag {
+    display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+    padding: 1px 7px; border-radius: 20px; margin-right: 8px; vertical-align: 1px;
+  }
+  .log .tag.modal { background: #dcfce7; color: var(--good); }
+  .log .tag.bg { background: #e0e7ff; color: #3730a3; }
+  .log .entry.escaped { background: var(--warn-bg); margin: 2px -14px; padding: 5px 14px; }
+  .log .tag.esc { background: #fecaca; color: var(--bad); }
+  .log .empty { color: var(--muted); font-family: inherit; }
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 0 0 4px; }
+  .steps li { counter-increment: step; margin: 0 0 10px; padding-left: 34px; position: relative; }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: 1px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--purple); color: #fff; font-size: 0.8rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  footer { color: var(--muted); font-size: 0.85rem; margin-top: 40px; }
+  footer a { color: var(--purple-deep); }
+  @media (prefers-color-scheme: dark) { footer a { color: #b79bff; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>The <code>inert</code> attribute</h1>
+  <p class="lede">One HTML attribute that makes a whole subtree unfocusable, unclickable, and invisible to assistive technology. It is the missing half of every hand-rolled modal dialog.</p>
+
+  <div class="card">
+    <h2>What it does</h2>
+    <p>Set <code class="inline">inert</code> on an element and the browser treats that element and everything inside it as if it isn't there for interaction: no tab stops, no click events, removed from the accessibility tree. The content still <em>renders</em> — it just can't be reached.</p>
+    <p>The classic use case is a modal. When your dialog opens, the page behind it should go <code class="inline">inert</code>. When the dialog closes, remove it. That's the whole pattern:</p>
+    <pre><span class="c">// opening your custom modal</span>
+dialog.classList.add("open");
+document.querySelector("main").inert = true;
+
+<span class="c">// closing it</span>
+dialog.classList.remove("open");
+document.querySelector("main").inert = false;</pre>
+    <p style="margin-top:12px">Try it below. Open the modal with <code class="inline">inert</code> off, press <kbd>Tab</kbd> a few times, and watch the focus log. Then turn it on and compare.</p>
+  </div>
+
+  <div class="card">
+    <h2>Live demo</h2>
+    <ol class="steps">
+      <li>Press <strong>Open modal</strong>. The dialog is a plain <code class="inline">&lt;div&gt;</code> — no native <code class="inline">&lt;dialog&gt;</code> magic.</li>
+      <li>Press <kbd>Tab</kbd> repeatedly and watch the <strong>focus log</strong>.</li>
+      <li>Close it, check <strong>"Make the background inert"</strong>, and repeat. Notice where focus can go now.</li>
+    </ol>
+
+    <div class="toggle-row" style="margin-bottom: 16px">
+      <input type="checkbox" id="inertToggle">
+      <label for="inertToggle">Make the background inert when the modal opens
+        <small>When checked, the page behind the dialog gets <code class="inline">inert</code> while it's open.</small>
+      </label>
+    </div>
+
+    <div class="demo-app" id="demoApp">
+      <nav class="demo-nav" aria-label="Demo">
+        <a href="#" id="nav1">Home</a>
+        <a href="#" id="nav2">Archive</a>
+        <a href="#" id="nav3">About</a>
+      </nav>
+      <div class="demo-body" id="demoMain">
+        <div class="demo-row">
+          <button type="button" class="btn-primary" id="openModal">Open modal</button>
+          <button type="button" id="counterBtn">Clicked 0 times</button>
+        </div>
+        <div class="demo-row">
+          <input type="text" id="demoInput" placeholder="A background text field" aria-label="Background text field">
+          <select id="demoSelect" aria-label="Background select">
+            <option>Option one</option>
+            <option>Option two</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin: 20px 0 8px; font-size: 1rem;">Focus log</h3>
+    <div class="log" id="focusLog" aria-live="off">
+      <div class="empty">Focus events will appear here. Open the modal and press Tab.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What to notice</h2>
+    <p><strong>Without <code class="inline">inert</code>:</strong> tabbing walks straight past the modal into the nav links, the text field, and the buttons behind it. A keyboard user can get lost behind the overlay; a screen-reader user never knew the background was "behind" anything at all. The red entries in the log are focus escaping the dialog.</p>
+    <p><strong>With <code class="inline">inert</code>:</strong> the background leaves the tab order entirely and drops out of the accessibility tree. One attribute, no focus-trap bookkeeping for the background — though pairing it with a small trap (or the native <code class="inline">&lt;dialog&gt;</code> element, which does this for you) is still the gold standard.</p>
+    <p>Browser support is broad: all modern browsers since ~2022. And it composes — <code class="inline">inert</code> subtrees can nest, and removing the attribute restores everything exactly as it was.</p>
+  </div>
+
+  <footer>
+    Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> · Part of the <a href="https://dominic.balass.one/#demos">web feature demo series</a>
+  </footer>
+</div>
+
+<div class="backdrop" id="backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="modal">
+    <h3 id="modalTitle">Notification settings</h3>
+    <p>A hand-rolled dialog. Nothing about this modal is special — the interesting part is what happens to the page behind it.</p>
+    <div class="field">
+      <label for="modalInput">Email for notifications</label>
+      <input type="text" id="modalInput" placeholder="you@example.com">
+    </div>
+    <div class="actions">
+      <button type="button" id="cancelBtn">Cancel</button>
+      <button type="button" class="btn-primary" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var backdrop = document.getElementById("backdrop");
+  var modal = document.getElementById("modal");
+  var openBtn = document.getElementById("openModal");
+  var cancelBtn = document.getElementById("cancelBtn");
+  var saveBtn = document.getElementById("saveBtn");
+  var inertToggle = document.getElementById("inertToggle");
+  var demoApp = document.getElementById("demoApp");
+  var log = document.getElementById("focusLog");
+  var counterBtn = document.getElementById("counterBtn");
+  var modalOpen = false;
+  var clicks = 0;
+
+  counterBtn.addEventListener("click", function () {
+    clicks++;
+    counterBtn.textContent = "Clicked " + clicks + (clicks === 1 ? " time" : " times");
+  });
+
+  // Prevent demo nav links from navigating.
+  demoApp.querySelectorAll("nav a").forEach(function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); });
+  });
+
+  function labelFor(el) {
+    if (el.id === "openModal") return "“Open modal” button";
+    if (el.id === "counterBtn") return "counter button";
+    if (el.id === "demoInput") return "background text field";
+    if (el.id === "demoSelect") return "background select";
+    if (el.id === "modalInput") return "modal email field";
+    if (el.id === "cancelBtn") return "“Cancel” button (modal)";
+    if (el.id === "saveBtn") return "“Save” button (modal)";
+    if (el.id === "inertToggle") return "“inert” checkbox";
+    if (el.tagName === "A") return "nav link “" + el.textContent + "”";
+    return "“" + (el.textContent || el.tagName).trim().slice(0, 24) + "”";
+  }
+
+  function logFocus(el) {
+    var empty = log.querySelector(".empty");
+    if (empty) empty.remove();
+    var inModal = modal.contains(el);
+    var entry = document.createElement("div");
+    entry.className = "entry";
+    var tag = document.createElement("span");
+    var escaped = modalOpen && !inModal && !inertToggle.checked;
+    if (inModal) {
+      tag.className = "tag modal";
+      tag.textContent = "MODAL";
+    } else if (escaped) {
+      tag.className = "tag esc";
+      tag.textContent = "ESCAPED";
+      entry.classList.add("escaped");
+    } else {
+      tag.className = "tag bg";
+      tag.textContent = "BACKGROUND";
+    }
+    entry.appendChild(tag);
+    entry.appendChild(document.createTextNode("Focus → " + labelFor(el)));
+    log.prepend(entry);
+    while (log.children.length > 14) log.removeChild(log.lastChild);
+  }
+
+  document.addEventListener("focusin", function (e) {
+    if (e.target instanceof HTMLElement) logFocus(e.target);
+  });
+
+  function openModal() {
+    modalOpen = true;
+    backdrop.classList.add("open");
+    if (inertToggle.checked) demoApp.inert = true;
+    document.getElementById("modalInput").focus();
+  }
+
+  function closeModal() {
+    modalOpen = false;
+    backdrop.classList.remove("open");
+    demoApp.inert = false;
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener("click", openModal);
+  cancelBtn.addEventListener("click", closeModal);
+  saveBtn.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", function (e) {
+    if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modalOpen) closeModal();
+  });
+})();
+</script>
+</body>
+</html>
