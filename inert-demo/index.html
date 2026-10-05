@@ -189,13 +189,23 @@
       <button class="tab" role="tab" aria-selected="false" data-fw="alpine" id="tab-alpine" aria-controls="panel-alpine">Alpine</button>
     </div>
 
-    <pre class="fw-panel active" id="panel-react" role="tabpanel" aria-labelledby="tab-react"><span class="k">function</span> <span class="k">Step</span>({ current, children }) {
+    <div class="fw-panel active" id="panel-react" role="tabpanel" aria-labelledby="tab-react">
+    <pre><span class="k">function</span> <span class="k">Step</span>({ current, children }) {
   <span class="k">return</span> (
     &lt;section <span class="k">inert</span>={!current}&gt;
       {children}
     &lt;/section&gt;
   );
 }</pre>
+    <p style="margin-top:12px">On React 18 or older, <code class="inline">inert</code> isn't a known prop, so set the property directly with a tiny hook:</p>
+    <pre><span class="k">function</span> <span class="k">useInert</span>(active) {
+  <span class="k">const</span> ref = useRef(<span class="k">null</span>);
+  useEffect(() =&gt; {
+    <span class="k">if</span> (ref.current) ref.current.inert = active;
+  }, [active]);
+  <span class="k">return</span> ref;
+}</pre>
+    </div>
 
     <pre class="fw-panel" id="panel-vue" role="tabpanel" aria-labelledby="tab-vue">&lt;script setup&gt;
 <span class="k">const</span> props = defineProps({ isCurrentStep: Boolean });
@@ -241,15 +251,7 @@
   <span class="c">&lt;!-- your step content --&gt;</span>
 &lt;/section&gt;</pre>
 
-    <p style="margin-top:12px">On React 18 or older, <code class="inline">inert</code> isn't a known prop, so set the property directly with a tiny hook:</p>
-    <pre><span class="k">function</span> <span class="k">useInert</span>(active) {
-  <span class="k">const</span> ref = useRef(<span class="k">null</span>);
-  useEffect(() =&gt; {
-    <span class="k">if</span> (ref.current) ref.current.inert = active;
-  }, [active]);
-  <span class="k">return</span> ref;
-}</pre>
-    <p style="margin-top:12px">Either way, it's one line per step — instead of <code class="inline">disabled</code> on every control plus <code class="inline">aria-hidden</code> on the section plus hoping you caught everything.</p>
+    <p style="margin-top:12px">That's the whole pattern: one line per step — instead of <code class="inline">disabled</code> on every control plus <code class="inline">aria-hidden</code> on the section plus hoping you caught everything.</p>
   </div>
 
   <div class="card">
