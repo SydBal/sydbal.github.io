@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rogue Survivor: Acts and Bosses</title>
+<meta name="description" content="Week 3 of the Rogue Survivor build log: a Slay-the-Spire-style act structure. Three free-choice rooms per act, three room types, three bosses drawn from a shuffle bag, then endless acts. Playable demo included.">
+<link rel="canonical" href="https://dominic.balass.one/rogue-survivor-acts/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/rogue-survivor-acts/">
+<meta property="og:title" content="Rogue Survivor: Acts and Bosses">
+<meta property="og:description" content="Three rooms, free choice, then a boss. Three bosses in a shuffle bag. Endless acts after that. Playable demo included.">
+<meta property="og:image" content="https://dominic.balass.one/rogue-survivor-acts/map.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rogue Survivor: Acts and Bosses">
+<meta name="twitter:description" content="Three rooms, free choice, then a boss. Three bosses in a shuffle bag. Endless acts after that. Playable demo included.">
+<meta name="twitter:image" content="https://dominic.balass.one/rogue-survivor-acts/map.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #0b0b10;
+    --panel: #14141c;
+    --ink: #e8e8f0;
+    --muted: #9a9ab0;
+    --purple: #a855f7;
+    --green: #4ade80;
+    --line: #262633;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+  header.hero { padding: 64px 0 32px; }
+  .kicker {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 12px; line-height: 1.15; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 720px; }
+  .lede strong { color: var(--ink); }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 32px 0;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat .num { font-size: 30px; font-weight: 700; color: var(--purple); }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  h2 { font-size: 26px; margin: 56px 0 8px; }
+  .section-sub { color: var(--muted); margin: 0 0 24px; max-width: 720px; }
+  .game-frame {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+  .game-frame iframe {
+    display: block;
+    width: 100%;
+    height: 70vh;
+    min-height: 420px;
+    border: 0;
+    background: #000;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .shots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 8px 0 8px;
+  }
+  @media (max-width: 760px) { .shots { grid-template-columns: 1fr; } }
+  .shots figure { margin: 0; }
+  .shots img {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #000;
+  }
+  .shots figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .comp { margin: 0 0 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .comp-head { padding: 20px 20px 4px; }
+  .comp-head h3 { margin: 0 0 6px; font-size: 18px; }
+  .comp-head h3 code { color: var(--purple); font-size: 17px; }
+  .comp-head p { margin: 0 0 4px; color: var(--muted); font-size: 15px; max-width: 760px; }
+  .comp pre {
+    margin: 16px 20px 20px;
+    background: #0a0a0f;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .note {
+    background: rgba(168,85,247,.08);
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 12px 0 36px;
+    font-size: 15px;
+  }
+  .note strong { color: var(--purple); }
+  footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+  footer a { color: var(--purple); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .btn {
+    display: inline-block;
+    background: var(--purple);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 999px;
+  }
+  .btn.ghost { background: transparent; border: 1px solid var(--purple); color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker">Rogue Survivor · Build Log · Week 3</span>
+    <h1>Acts and Bosses</h1>
+    <p class="lede">
+      The endless survival run is now a dungeon. Each act is
+      <strong>three free-choice rooms</strong> picked from a Slay-the-Spire-style
+      map, then a <strong>boss</strong>. Three acts, then endless acts with
+      scaling difficulty. Health, score, and time carry between rooms.
+      The playable build is up top.
+    </p>
+    <div class="btn-row">
+      <a class="btn" href="https://dominic.balass.one/rogue-survivor/w3/">Play the week 3 build</a>
+      <a class="btn ghost" href="https://github.com/SydBal/rogue-survivor">Source on GitHub</a>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num">3</div><div class="lbl">room types: exterminate, survive, reach</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">bosses, shuffle-bag drawn</div></div>
+    <div class="stat"><div class="num">3+∞</div><div class="lbl">acts, then endless with scaling</div></div>
+    <div class="stat"><div class="num">20</div><div class="lbl">automated gameplay tests passing</div></div>
+    <div class="stat"><div class="num">16</div><div class="lbl">Playwright UI tests passing</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">scale factor for every menu length</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">fixed pixel widths</div></div>
+  </div>
+
+<h2>Play it</h2>
+<p class="section-sub">The week 3 build, frozen in time. Pick rooms on the map, clear them, face the boss. Same engine underneath.</p>
+<div class="game-frame">
+<iframe src="https://dominic.balass.one/rogue-survivor/w3/" title="Rogue Survivor (week 3 acts build)"></iframe>
+</div>
+<p class="hint">Click the game once so it captures your keyboard. Pick a room on the map with click, tap, or Tab + Enter.</p>
+
+<h2>The map</h2>
+<p class="section-sub">Between rooms the game shows the act map, drawn on canvas with last week's Survivor UI kit. Each round offers three rooms, free choice, no path constraints for now. Clear a room, see your stats, pick the next. Clear all three and the boss node unlocks.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>generateAct</code> + <code>MapMenu</code></h3>
+<p>Every round offers all three room types with shuffled enemy mixes, so each act guarantees variety. Nodes are canvas-drawn circles with focus support from the SurvivorFocusManager: Tab and Enter work, and mouse/touch hit-test the circles directly.</p>
+</div>
+<pre><code>const generateAct = (actNum) =&gt; {
+  const rounds = []
+  for (let r = 0; r &lt; 3; r++) {
+    const types = shuffled(Object.keys(ROOM_TYPES))
+    const mixes = shuffled(Object.keys(ENEMY_MIXES))
+    rounds.push(types.map((type, i) =&gt; ({ type, mix: mixes[i], picked: false })))
+  }
+  return { number: actNum, rounds, roundIndex: 0, bossType: drawBossType() }
+}</code></pre>
+</div>
+
+<h2>Room types</h2>
+<p class="section-sub">Rooms own their spawn plan and their clear condition. The old endless spawner is gone. Everything (health, shields, score, time) carries between rooms; each room just resets enemies.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>Exterminate</code></h3>
+<p>A finite roster spawns in small waves. The room clears when the queue is empty and the last enemy dies. Roster size scales with the act.</p>
+</div>
+<pre><code>if (this.type === 'extermination')
+  return this.toSpawn &lt;= 0 &amp;&amp; enemies.length === 0</code></pre>
+</div>
+<div class="comp">
+<div class="comp-head">
+<h3><code>Survive</code></h3>
+<p>The classic: a timer, and the spawner trickles like the old endless mode. Last until the clock runs out. Whatever is left gets wiped on the way out.</p>
+</div>
+<pre><code>if (this.type === 'survival')
+  return gameTime - this.roomStartTime &gt;= this.duration</code></pre>
+</div>
+<div class="comp">
+<div class="comp-head">
+<h3><code>Reach</code></h3>
+<p>A destination marker spawns at a world-fixed point far away. Because the controls are inverted (the world moves around you), the marker shifts with the world exactly like enemies do, so steering toward it just works. Off-screen, an edge arrow points the way.</p>
+</div>
+<pre><code>// World-fixed point: shifts exactly like the enemies do.
+update() {
+  shiftEnemiesFromKeyboard(this)
+  shiftEnemiesFromMouse(this)
+  shiftEnemiesFromGamepad(this)
+}</code></pre>
+</div>
+
+<h2>The bosses</h2>
+<p class="section-sub">Everything else in the game dies in one shield hit. Bosses have HP that shield hits chip away, an HP bar overhead, and touching one hurts you (gated by invulnerability frames). Three bosses, drawn from a shuffle bag: you cycle through all three before any repeats.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>HiveTyrant</code></h3>
+<p>Huge, slow, and fertile. It births waves of chasers while you chip its HP. The fight is crowd control: manage the swarm, find windows on the boss.</p>
+</div>
+<pre><code>if (this.spawnTimer % 220 === 0) spawnEnemyWave(EnemyBall, 4)</code></pre>
+</div>
+<div class="comp">
+<div class="comp-head">
+<h3><code>DashReaper</code></h3>
+<p>Stalks slowly, stops, flashes white, then dashes at where you were standing. Dodge the dash, punish the recovery. A four-state machine: stalk, telegraph, dash, recover.</p>
+</div>
+<pre><code>// Telegraph: stop and flash, then commit to the dash.
+this.speedX = 0; this.speedY = 0
+setSpeedTowardsTarget(this, player, CONFIG.enemy.speed * 6 * mul)</code></pre>
+</div>
+<div class="comp">
+<div class="comp-head">
+<h3><code>Warden</code></h3>
+<p>A slow core ringed by four guard orbs: regular enemies flying in orbit instead of chasing. Your shield kills guards like anything else, but the Warden reforges one every few seconds. Find angles through the ring.</p>
+</div>
+<pre><code>// Shuffle-bag: all three bosses before any repeat.
+const drawBossType = () =&gt; {
+  if (!bossBag.length) bossBag = shuffled(Object.keys(BOSS_INFO))
+  return bossBag.pop()
+}</code></pre>
+</div>
+
+<h2>In the game</h2>
+<p class="section-sub">The act map, a boss fight, a reach room, and the room-clear stats. All screenshots from the real build.</p>
+<div class="shots">
+<figure>
+<img src="map.png" alt="Act map: three columns of room nodes and a locked boss node">
+<figcaption>The act map. Three rooms, free choice, boss locked until all clear.</figcaption>
+</figure>
+<figure>
+<img src="boss-fight.png" alt="The Warden boss with guard orbs and an HP bar">
+<figcaption>The Warden, ringed by guard orbs, HP bar overhead.</figcaption>
+</figure>
+<figure>
+<img src="destination.png" alt="Reach room with an edge arrow pointing to the off-screen destination">
+<figcaption>A Reach room. The edge arrow points to the destination.</figcaption>
+</figure>
+<figure>
+<img src="room-clear.png" alt="Room cleared stats panel with kills, score, time, and HP">
+<figcaption>Room-clear stats. Everything carries into the next room.</figcaption>
+</figure>
+</div>
+
+<div class="note">
+<strong>Still no formal win condition.</strong> The acts keep coming, forever.
+But the shield still orbits faster every act. Survive long enough and it
+becomes a blur nothing gets through. Practically invulnerable, completely
+unplanned. I love it.
+</div>
+
+<footer>
+Rogue Survivor is hand-built in vanilla JavaScript and Canvas 2D.
+Week 3 build frozen at <a href="https://dominic.balass.one/rogue-survivor/w3/">/rogue-survivor/w3/</a>.
+Source: <a href="https://github.com/SydBal/rogue-survivor">SydBal/rogue-survivor</a> ·
+<a href="https://dominic.balass.one/">dominic.balass.one</a>
+</footer>
+
+</div>
+</body>
+</html>
