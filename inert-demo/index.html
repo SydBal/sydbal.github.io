@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The inert attribute — step flows in React - Dominic Balassone</title>
+<title>The inert attribute — locking step flows - Dominic Balassone</title>
 <meta name="description" content="An interactive demo of the HTML inert attribute in a multi-step flow: one React prop that keeps keyboard and screen-reader users on the current step.">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
 <script>
@@ -152,6 +152,19 @@
     background: var(--purple); color: #fff; font-size: 0.8rem; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
   }
+
+  /* ---- framework tabs ---- */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+  .tab {
+    border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+    padding: 7px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+  }
+  .tab:hover { border-color: var(--purple); color: var(--ink); }
+  .tab[aria-selected="true"] {
+    background: var(--purple); border-color: var(--purple-deep); color: #fff;
+  }
+  .fw-panel { display: none; }
+  .fw-panel.active { display: block; }
   footer { color: var(--muted); font-size: 0.85rem; margin-top: 40px; }
   footer a { color: var(--purple-deep); }
   @media (prefers-color-scheme: dark) { footer a { color: #b79bff; } }
@@ -164,15 +177,70 @@
   <p class="lede">One HTML attribute that makes a whole subtree unfocusable, unclickable, and invisible to assistive technology. It is the cleanest way to lock the steps a user hasn't reached yet.</p>
 
   <div class="card">
-    <h2>The React version is one prop</h2>
-    <p>React 19 supports <code class="inline">inert</code> as a plain boolean prop — no wrapper, no effect, no DOM fiddling:</p>
-    <pre><span class="k">function</span> <span class="k">Step</span>({ current, children }) {
+    <h2>One line in your framework</h2>
+    <p>Every framework binds it the same way: a boolean that adds or removes the attribute. Pick yours:</p>
+    <div class="tabs" role="tablist" aria-label="Framework examples">
+      <button class="tab" role="tab" aria-selected="true" data-fw="react" id="tab-react" aria-controls="panel-react">React 19</button>
+      <button class="tab" role="tab" aria-selected="false" data-fw="vue" id="tab-vue" aria-controls="panel-vue">Vue</button>
+      <button class="tab" role="tab" aria-selected="false" data-fw="svelte" id="tab-svelte" aria-controls="panel-svelte">Svelte</button>
+      <button class="tab" role="tab" aria-selected="false" data-fw="angular" id="tab-angular" aria-controls="panel-angular">Angular</button>
+      <button class="tab" role="tab" aria-selected="false" data-fw="solid" id="tab-solid" aria-controls="panel-solid">Solid</button>
+      <button class="tab" role="tab" aria-selected="false" data-fw="lit" id="tab-lit" aria-controls="panel-lit">Lit</button>
+      <button class="tab" role="tab" aria-selected="false" data-fw="alpine" id="tab-alpine" aria-controls="panel-alpine">Alpine</button>
+    </div>
+
+    <pre class="fw-panel active" id="panel-react" role="tabpanel" aria-labelledby="tab-react"><span class="k">function</span> <span class="k">Step</span>({ current, children }) {
   <span class="k">return</span> (
-    &lt;section <span class="k">inert</span>={!current} className={!current ? <span class="c">"step is-locked"</span> : <span class="c">"step"</span>}&gt;
+    &lt;section <span class="k">inert</span>={!current}&gt;
       {children}
     &lt;/section&gt;
   );
 }</pre>
+
+    <pre class="fw-panel" id="panel-vue" role="tabpanel" aria-labelledby="tab-vue">&lt;script setup&gt;
+<span class="k">const</span> props = defineProps({ isCurrentStep: Boolean });
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;section <span class="k">:inert</span>=<span class="c">"!isCurrentStep"</span>&gt;
+    &lt;slot /&gt;
+  &lt;/section&gt;
+&lt;/template&gt;</pre>
+
+    <pre class="fw-panel" id="panel-svelte" role="tabpanel" aria-labelledby="tab-svelte">&lt;script&gt;
+  <span class="k">let</span> { current, children } = $props();
+&lt;/script&gt;
+
+&lt;section <span class="k">inert</span>={!current || <span class="k">undefined</span>}&gt;
+  {@render children()}
+&lt;/section&gt;</pre>
+
+    <pre class="fw-panel" id="panel-angular" role="tabpanel" aria-labelledby="tab-angular"><span class="c">&lt;!-- step.component.html --&gt;</span>
+&lt;section <span class="k">[inert]</span>=<span class="c">"!isCurrentStep"</span>&gt;
+  &lt;ng-content /&gt;
+&lt;/section&gt;</pre>
+
+    <pre class="fw-panel" id="panel-solid" role="tabpanel" aria-labelledby="tab-solid"><span class="k">function</span> <span class="k">Step</span>(props) {
+  <span class="k">return</span> (
+    &lt;section <span class="k">inert</span>={!props.current}&gt;
+      {props.children}
+    &lt;/section&gt;
+  );
+}</pre>
+
+    <pre class="fw-panel" id="panel-lit" role="tabpanel" aria-labelledby="tab-lit"><span class="k">render</span>() {
+  <span class="k">return</span> html`
+    &lt;section <span class="k">?inert</span>=${!this.currentStep}&gt;
+      &lt;slot&gt;&lt;/slot&gt;
+    &lt;/section&gt;
+  `;
+}</pre>
+
+    <pre class="fw-panel" id="panel-alpine" role="tabpanel" aria-labelledby="tab-alpine">&lt;section x-data=<span class="c">"{ isCurrentStep: false }"</span>
+         <span class="k">:inert</span>=<span class="c">"!isCurrentStep"</span>&gt;
+  <span class="c">&lt;!-- your step content --&gt;</span>
+&lt;/section&gt;</pre>
+
     <p style="margin-top:12px">On React 18 or older, <code class="inline">inert</code> isn't a known prop, so set the property directly with a tiny hook:</p>
     <pre><span class="k">function</span> <span class="k">useInert</span>(active) {
   <span class="k">const</span> ref = useRef(<span class="k">null</span>);
@@ -393,6 +461,24 @@
     goTo(1);
   });
   toggle.addEventListener("change", applyInert);
+
+  /* framework tabs */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+  var panels = Array.prototype.slice.call(document.querySelectorAll(".fw-panel"));
+  function selectTab(tab) {
+    tabs.forEach(function (t) { t.setAttribute("aria-selected", t === tab ? "true" : "false"); });
+    panels.forEach(function (p) {
+      p.classList.toggle("active", p.id === tab.getAttribute("aria-controls"));
+    });
+  }
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () { selectTab(tab); });
+    tab.addEventListener("keydown", function (e) {
+      var i = tabs.indexOf(tab);
+      if (e.key === "ArrowRight") { var n = tabs[(i + 1) % tabs.length]; n.focus(); selectTab(n); }
+      if (e.key === "ArrowLeft") { var p = tabs[(i - 1 + tabs.length) % tabs.length]; p.focus(); selectTab(p); }
+    });
+  });
 
   render();
 })();
