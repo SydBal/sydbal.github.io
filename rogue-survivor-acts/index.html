@@ -167,7 +167,7 @@ gtag('config', 'G-C0DG17Z442');
     <div class="stat"><div class="num">3</div><div class="lbl">room types: exterminate, survive, reach</div></div>
     <div class="stat"><div class="num">3</div><div class="lbl">bosses, shuffle-bag drawn</div></div>
     <div class="stat"><div class="num">3+∞</div><div class="lbl">acts, then endless with scaling</div></div>
-    <div class="stat"><div class="num">24</div><div class="lbl">automated gameplay tests passing</div></div>
+    <div class="stat"><div class="num">25</div><div class="lbl">automated gameplay tests passing</div></div>
     <div class="stat"><div class="num">16</div><div class="lbl">Playwright UI tests passing</div></div>
     <div class="stat"><div class="num">1</div><div class="lbl">scale factor for every menu length</div></div>
     <div class="stat"><div class="num">0</div><div class="lbl">fixed pixel widths</div></div>
@@ -196,6 +196,18 @@ gtag('config', 'G-C0DG17Z442');
   }
   return { number: actNum, rounds, roundIndex: 0, bossType: drawBossType() }
 }</code></pre>
+</div>
+<div class="comp">
+<div class="comp-head">
+<h3><code>Dymensions</code>, ported from Classic Scoundrel</h3>
+<p>Scoundrel lays out UI in a fixed virtual resolution and maps it to the screen with one uniform scale. I ported that system over, and the entire map panel is authored in a 1000x880 virtual space: title, nodes, labels, hint. Columns and rows can never drift or crowd when the aspect changes. The geometry is identical on a phone and an ultrawide. One deliberate deviation: labels keep a 12px legibility floor instead of shrinking to 7px on portrait phones.</p>
+</div>
+<pre><code>// Scoped Dymensions: the same uniform-scale algorithm,
+// applied to the map panel instead of the canvas.
+this.mapDym = createDymensions(MAP_VW, MAP_VH) // 1000 x 880
+this.mapDym.resize(availW, availH)             // min-fit scale, centered
+const sx = (vx) =&gt; px + d.toPositionX(vx)      // virtual -&gt; screen
+const sy = (vy) =&gt; py + d.toPositionY(vy)</code></pre>
 </div>
 
 <h2>Room types</h2>
