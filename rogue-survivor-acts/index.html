@@ -167,7 +167,7 @@ gtag('config', 'G-C0DG17Z442');
     <div class="stat"><div class="num">3</div><div class="lbl">room types: exterminate, survive, reach</div></div>
     <div class="stat"><div class="num">3</div><div class="lbl">bosses, shuffle-bag drawn</div></div>
     <div class="stat"><div class="num">3+∞</div><div class="lbl">acts, then endless with scaling</div></div>
-    <div class="stat"><div class="num">32</div><div class="lbl">automated gameplay tests passing</div></div>
+    <div class="stat"><div class="num">36</div><div class="lbl">automated gameplay tests passing</div></div>
     <div class="stat"><div class="num">16</div><div class="lbl">Playwright UI tests passing</div></div>
     <div class="stat"><div class="num">1</div><div class="lbl">scale factor for every menu length</div></div>
     <div class="stat"><div class="num">0</div><div class="lbl">fixed pixel widths</div></div>
@@ -222,6 +222,24 @@ if (this._splashAct !== actNumber) {
 // Countdown freezes the world: enemies, spawners, and the clock.
 const frozen = countdownT > 0
 if (!frozen) { /* ...update world, spawn, tick clock... */ }</code></pre>
+</div>
+<div class="comp">
+<div class="comp-head">
+<h3>Softer transitions</h3>
+<p>Every hard cut got smoothed. Full-screen state swaps (start to map, map to room, stats back to map, game over to a fresh run) fade through black, swapping state at the black point. Overlay panels (pause, room-clear, game-over) fade in and rise a few pixels on an ease-out curve instead of popping.</p>
+</div>
+<pre><code>// Fade-through-black: swap state at the black point, never stack.
+const startTransition = (midFn) =&gt; {
+  if (transitionT &gt; 0) { midFn(); return }
+  transitionMid = midFn
+  transitionT = TRANSIT_SECS // 0.3s
+}
+// Panel open: easeOutCubic fade + rise, about 0.23s.
+applyOpenAnim() {
+  const e = 1 - Math.pow(1 - this.openAnimT, 3)
+  canvasContext.globalAlpha *= e
+  canvasContext.translate(0, (1 - e) * risePx)
+}</code></pre>
 </div>
 
 <h2>Room types</h2>
