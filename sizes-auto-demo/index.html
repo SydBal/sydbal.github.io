@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sizes="auto": let the container pick the file - Dominic Balassone</title>
+<meta name="description" content="Stop hand-writing sizes. With loading=&quot;lazy&quot; and sizes=&quot;auto&quot;, the browser reads the image's laid-out width and picks the right srcset file. Live demo shows which file each container pulls.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/sizes-auto-demo/">
+<meta property="og:title" content="sizes=&quot;auto&quot;: let the container pick the file">
+<meta property="og:description" content="One attribute kills the stale-sizes problem: the browser measures the laid-out slot and picks the right srcset file. Live readouts included. Chrome/Edge 126+, Firefox 150+, no Safari.">
+<meta property="og:image" content="https://dominic.balass.one/sizes-auto-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="sizes=&quot;auto&quot;: let the container pick the file">
+<meta name="twitter:description" content="One attribute kills the stale-sizes problem: the browser measures the laid-out slot and picks the right srcset file. Live readouts included. Chrome/Edge 126+, Firefox 150+, no Safari.">
+<meta name="twitter:image" content="https://dominic.balass.one/sizes-auto-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+    --code-bg: #1d1d26;
+    --code-ink: #eceaf6;
+    --good: #15803d;
+    --good-bg: #dcfce7;
+    --bad: #b91c1c;
+    --bad-bg: #fee2e2;
+    --warn: #b45309;
+    --warn-bg: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --purple-soft: #2e1a5e;
+      --border: #2c2c34;
+      --good: #4ade80;
+      --good-bg: #14532d;
+      --bad: #f87171;
+      --bad-bg: #7f1d1d;
+      --warn: #fbbf24;
+      --warn-bg: #78350f;
+    }
+  }
+  * { border-radius: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 3px solid var(--purple);
+    outline-offset: 2px;
+  }
+  a { color: var(--purple-deep); font-weight: 600; }
+  @media (prefers-color-scheme: dark) { a { color: var(--purple); } }
+  header.top {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 0.5rem;
+  }
+  header.top .back { font-size: 0.9rem; }
+  h1 { font-size: 2.2rem; margin: 0.5rem 0 0.25rem; line-height: 1.2; }
+  h1 code { font-size: 0.85em; }
+  .lede { color: var(--muted); font-size: 1.1rem; max-width: 60ch; }
+  main { max-width: 880px; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+  section { margin-top: 2.5rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  p { max-width: 70ch; }
+
+  pre {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    border: 1px solid var(--border);
+  }
+  .snippet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: 0.6rem 1rem;
+  }
+  .snippet-head strong { font-size: 0.95rem; }
+  .copy-btn, .rerun-btn {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .copy-btn.copied { background: var(--good); }
+
+  .slot { margin: 1.5rem 0 0; }
+  .slot-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .slot-label code { text-transform: none; letter-spacing: 0; }
+  .frame { border: 1px solid var(--border); background: var(--card); padding: 1rem; }
+  .frame img { display: block; width: 100%; height: auto; background: var(--purple-soft); }
+  .readout {
+    background: var(--purple-soft);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 0.9rem 1.25rem;
+    font-size: 0.92rem;
+  }
+  .readout .row { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; }
+  .readout code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+  .pill {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .pill.bad { background: var(--bad-bg); color: var(--bad); }
+  .pill.neutral { background: var(--border); color: var(--muted); }
+  .hint { color: var(--muted); font-size: 0.95rem; margin-top: 0.75rem; }
+
+  .cards2 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 640px) { .cards2 { grid-template-columns: 1fr 1fr; } }
+  .sidebyside { display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: start; }
+  @media (min-width: 640px) { .sidebyside { grid-template-columns: 280px 1fr; } }
+  .sidebyside p { margin-top: 0; }
+
+  .note {
+    border-left: 4px solid var(--purple);
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    margin-top: 1rem;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  ul.tight li { margin-bottom: 0.45rem; max-width: 70ch; }
+  table.spec { border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+  table.spec th, table.spec td { border: 1px solid var(--border); padding: 0.45rem 0.7rem; text-align: left; }
+  table.spec th { background: var(--card); }
+  footer {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 1.25rem 2.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="https://dominic.balass.one/">&larr; dominic.balass.one</a>
+  <h1><code>sizes="auto"</code>: let the container pick the file</h1>
+  <p class="lede">A follow-up to the <code>&lt;picture&gt;</code> post. Hand-written <code>sizes</code> goes stale the moment your CSS changes. With <code>loading="lazy"</code> and <code>sizes="auto"</code>, the browser measures the image's laid-out width and picks the right <code>srcset</code> file itself. Same image, three containers, three different downloads below.</p>
+</header>
+<main>
+  <section>
+    <h2>The one-line fix</h2>
+    <p>Delete your hand-written <code>sizes</code> media query and write <code>auto</code> instead. That is the whole change. The browser does the measuring your CSS used to promise.</p>
+    <div class="snippet-head">
+      <strong>sizes-auto.html</strong>
+      <button class="copy-btn" id="copyBtn" type="button">Copy</button>
+    </div>
+<pre id="snippet">&lt;img src="hero-wide-640.jpg"
+     srcset="hero-wide-320.jpg 320w,
+             hero-wide-640.jpg 640w,
+             hero-wide-1280.jpg 1280w"
+     sizes="auto"
+     loading="lazy"
+     width="1280" height="549"
+     alt="Lighthouse on a coastal cliff at golden hour"&gt;</pre>
+    <div class="note">
+      <strong>Why this beats hand-written <code>sizes</code>.</strong> Without any <code>sizes</code>, the browser assumes <code>100vw</code> and downloads for your whole viewport even when the image renders in a 300px card. A hand-written <code>sizes="(max-width: 900px) 100vw, 900px"</code> fixes that until the layout changes and nobody updates the markup. <code>auto</code> reads the real slot width, so it cannot go stale.
+    </div>
+  </section>
+
+  <section>
+    <h2>Watch it work</h2>
+    <p>The exact same image markup in three different containers. Each readout shows the slot width, the file the browser actually chose, and what a <code>100vw</code> fallback would have downloaded. Resize the window, hit re-run, and watch the files change.</p>
+    <p><button class="rerun-btn" id="rerunBtn" type="button">Re-run selection</button></p>
+
+    <div class="slot">
+      <div class="slot-label">A. Full-width article &mdash; <code>sizes="auto"</code></div>
+      <div class="frame">
+        <img class="demo-img" data-key="wide"
+             src="hero-wide-640.jpg"
+             srcset="hero-wide-320.jpg 320w, hero-wide-640.jpg 640w, hero-wide-1280.jpg 1280w"
+             sizes="auto" loading="lazy" decoding="async"
+             width="1280" height="549" alt="Lighthouse on a coastal cliff at golden hour">
+      </div>
+      <div class="readout" aria-live="off"><div class="row" data-readout="wide"></div></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label">B. Card grid (~400px cards) &mdash; <code>sizes="auto"</code></div>
+      <div class="cards2">
+        <div>
+          <div class="frame">
+            <img class="demo-img" data-key="card1"
+                 src="hero-wide-640.jpg"
+                 srcset="hero-wide-320.jpg 320w, hero-wide-640.jpg 640w, hero-wide-1280.jpg 1280w"
+                 sizes="auto" loading="lazy" decoding="async"
+                 width="1280" height="549" alt="Lighthouse on a coastal cliff at golden hour">
+          </div>
+          <div class="readout" aria-live="off"><div class="row" data-readout="card1"></div></div>
+        </div>
+        <div>
+          <div class="frame">
+            <img class="demo-img" data-key="card2"
+                 src="hero-wide-640.jpg"
+                 srcset="hero-wide-320.jpg 320w, hero-wide-640.jpg 640w, hero-wide-1280.jpg 1280w"
+                 sizes="auto" loading="lazy" decoding="async"
+                 width="1280" height="549" alt="Lighthouse on a coastal cliff at golden hour">
+          </div>
+          <div class="readout" aria-live="off"><div class="row" data-readout="card2"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label">C. Sidebar column (~280px) &mdash; <code>sizes="auto"</code></div>
+      <div class="sidebyside">
+        <div>
+          <div class="frame">
+            <img class="demo-img" data-key="side"
+                 src="hero-wide-640.jpg"
+                 srcset="hero-wide-320.jpg 320w, hero-wide-640.jpg 640w, hero-wide-1280.jpg 1280w"
+                 sizes="auto" loading="lazy" decoding="async"
+                 width="1280" height="549" alt="Lighthouse on a coastal cliff at golden hour">
+          </div>
+          <div class="readout" aria-live="off"><div class="row" data-readout="side"></div></div>
+        </div>
+        <p>This is the case hand-written <code>sizes</code> gets wrong most often: a narrow rail inside a wide page. Nobody writes a media query for "the sidebar", so the image quietly downloads the desktop file. <code>auto</code> just measures the rail.</p>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label">D. The mistake: same sidebar, <code>sizes="100vw"</code></div>
+      <div class="sidebyside">
+        <div>
+          <div class="frame">
+            <img class="demo-img" data-key="bad"
+                 src="hero-wide-640.jpg"
+                 srcset="hero-wide-320.jpg 320w, hero-wide-640.jpg 640w, hero-wide-1280.jpg 1280w"
+                 sizes="100vw" loading="lazy" decoding="async"
+                 width="1280" height="549" alt="Lighthouse on a coastal cliff at golden hour">
+          </div>
+          <div class="readout" aria-live="off"><div class="row" data-readout="bad"></div></div>
+        </div>
+        <p>This is what the browser does when <code>sizes</code> is missing or wrong: it assumes the image spans the viewport and grabs the biggest file it needs for that. Same 280px slot as C, wildly different download.</p>
+      </div>
+    </div>
+
+    <p class="hint">Selection happens once per load, not on resize: the browser picks a file when it starts fetching. That is why the re-run button exists. Shrink the window, re-run, and compare A against C.</p>
+  </section>
+
+  <section>
+    <h2>Browser support</h2>
+    <table class="spec" aria-label="sizes=auto browser support">
+      <tr><th>Browser</th><th>Support</th></tr>
+      <tr><td>Chrome / Edge</td><td>126+ (June 2024)</td></tr>
+      <tr><td>Firefox</td><td>150+ (April 2026)</td></tr>
+      <tr><td>Safari / iOS Safari</td><td>Not supported</td></tr>
+      <tr><td>Baseline</td><td>No &mdash; blocked by Safari</td></tr>
+    </table>
+    <p class="hint">Roughly 70% global coverage as of mid-2026, and under 1% of page loads actually use it. Genuinely underused.</p>
+  </section>
+
+  <section>
+    <h2>Honest notes</h2>
+    <ul class="tight">
+      <li><strong>It goes on the <code>&lt;img&gt;</code>, not on <code>&lt;source&gt;</code>.</strong> Inside <code>&lt;picture&gt;</code>, a matched <code>&lt;source&gt;</code> inherits the img's <code>sizes</code> when it does not set its own. Do not put <code>sizes="auto"</code> on the source elements.</li>
+      <li><strong>Lazy only.</strong> The spec applies it to <code>loading="lazy"</code> images, so never use it on your LCP or hero image. The browser has to finish layout before it can measure the slot, which delays the single most important image on the page. Keep an explicit <code>sizes</code> there.</li>
+      <li><strong>It picks the file, not the crop.</strong> If you want a different crop per container, that is still <code>&lt;picture&gt;</code> media queries or JavaScript (a <code>ResizeObserver</code> swapping sources). <code>auto</code> solves resolution selection.</li>
+      <li><strong>On Safari it falls back to <code>100vw</code>.</strong> Oversized, but sharp, never broken. Writing <code>sizes="auto, 100vw"</code> makes the fallback explicit, and Shopify's <code>autosizes</code> polyfill closes the gap if your Safari traffic matters.</li>
+      <li><strong>Keep <code>width</code> and <code>height</code> on the <code>&lt;img&gt;</code>.</strong> Same as always: they reserve space and prevent layout shift while the lazy image waits below the fold.</li>
+    </ul>
+    <div class="note warn">
+      <strong>Do not "fix" the demo by removing <code>loading="lazy"</code>.</strong> Without it, <code>sizes="auto"</code> is invalid and the browser falls back to <code>100vw</code>. If every image on the page is above the fold, you do not need lazy loading and you do not need <code>auto</code> either. This attribute is for below-the-fold images in real layouts.
+    </div>
+  </section>
+</main>
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> &middot; <code>sizes="auto"</code> demo
+</footer>
+<script>
+(function () {
+  'use strict';
+
+  var WIDTHS = [320, 640, 1280];
+
+  // ---- Copy button ----
+  var copyBtn = document.getElementById('copyBtn');
+  var snippet = document.getElementById('snippet');
+  copyBtn.addEventListener('click', function () {
+    var text = snippet.textContent;
+    function done() {
+      copyBtn.textContent = 'Copied';
+      copyBtn.classList.add('copied');
+      setTimeout(function () {
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('copied');
+      }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+  });
+
+  // ---- Live readouts ----
+  function fileName(url) {
+    try { return decodeURIComponent(new URL(url, location.href).pathname.split('/').pop()).split('?')[0]; }
+    catch (e) { return url; }
+  }
+  function widthOf(name) {
+    var m = /(\d+)\.jpg$/.exec(name || '');
+    return m ? parseInt(m[1], 10) : null;
+  }
+  // What sizes="100vw" would have picked for this viewport+DPR.
+  function vwPick() {
+    var need = Math.ceil(window.innerWidth * (window.devicePixelRatio || 1));
+    for (var i = 0; i < WIDTHS.length; i++) {
+      if (WIDTHS[i] >= need) return WIDTHS[i];
+    }
+    return WIDTHS[WIDTHS.length - 1];
+  }
+  function tick(img) {
+    var key = img.getAttribute('data-key');
+    var holder = document.querySelector('[data-readout="' + key + '"]');
+    if (!holder) return;
+    var chosen = fileName(img.currentSrc || img.src);
+    var chosenW = widthOf(chosen);
+    var slot = Math.round(img.clientWidth);
+    var vw = vwPick();
+    var verdict, cls;
+    if (chosenW === null) {
+      verdict = 'loading&hellip;'; cls = 'neutral';
+    } else if (chosenW < vw) {
+      verdict = 'right-sized'; cls = 'good';
+    } else if (key === 'bad') {
+      verdict = 'oversized'; cls = 'bad';
+    } else {
+      verdict = 'same as 100vw'; cls = 'neutral';
+    }
+    holder.innerHTML =
+      '<span>Slot: <code>' + slot + 'px</code></span>' +
+      '<span>Viewport: <code>' + window.innerWidth + 'px</code> @ <code>' + (window.devicePixelRatio || 1) + 'x</code></span>' +
+      '<span>Chosen file: <code>' + chosen + '</code></span>' +
+      '<span>100vw would pick: <code>hero-wide-' + vw + '.jpg</code></span>' +
+      '<span><span class="pill ' + cls + '">' + verdict + '</span></span>';
+  }
+  function tickAll() {
+    var imgs = document.querySelectorAll('img.demo-img');
+    for (var i = 0; i < imgs.length; i++) tick(imgs[i]);
+  }
+  var imgs = document.querySelectorAll('img.demo-img');
+  for (var i = 0; i < imgs.length; i++) {
+    imgs[i].addEventListener('load', (function (img) {
+      return function () { tick(img); };
+    })(imgs[i]));
+  }
+  window.addEventListener('resize', tickAll);
+  tickAll();
+
+  // ---- Re-run: cache-bust so the browser selects again ----
+  var rerunBtn = document.getElementById('rerunBtn');
+  var run = 0;
+  rerunBtn.addEventListener('click', function () {
+    run++;
+    for (var i = 0; i < imgs.length; i++) {
+      (function (img) {
+        var bust = function (url) {
+          var base = url.split('?')[0];
+          return base + '?run=' + run;
+        };
+        var parts = img.getAttribute('srcset').split(',').map(function (p) {
+          var t = p.trim().split(/\s+/);
+          return bust(t[0]) + ' ' + t[1];
+        });
+        // Reset first so the load event fires reliably.
+        img.removeAttribute('srcset');
+        img.removeAttribute('src');
+        img.setAttribute('srcset', parts.join(', '));
+        img.setAttribute('src', bust('hero-wide-640.jpg'));
+      })(imgs[i]);
+    }
+    tickAll();
+  });
+})();
+</script>
+</body>
+</html>
