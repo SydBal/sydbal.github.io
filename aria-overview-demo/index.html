@@ -365,7 +365,16 @@
           <span class="code-tag do">Do</span>
           <pre class="codeblock"><code>&lt;button&gt;Load more&lt;/button&gt;</code></pre>
         </li>
-        <li>Every custom ARIA control must work with the keyboard. If you do build a custom widget, it needs Tab access, arrow keys where expected, and visible focus, just like the native version.</li>
+        <li>Every custom ARIA control must work with the keyboard. If you do build a custom widget, it needs Tab access, arrow keys where expected, and visible focus, just like the native version.
+          <span class="code-tag dont">Don't</span>
+          <pre class="codeblock"><code>&lt;!-- mouse-only: keyboard users can never reach it --&gt;
+&lt;div class="switch" onclick="toggle()"&gt;Notifications&lt;/div&gt;</code></pre>
+          <span class="code-tag do">Do</span>
+          <pre class="codeblock"><code>&lt;div class="switch" role="switch" aria-checked="false" tabindex="0"
+     onclick="toggle()" onkeydown="if (event.key === ' ') toggle()"&gt;
+  Notifications
+&lt;/div&gt;</code></pre>
+        </li>
         <li>Never put <code>role="presentation"</code> or <code>aria-hidden="true"</code> on a focusable element. It stays in the Tab order but vanishes for assistive tech.
           <span class="code-tag dont">Don't</span>
           <pre class="codeblock"><code>&lt;button aria-hidden="true"&gt;Save&lt;/button&gt;</code></pre>
@@ -422,6 +431,7 @@
       <pre class="codeblock"><code>&lt;button aria-pressed="false" id="notify"&gt;Notifications: off&lt;/button&gt;
 
 &lt;script&gt;
+  const notify = document.getElementById('notify');
   notify.addEventListener('click', () =&gt; {
     const on = notify.getAttribute('aria-pressed') === 'true';
     notify.setAttribute('aria-pressed', String(!on));
