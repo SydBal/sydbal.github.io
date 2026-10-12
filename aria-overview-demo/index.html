@@ -361,12 +361,12 @@
         </div>
         <div class="inspect-sample" data-inspect tabindex="0">
           <label for="insp-email">Email</label>
-          <input type="email" id="insp-email" placeholder="you@example.com">
+          <input type="email" id="insp-email" placeholder="you@example.com" data-inspect-child>
           <p class="note">Input with an associated <code>&lt;label&gt;</code>.</p>
         </div>
         <div class="inspect-sample" data-inspect tabindex="0">
           <h4 id="insp-heading">Shipping address</h4>
-          <div aria-labelledby="insp-heading" data-inspect-child>
+          <div role="group" aria-labelledby="insp-heading" data-inspect-child>
             <input type="text" aria-label="Street" placeholder="Street" style="margin-bottom:0.4rem;">
             <input type="text" aria-label="City" placeholder="City">
           </div>
