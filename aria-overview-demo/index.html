@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ARIA: An Overview</title>
-<meta name="description" content="What ARIA is, how it reaches a screen reader, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
+<meta name="description" content="What ARIA is, how it reaches a screen reader, the minimum you need, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ARIA: An Overview">
-<meta property="og:description" content="What ARIA is, how it reaches a screen reader, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
+<meta property="og:description" content="What ARIA is, how it reaches a screen reader, the minimum you need, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
 <meta property="og:url" content="https://dominic.balass.one/aria-overview-demo/">
 <meta property="og:image" content="https://dominic.balass.one/aria-overview-demo/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ARIA: An Overview">
-<meta name="twitter:description" content="What ARIA is, how it reaches a screen reader, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
+<meta name="twitter:description" content="What ARIA is, how it reaches a screen reader, the minimum you need, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
 <meta name="twitter:image" content="https://dominic.balass.one/aria-overview-demo/og-image.png">
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
@@ -325,7 +325,7 @@
   <header class="top">
     <span class="kicker">LinkedIn series demo</span>
     <h1>ARIA: An Overview</h1>
-    <p class="lede">ARIA tells assistive technology what your interface is and what it is doing. This page covers what it is, where it came from, how it reaches a screen reader, the minimum you actually need, its five rules, and four working patterns to try.</p>
+    <p class="lede">ARIA tells assistive technology what your interface is and what it is doing. This page covers what it is, how it reaches a screen reader, the minimum you actually need, its five rules, and four working patterns to try.</p>
   </header>
 
   <main id="main" tabindex="-1">
@@ -339,17 +339,6 @@
   Mute
 &lt;/button&gt;</code></pre>
       <p>Together they form a contract between the page and assistive technology. You describe the interface honestly, and screen readers announce it correctly. ARIA never changes how an element looks or behaves. It only changes how it is announced.</p>
-    </section>
-
-    <section class="card" aria-labelledby="h-history">
-      <h2 id="h-history">A short history</h2>
-      <ul class="timeline">
-        <li><span class="yr">Sep 2006</span>First public working draft. Ajax apps were leaving screen readers behind.</li>
-        <li><span class="yr">Jan 2011</span>Candidate Recommendation.</li>
-        <li><span class="yr">Mar 20, 2014</span>WAI-ARIA 1.0 becomes a W3C Recommendation.</li>
-        <li><span class="yr">Dec 2017</span>ARIA 1.1, with new roles and digital publishing support.</li>
-        <li><span class="yr">2023</span>ARIA 1.2 becomes a W3C Recommendation.</li>
-      </ul>
     </section>
 
     <section class="card" aria-labelledby="h-pipeline">
@@ -366,7 +355,7 @@
 
     <section class="card" aria-labelledby="h-minimum">
       <h2 id="h-minimum">The minimum: name it, role it, state it</h2>
-      <p>Before the history and the rules, here is the smallest useful version of ARIA. Most accessibility bugs are just one of these four missing. Each one is demonstrated live further down the page.</p>
+      <p>Before the rules, here is the smallest useful version of ARIA. Most accessibility bugs are just one of these four missing. Each one is demonstrated live further down the page.</p>
 
       <h3>Name it</h3>
       <p>Every interactive element needs an accessible name. An icon alone is not a name, and neither is a placeholder.</p>
