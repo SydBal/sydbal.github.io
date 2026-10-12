@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ARIA: An Overview</title>
-<meta name="description" content="What ARIA is, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
+<meta name="description" content="What ARIA is, how it reaches a screen reader, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ARIA: An Overview">
-<meta property="og:description" content="What ARIA is, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
+<meta property="og:description" content="What ARIA is, how it reaches a screen reader, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
 <meta property="og:url" content="https://dominic.balass.one/aria-overview-demo/">
 <meta property="og:image" content="https://dominic.balass.one/aria-overview-demo/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ARIA: An Overview">
-<meta name="twitter:description" content="What ARIA is, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
+<meta name="twitter:description" content="What ARIA is, how it reaches a screen reader, where it came from, the five rules, and four working demos: a live announcer, an aria-pressed toggle, proper tabs, and an accessible-name inspector.">
 <meta name="twitter:image" content="https://dominic.balass.one/aria-overview-demo/og-image.png">
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
@@ -325,7 +325,7 @@
   <header class="top">
     <span class="kicker">LinkedIn series demo</span>
     <h1>ARIA: An Overview</h1>
-    <p class="lede">ARIA tells assistive technology what your interface is and what it is doing. This page starts with the minimum you actually need, then covers the spec, its history, its five rules, and four working patterns to try.</p>
+    <p class="lede">ARIA tells assistive technology what your interface is and what it is doing. This page starts with the minimum you actually need, then covers the spec, how it reaches a screen reader, its history, its five rules, and four working patterns to try.</p>
   </header>
 
   <main id="main" tabindex="-1">
@@ -394,8 +394,20 @@
       <p>Together they form a contract between the page and assistive technology. You describe the interface honestly, and screen readers announce it correctly. ARIA never changes how an element looks or behaves. It only changes how it is announced.</p>
     </section>
 
+    <section class="card" aria-labelledby="h-pipeline">
+      <h2 id="h-pipeline"><span class="num">3.</span>How it reaches a screen reader</h2>
+      <p>Your HTML never talks to a screen reader directly. There are four steps in between:</p>
+      <ol>
+        <li><strong>The browser builds an accessibility tree</strong> alongside the DOM. Every node gets a role, a name, states, and properties. Native HTML fills most of it in; ARIA covers the gaps.</li>
+        <li><strong>ARIA annotates that tree.</strong> <code>aria-label="Close dialog"</code> changes zero pixels on screen. It renames the node's entry in the tree from "&#10005;" to "Close dialog".</li>
+        <li><strong>The operating system exposes the tree</strong> through its accessibility APIs. Your page never sees this part.</li>
+        <li><strong>The screen reader reads the tree</strong> and turns it into speech or braille. Flip <code>aria-pressed</code> and the browser fires a state-change event the reader announces. Mark a region <code>aria-live</code> and its text changes fire announcement events.</li>
+      </ol>
+      <p class="note">Watch it yourself: open this page in Chrome DevTools, select any element, and check the Accessibility pane. It shows the computed role, name, and where each name came from. It is the same data the <a href="#h-inspector">name inspector</a> below reports.</p>
+    </section>
+
     <section class="card" aria-labelledby="h-history">
-      <h2 id="h-history"><span class="num">3.</span>A short history</h2>
+      <h2 id="h-history"><span class="num">4.</span>A short history</h2>
       <ul class="timeline">
         <li><span class="yr">Sep 2006</span>First public working draft. Ajax apps were leaving screen readers behind.</li>
         <li><span class="yr">Jan 2011</span>Candidate Recommendation.</li>
@@ -406,7 +418,7 @@
     </section>
 
     <section class="card" aria-labelledby="h-rules">
-      <h2 id="h-rules"><span class="num">4.</span>The five rules of ARIA</h2>
+      <h2 id="h-rules"><span class="num">5.</span>The five rules of ARIA</h2>
       <ol class="rules">
         <li>If native HTML does the job, use it.
           <span class="code-tag dont">Don't</span>
@@ -446,7 +458,7 @@
     </section>
 
     <section class="card" aria-labelledby="h-demos">
-      <h2 id="h-demos"><span class="num">5.</span>Four working demos</h2>
+      <h2 id="h-demos"><span class="num">6.</span>Four working demos</h2>
 
       <h3 id="h-announcer">The announcer</h3>
       <p>Screen readers announce changes inside <code>aria-live</code> regions. Type a message, pick a politeness, and send it. The message goes into a real live region on this page, and it is mirrored in the log so sighted visitors can see what a screen reader would say.</p>
