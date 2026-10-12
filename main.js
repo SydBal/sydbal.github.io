@@ -240,6 +240,14 @@
   if (!input) return;
   var grid = document.querySelector('#demos .cards');
   if (!grid) return;
+  // demos newest-first sort (Oct 2026)
+  // Newest-first default order, stable for equal dates.
+  Array.prototype.slice.call(grid.children).sort(function (a, b) {
+    var da = a.getAttribute('data-published') || '';
+    var db = b.getAttribute('data-published') || '';
+    if (da === db) return 0;
+    return da < db ? 1 : -1;
+  }).forEach(function (card) { grid.appendChild(card); });
   var cards = Array.prototype.slice.call(grid.querySelectorAll('.card'));
   var count = document.getElementById('demos-count');
 
