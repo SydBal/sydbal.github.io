@@ -233,3 +233,35 @@
   sizeCanvas();
   start();
 })();
+
+// demos search filter (Oct 2026)
+(function () {
+  var input = document.getElementById('demos-search-input');
+  if (!input) return;
+  var grid = document.querySelector('#demos .cards');
+  if (!grid) return;
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.card'));
+  var count = document.getElementById('demos-count');
+
+  function haystack(card) {
+    var t = card.querySelector('h3') ? card.querySelector('h3').textContent : '';
+    var tags = Array.prototype.map.call(
+      card.querySelectorAll('.tags li'),
+      function (li) { return li.textContent; }
+    ).join(' ');
+    return (t + ' ' + tags).toLowerCase();
+  }
+
+  function apply() {
+    var q = input.value.trim().toLowerCase();
+    var shown = 0;
+    cards.forEach(function (card) {
+      var hit = !q || haystack(card).indexOf(q) !== -1;
+      card.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    if (count) count.textContent = q ? (shown + ' of ' + cards.length + ' demos') : '';
+  }
+
+  input.addEventListener('input', apply);
+})();
