@@ -323,13 +323,66 @@
   <header class="top">
     <span class="kicker">LinkedIn series demo</span>
     <h1>ARIA: An Overview</h1>
-    <p class="lede">ARIA tells assistive technology what your interface is and what it is doing. This page explains the spec, its history, its five rules, and gives you four working patterns to try.</p>
+    <p class="lede">ARIA tells assistive technology what your interface is and what it is doing. This page starts with the minimum you actually need, then covers the spec, its history, its five rules, and four working patterns to try.</p>
   </header>
 
   <main id="main" tabindex="-1">
 
+    <section class="card" aria-labelledby="h-minimum">
+      <h2 id="h-minimum"><span class="num">1.</span>The minimum: name it, role it, state it</h2>
+      <p>Before the history and the rules, here is the smallest useful version of ARIA. Most accessibility bugs are just one of these four missing. Each one is demonstrated live further down the page.</p>
+
+      <h3>Name it</h3>
+      <p>Every interactive element needs an accessible name. An icon alone is not a name, and neither is a placeholder.</p>
+      <span class="code-tag dont">Don't</span>
+      <pre class="codeblock"><code>&lt;button&gt;&#10005;&lt;/button&gt;
+&lt;input type="email" placeholder="you@example.com"&gt;</code></pre>
+      <span class="code-tag do">Do</span>
+      <pre class="codeblock"><code>&lt;button aria-label="Close dialog"&gt;&#10005;&lt;/button&gt;
+
+&lt;label for="email"&gt;Email&lt;/label&gt;
+&lt;input type="email" id="email"&gt;</code></pre>
+      <p>See the difference in the <a href="#h-inspector">name inspector</a>: the unnamed versions report no accessible name, the named ones report theirs and where it came from.</p>
+
+      <h3>Role it</h3>
+      <p>A group of related controls should announce itself as a group, not as a pile of divs.</p>
+      <span class="code-tag dont">Don't</span>
+      <pre class="codeblock"><code>&lt;div&gt;
+  &lt;h4&gt;Shipping address&lt;/h4&gt;
+  &lt;input type="text" aria-label="Street"&gt;
+&lt;/div&gt;</code></pre>
+      <span class="code-tag do">Do</span>
+      <pre class="codeblock"><code>&lt;div role="group" aria-labelledby="addr-heading"&gt;
+  &lt;h4 id="addr-heading"&gt;Shipping address&lt;/h4&gt;
+  &lt;input type="text" aria-label="Street"&gt;
+&lt;/div&gt;</code></pre>
+
+      <h3>State it</h3>
+      <p>If it toggles, say so. <code>aria-pressed</code> is the difference between "a button" and "a button that is on".</p>
+      <span class="code-tag dont">Don't</span>
+      <pre class="codeblock"><code>&lt;button id="notify"&gt;Notifications: off&lt;/button&gt;
+&lt;!-- the label changes, but assistive tech only hears "button" --&gt;</code></pre>
+      <span class="code-tag do">Do</span>
+      <pre class="codeblock"><code>&lt;button id="notify" aria-pressed="false"&gt;Notifications: off&lt;/button&gt;</code></pre>
+      <p>Try it in <a href="#h-toggle">the toggle demo</a>: flipping the button flips <code>aria-pressed</code>, and the announcement follows.</p>
+
+      <h3>Announce its updates</h3>
+      <p>When content changes on its own, put it in a live region or nobody hears about it.</p>
+      <span class="code-tag dont">Don't</span>
+      <pre class="codeblock"><code>&lt;div id="status"&gt;&lt;/div&gt;
+&lt;script&gt;
+  // screen readers never announce this
+  document.getElementById('status').textContent = 'File saved.';
+&lt;/script&gt;</code></pre>
+      <span class="code-tag do">Do</span>
+      <pre class="codeblock"><code>&lt;div id="status" aria-live="polite"&gt;&lt;/div&gt;</code></pre>
+      <p>Type into <a href="#h-announcer">the announcer demo</a> to feel the difference between <code>polite</code> and <code>assertive</code>.</p>
+
+      <p>The <a href="#h-tabs">tabs demo</a> puts it all together: roles, names, states, and keyboard support in one widget.</p>
+    </section>
+
     <section class="card" aria-labelledby="h-what">
-      <h2 id="h-what"><span class="num">1.</span>What it is</h2>
+      <h2 id="h-what"><span class="num">2.</span>What it is</h2>
       <p>ARIA stands for Accessible Rich Internet Applications. It is a W3C specification that adds roles, states, and properties to HTML.</p>
       <p>A <strong>role</strong> says what an element is, like <code>tab</code> or <code>dialog</code>. A <strong>state</strong> says what condition it is in, like <code>pressed</code> or <code>expanded</code>. A <strong>property</strong> adds a relationship or label, like <code>aria-label</code> or <code>aria-controls</code>.</p>
       <p>Here is all three on one element. The role comes free with <code>&lt;button&gt;</code>, <code>aria-pressed</code> is the state, <code>aria-label</code> is the property:</p>
@@ -340,7 +393,7 @@
     </section>
 
     <section class="card" aria-labelledby="h-history">
-      <h2 id="h-history"><span class="num">2.</span>A short history</h2>
+      <h2 id="h-history"><span class="num">3.</span>A short history</h2>
       <ul class="timeline">
         <li><span class="yr">Sep 2006</span>First public working draft. Ajax apps were leaving screen readers behind.</li>
         <li><span class="yr">Jan 2011</span>Candidate Recommendation.</li>
@@ -351,7 +404,7 @@
     </section>
 
     <section class="card" aria-labelledby="h-rules">
-      <h2 id="h-rules"><span class="num">3.</span>The five rules of ARIA</h2>
+      <h2 id="h-rules"><span class="num">4.</span>The five rules of ARIA</h2>
       <ol class="rules">
         <li>If native HTML does the job, use it.
           <span class="code-tag dont">Don't</span>
@@ -391,7 +444,7 @@
     </section>
 
     <section class="card" aria-labelledby="h-demos">
-      <h2 id="h-demos"><span class="num">4.</span>Four working demos</h2>
+      <h2 id="h-demos"><span class="num">5.</span>Four working demos</h2>
 
       <h3 id="h-announcer">The announcer</h3>
       <p>Screen readers announce changes inside <code>aria-live</code> regions. Type a message, pick a politeness, and send it. The message goes into a real live region on this page, and it is mirrored in the log so sighted visitors can see what a screen reader would say.</p>
