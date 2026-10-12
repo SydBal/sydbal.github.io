@@ -111,15 +111,69 @@
   .readout .yes { color: var(--good); font-weight: 700; }
   .readout .no { color: var(--muted); font-weight: 400; }
   .note { font-size: 0.9rem; color: var(--muted); }
-  ul.timeline { list-style: none; padding: 0; margin: 0.5rem 0 0; }
-  ul.timeline li { margin: 0.55rem 0; padding-left: 0; }
+  ul.timeline {
+    list-style: none;
+    margin: 1rem 0 0.25rem 0.5rem;
+    padding: 0 0 0 1.75rem;
+    border-left: 3px solid var(--purple);
+  }
+  ul.timeline li { position: relative; margin: 0 0 1.2rem; }
+  ul.timeline li:last-child { margin-bottom: 0; }
+  ul.timeline li::before {
+    content: "";
+    position: absolute;
+    left: calc(-1.75rem - 7.5px);
+    top: 0.32rem;
+    width: 12px;
+    height: 12px;
+    background: var(--purple);
+    box-shadow: 0 0 0 3px var(--card);
+  }
   ul.timeline .yr {
     display: inline-block;
-    min-width: 7.5rem;
     font-weight: 700;
-    color: var(--purple-deep);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: var(--purple);
+    padding: 0.15rem 0.6rem;
+    margin: 0 0.6rem 0.25rem 0;
+    white-space: nowrap;
+  }
+  @media (prefers-color-scheme: dark) {
+    ul.timeline .yr { color: #101014; }
+  }
+  pre.codeblock {
+    background: #1c1c22;
+    color: #f1f0f5;
+    border: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
     font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 0.6rem 0 1.1rem;
+    tab-size: 2;
+  }
+  pre.codeblock code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+  }
+  .code-tag {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0.9rem 0 0;
+  }
+  .code-tag.do { color: var(--good); }
+  .code-tag.dont { color: #b91c1c; }
+  @media (prefers-color-scheme: dark) {
+    .code-tag.dont { color: #f87171; }
   }
   ol.rules { padding-left: 1.4rem; margin: 0.5rem 0 0; }
   ol.rules li { margin: 0.55rem 0; }
@@ -278,6 +332,10 @@
       <h2 id="h-what"><span class="num">1.</span>What it is</h2>
       <p>ARIA stands for Accessible Rich Internet Applications. It is a W3C specification that adds roles, states, and properties to HTML.</p>
       <p>A <strong>role</strong> says what an element is, like <code>tab</code> or <code>dialog</code>. A <strong>state</strong> says what condition it is in, like <code>pressed</code> or <code>expanded</code>. A <strong>property</strong> adds a relationship or label, like <code>aria-label</code> or <code>aria-controls</code>.</p>
+      <p>Here is all three on one element. The role comes free with <code>&lt;button&gt;</code>, <code>aria-pressed</code> is the state, <code>aria-label</code> is the property:</p>
+      <pre class="codeblock"><code>&lt;button aria-pressed="false" aria-label="Mute notifications"&gt;
+  Mute
+&lt;/button&gt;</code></pre>
       <p>Together they form a contract between the page and assistive technology. You describe the interface honestly, and screen readers announce it correctly. ARIA never changes how an element looks or behaves. It only changes how it is announced.</p>
     </section>
 
@@ -295,11 +353,31 @@
     <section class="card" aria-labelledby="h-rules">
       <h2 id="h-rules"><span class="num">3.</span>The five rules of ARIA</h2>
       <ol class="rules">
-        <li>If native HTML does the job, use it. A real <code>&lt;button&gt;</code> beats <code>&lt;div role="button"&gt;</code>.</li>
-        <li>Do not change native semantics. A heading is a heading, so do not override it into a button.</li>
-        <li>Every custom ARIA control must work with the keyboard.</li>
-        <li>Never put <code>role="presentation"</code> or <code>aria-hidden="true"</code> on a focusable element.</li>
-        <li>Every interactive element needs an accessible name.</li>
+        <li>If native HTML does the job, use it.
+          <span class="code-tag dont">Don't</span>
+          <pre class="codeblock"><code>&lt;div role="button" tabindex="0"&gt;Sign in&lt;/div&gt;</code></pre>
+          <span class="code-tag do">Do</span>
+          <pre class="codeblock"><code>&lt;button&gt;Sign in&lt;/button&gt;</code></pre>
+        </li>
+        <li>Do not change native semantics. A heading is a heading.
+          <span class="code-tag dont">Don't</span>
+          <pre class="codeblock"><code>&lt;h2 role="button" tabindex="0"&gt;Load more&lt;/h2&gt;</code></pre>
+          <span class="code-tag do">Do</span>
+          <pre class="codeblock"><code>&lt;button&gt;Load more&lt;/button&gt;</code></pre>
+        </li>
+        <li>Every custom ARIA control must work with the keyboard. If you do build a custom widget, it needs Tab access, arrow keys where expected, and visible focus, just like the native version.</li>
+        <li>Never put <code>role="presentation"</code> or <code>aria-hidden="true"</code> on a focusable element. It stays in the Tab order but vanishes for assistive tech.
+          <span class="code-tag dont">Don't</span>
+          <pre class="codeblock"><code>&lt;button aria-hidden="true"&gt;Save&lt;/button&gt;</code></pre>
+          <span class="code-tag do">Do</span>
+          <pre class="codeblock"><code>&lt;button&gt;Save&lt;/button&gt;</code></pre>
+        </li>
+        <li>Every interactive element needs an accessible name. An icon alone is not a name.
+          <span class="code-tag dont">Don't</span>
+          <pre class="codeblock"><code>&lt;button&gt;&#10005;&lt;/button&gt;</code></pre>
+          <span class="code-tag do">Do</span>
+          <pre class="codeblock"><code>&lt;button aria-label="Close dialog"&gt;&#10005;&lt;/button&gt;</code></pre>
+        </li>
       </ol>
     </section>
 
@@ -308,6 +386,13 @@
 
       <h3 id="h-announcer">The announcer</h3>
       <p>Screen readers announce changes inside <code>aria-live</code> regions. Type a message, pick a politeness, and send it. The message goes into a real live region on this page, and it is mirrored in the log so sighted visitors can see what a screen reader would say.</p>
+      <pre class="codeblock"><code>&lt;!-- polite waits for a pause, assertive interrupts --&gt;
+&lt;div aria-live="polite" id="live-polite"&gt;&lt;/div&gt;
+&lt;div aria-live="assertive" id="live-assertive"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  document.getElementById('live-polite').textContent = 'File saved.';
+&lt;/script&gt;</code></pre>
       <div class="field-row">
         <label for="announce-text">Message</label>
         <input type="text" id="announce-text" placeholder="e.g. File saved" autocomplete="off">
@@ -334,6 +419,14 @@
         <button class="btn" id="demo-toggle" type="button" aria-pressed="false">Notifications: off</button>
         <p class="readout" id="toggle-readout" role="status">aria-pressed="false"</p>
       </div>
+      <pre class="codeblock"><code>&lt;button aria-pressed="false" id="notify"&gt;Notifications: off&lt;/button&gt;
+
+&lt;script&gt;
+  notify.addEventListener('click', () =&gt; {
+    const on = notify.getAttribute('aria-pressed') === 'true';
+    notify.setAttribute('aria-pressed', String(!on));
+  });
+&lt;/script&gt;</code></pre>
 
       <h3 id="h-tabs">The tabs</h3>
       <p>The tab pattern needs <code>role="tablist"</code>, <code>role="tab"</code>, and <code>role="tabpanel"</code>, plus <code>aria-selected</code> on the active tab. Arrow keys move between tabs, Home and End jump to the ends, and only the active tab is in the Tab order.</p>
@@ -351,9 +444,22 @@
       <div role="tabpanel" id="panel-3" aria-labelledby="tab-3" tabindex="0" hidden>
         <p>A state answers the question "what condition is it in?" Pressed, expanded, selected, checked. States change as the user interacts, and the announcements follow.</p>
       </div>
+      <pre class="codeblock"><code>&lt;div role="tablist" aria-label="ARIA concepts"&gt;
+  &lt;button role="tab" id="tab-1" aria-selected="true"
+          aria-controls="panel-1"&gt;HTML first&lt;/button&gt;
+  &lt;button role="tab" id="tab-2" aria-selected="false" tabindex="-1"
+          aria-controls="panel-2"&gt;Roles&lt;/button&gt;
+&lt;/div&gt;
+&lt;div role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0"&gt;
+  ...
+&lt;/div&gt;</code></pre>
 
       <h3 id="h-inspector">The name inspector</h3>
       <p>Rule five: every interactive element needs an accessible name. Focus or hover each sample to see its computed role and name. The computation below is simplified, but the sources are the real ones.</p>
+      <pre class="codeblock"><code>&lt;!-- name comes from the label, role from the input type --&gt;
+&lt;label for="email"&gt;Email&lt;/label&gt;
+&lt;input type="email" id="email"&gt;
+&lt;!-- announced as: textbox, "Email" --&gt;</code></pre>
       <div class="inspect-grid">
         <div class="inspect-sample" data-inspect tabindex="0">
           <button class="icon-btn" type="button" aria-label="Close dialog" data-inspect-child>&#10005;</button>
