@@ -140,10 +140,10 @@
     user-select: none;
   }
   .tooltip:active { cursor: grabbing; }
-  .tooltip.tip-bottom { top: anchor(bottom); left: clamp(120px, anchor(center), calc(100% - 120px)); translate: -50% 0; margin-top: 10px; }
-  .tooltip.tip-top { bottom: anchor(top); left: clamp(120px, anchor(center), calc(100% - 120px)); translate: -50% 0; margin-bottom: 10px; }
-  .tooltip.tip-left { right: anchor(left); top: clamp(40px, anchor(center), calc(100% - 40px)); translate: 0 -50%; margin-right: 10px; }
-  .tooltip.tip-right { left: anchor(right); top: clamp(40px, anchor(center), calc(100% - 40px)); translate: 0 -50%; margin-left: 10px; }
+  .tooltip.tip-bottom { top: calc(anchor(bottom) + 10px); left: clamp(120px, anchor(center), calc(100% - 120px)); translate: -50% 0; }
+  .tooltip.tip-top { bottom: calc(anchor(top) + 10px); left: clamp(120px, anchor(center), calc(100% - 120px)); translate: -50% 0; }
+  .tooltip.tip-left { right: calc(anchor(left) + 10px); top: clamp(40px, anchor(center), calc(100% - 40px)); translate: 0 -50%; }
+  .tooltip.tip-right { left: calc(anchor(right) + 10px); top: clamp(40px, anchor(center), calc(100% - 40px)); translate: 0 -50%; }
   .tooltip.fallbacks { position-try-fallbacks: flip-block, flip-inline; }
   .tooltip.no-anchor-support { display: none; }
 
@@ -284,10 +284,10 @@ placeTip();</pre>
 #tip {
   position: absolute;
   position-anchor: --tip;
-  top: anchor(bottom);
+  /* margin would not flip; bake the gap into the inset */
+  top: calc(anchor(bottom) + 10px);
   left: anchor(center);
   translate: -50% 0;
-  margin-top: 10px;
   /* flip automatically near edges */
   position-try-fallbacks:
     flip-block, flip-inline;
