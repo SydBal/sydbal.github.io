@@ -121,6 +121,9 @@
     white-space: nowrap;
   }
   .anchor-btn:active { cursor: grabbing; }
+  @media (pointer: coarse) {
+    .anchor-btn { padding: 1rem 1.5rem; }
+  }
   .tooltip {
     position: absolute;
     position-anchor: --play-anchor;
@@ -130,13 +133,17 @@
     padding: 0.5rem 0.8rem;
     font-size: 0.9rem;
     max-width: 240px;
-    pointer-events: none;
     z-index: 5;
+    cursor: grab;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
-  .tooltip.tip-bottom { top: anchor(bottom); left: anchor(center); translate: -50% 0; margin-top: 10px; }
-  .tooltip.tip-top { bottom: anchor(top); left: anchor(center); translate: -50% 0; margin-bottom: 10px; }
-  .tooltip.tip-left { right: anchor(left); top: anchor(center); translate: 0 -50%; margin-right: 10px; }
-  .tooltip.tip-right { left: anchor(right); top: anchor(center); translate: 0 -50%; margin-left: 10px; }
+  .tooltip:active { cursor: grabbing; }
+  .tooltip.tip-bottom { top: anchor(bottom); left: clamp(120px, anchor(center), calc(100% - 120px)); translate: -50% 0; margin-top: 10px; }
+  .tooltip.tip-top { bottom: anchor(top); left: clamp(120px, anchor(center), calc(100% - 120px)); translate: -50% 0; margin-bottom: 10px; }
+  .tooltip.tip-left { right: anchor(left); top: clamp(40px, anchor(center), calc(100% - 40px)); translate: 0 -50%; margin-right: 10px; }
+  .tooltip.tip-right { left: anchor(right); top: clamp(40px, anchor(center), calc(100% - 40px)); translate: 0 -50%; margin-left: 10px; }
   .tooltip.fallbacks { position-try-fallbacks: flip-block, flip-inline; }
   .tooltip.no-anchor-support { display: none; }
 
@@ -175,7 +182,7 @@
   /* ---------- Code snippets ---------- */
   .code-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem; }
   @media (min-width: 720px) { .code-grid { grid-template-columns: 1fr 1fr; } }
-  .code-card { background: var(--card); border: 1px solid var(--border); }
+  .code-card { background: var(--card); border: 1px solid var(--border); min-width: 0; }
   .code-card h3 { margin: 0; padding: 0.7rem 1rem; font-size: 1rem; border-bottom: 1px solid var(--border); }
   .code-card h3 .tag { font-weight: 400; font-size: 0.8rem; color: var(--muted); }
   pre {
@@ -240,7 +247,7 @@
         <span>Active side: <code id="activeSide">&mdash;</code></span>
       </div>
     </div>
-    <p class="hint">Drag the button near an edge with auto-flip on and watch the tooltip flip sides by itself. Scroll this page or resize the window: it stays glued. The button also moves with arrow keys when focused. The script below only moves the anchor; the tooltip's position is computed entirely by CSS.</p>
+    <p class="hint">Drag the button or the tooltip near an edge with auto-flip on and watch the tooltip flip sides by itself. Scroll this page or resize the window: it stays glued. The button also moves with arrow keys when focused. The script below only moves the anchor; the tooltip's position is computed entirely by CSS.</p>
   </section>
 
   <section>
@@ -346,20 +353,30 @@ placeTip();</pre>
     anchor.style.transform = 'translate(-50%, -50%)';
   }
   var dragging = false;
-  anchor.addEventListener('pointerdown', function (e) {
+  function startDrag(e) {
     dragging = true;
-    anchor.setPointerCapture(e.pointerId);
+    e.currentTarget.setPointerCapture(e.pointerId);
     e.preventDefault();
-  });
-  anchor.addEventListener('pointermove', function (e) {
+  }
+  function moveDrag(e) {
     if (!dragging) return;
     var r = stage.getBoundingClientRect();
     ax = (e.clientX - r.left) / r.width;
     ay = (e.clientY - r.top) / r.height;
     render();
+  }
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    anchor.focus({ preventScroll: true });
+  }
+  // The tooltip is glued to the button, so grabbing either one drags the pair.
+  [anchor, tip].forEach(function (el) {
+    el.addEventListener('pointerdown', startDrag);
+    el.addEventListener('pointermove', moveDrag);
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', function () { dragging = false; });
   });
-  anchor.addEventListener('pointerup', function () { dragging = false; anchor.focus({ preventScroll: true }); });
-  anchor.addEventListener('pointercancel', function () { dragging = false; });
   anchor.addEventListener('keydown', function (e) {
     var step = 0.04, moved = true;
     if (e.key === 'ArrowLeft') ax -= step;
