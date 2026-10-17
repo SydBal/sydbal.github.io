@@ -196,6 +196,7 @@
     <h2>Honest notes</h2>
     <ul>
       <li><strong>Chromium only.</strong> Chrome and Edge 95+. No Firefox, no Safari. Feature-detect with <code>'EyeDropper' in window</code> and fall back to <code>&lt;input type="color"&gt;</code>.</li>
+      <li><strong>iPhone is out entirely, and no update will fix it.</strong> Apple requires every iOS browser to run on WebKit, so Chrome, Edge, and Firefox on iPhone are all WebKit under the hood. None of them have this API. It is a platform rule, not a version gap.</li>
       <li><strong>Needs a user gesture and HTTPS.</strong> You cannot open it on page load or from a timer.</li>
       <li><strong>Why no permission prompt is fine.</strong> The page never sees your screen. The browser asks the OS for one pixel and hands back a single hex string. One deliberate click buys exactly one color, the magnifier UI is browser-controlled, and Esc always cancels. Stealing anything meaningful one pixel per click is not a practical attack.</li>
       <li><strong>The real color-picker danger is elsewhere.</strong> Malicious browser extensions masquerading as color pickers have hit millions of users, but that is an extension-permissions problem, not this API. The web API is deliberately too narrow to abuse.</li>
