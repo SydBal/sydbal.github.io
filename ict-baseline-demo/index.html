@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICT Testing Baseline, Hands-On - Dominic Balassone</title>
+<meta name="description" content="What the government's ICT Testing Baseline actually is: the shared, step-by-step test script behind Section 508. Try five real baseline checks yourself.">
+<meta property="og:title" content="ICT Testing Baseline, Hands-On">
+<meta property="og:description" content="The shared test script behind Section 508. Try five real baseline checks yourself.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/ict-baseline-demo/">
+<meta property="og:image" content="https://dominic.balass.one/ict-baseline-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ICT Testing Baseline, Hands-On">
+<meta name="twitter:description" content="The shared test script behind Section 508. Try five real baseline checks yourself.">
+<meta name="twitter:image" content="https://dominic.balass.one/ict-baseline-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #17171c;
+    --muted: #55555e;
+    --purple: #7c3aed;
+    --purple-deep: #5b21b6;
+    --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+    --code-bg: #1d1d26;
+    --code-ink: #eceaf6;
+    --good: #15803d;
+    --good-bg: #dcfce7;
+    --bad: #b91c1c;
+    --bad-bg: #fee2e2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014;
+      --card: #18181e;
+      --ink: #f1f0f5;
+      --muted: #b6b6c0;
+      --purple-soft: #2e1a5e;
+      --border: #2c2c34;
+      --good: #4ade80;
+      --good-bg: #14532d;
+      --bad: #f87171;
+      --bad-bg: #7f1d1d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  :focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-size: 1.9rem; margin: 0 0 0.25rem; }
+  .lede { color: var(--muted); margin: 0 0 2rem; font-size: 1.05rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  h2 { font-size: 1.3rem; margin: 0 0 0.75rem; }
+  .chain { display: grid; gap: 0.75rem; margin: 1rem 0; }
+  .chain .link {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    background: var(--bg);
+  }
+  .chain .link strong { display: block; margin-bottom: 0.25rem; }
+  .chain .link p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .chain .arrow { text-align: center; color: var(--purple); font-weight: 700; }
+  .test-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.25rem;
+    margin: 1rem 0;
+    background: var(--bg);
+  }
+  .test-card h3 { margin: 0 0 0.25rem; font-size: 1.05rem; }
+  .test-card .sc { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.75rem; }
+  .test-card .asks { margin: 0 0 0.75rem; font-size: 0.95rem; }
+  .sample {
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--card);
+  }
+  .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--ink);
+  }
+  button[aria-pressed="true"] {
+    background: var(--purple-soft);
+    border-color: var(--purple);
+    font-weight: 600;
+  }
+  button.run {
+    background: var(--purple);
+    border-color: var(--purple-deep);
+    color: #fff;
+    font-weight: 600;
+  }
+  button.run:hover { background: var(--purple-deep); }
+  .verdict { margin-top: 0.75rem; font-size: 0.95rem; }
+  .verdict .badge {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    margin-right: 0.5rem;
+  }
+  .verdict.pass .badge { background: var(--good-bg); color: var(--good); }
+  .verdict.fail .badge { background: var(--bad-bg); color: var(--bad); }
+  .verdict .why { color: var(--muted); }
+  code.inline {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  ul { margin: 0; padding-left: 1.25rem; }
+  li { margin-bottom: 0.5rem; }
+  li::marker { color: var(--purple); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  /* samples */
+  .fake-btn {
+    display: inline-block;
+    background: var(--purple);
+    color: #fff;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .real-btn {
+    font: inherit;
+    background: var(--purple);
+    color: #fff;
+    border: 1px solid var(--purple-deep);
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .no-ring { outline: none !important; }
+  .ring-btn:focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  .low-contrast { color: #a8a8b0; font-size: 1.1rem; font-weight: 600; }
+  .hi-contrast { color: #17171c; font-size: 1.1rem; font-weight: 600; }
+  @media (prefers-color-scheme: dark) {
+    .hi-contrast { color: #f1f0f5; }
+    .low-contrast { color: #6e6e78; }
+  }
+  .sample input[type="text"] {
+    font: inherit;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100%;
+    max-width: 280px;
+  }
+  .sample label { display: block; margin-bottom: 0.35rem; font-weight: 600; }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.9rem; }
+  footer a { color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The ICT Testing Baseline, hands-on</h1>
+  <p class="lede">Section 508 is the law. WCAG is what "accessible" means. The Baseline is the shared, step-by-step script for testing it, so five testers get the same answer instead of five opinions. Try five of its checks below.</p>
+
+  <div class="card">
+    <h2>What it is, in 30 seconds</h2>
+    <div class="chain">
+      <div class="link">
+        <strong>Section 508, the law</strong>
+        <p>US federal agencies (and anyone selling them tech) must make electronic content accessible. It says what must happen, not how to check it.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">↓</div>
+      <div class="link">
+        <strong>WCAG, the definition</strong>
+        <p>The W3C's Web Content Accessibility Guidelines define what "accessible" means, as testable success criteria like "all functionality is keyboard operable."</p>
+      </div>
+      <div class="arrow" aria-hidden="true">↓</div>
+      <div class="link">
+        <strong>The Baseline, the script</strong>
+        <p>The ICT Testing Baseline turns each requirement into an exact test procedure: what to inspect, what tools to use, what counts as pass or fail. It is the script DHS Trusted Testers are certified to run. Automated checkers catch roughly a third of issues; the Baseline is the manual rest.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Try five baseline checks</h2>
+    <p style="color:var(--muted);margin-top:0">Each card has a broken and a fixed sample. Flip between them, run the check, and watch the verdict change. These are simplified versions of real Baseline tests.</p>
+
+    <!-- 1. Keyboard -->
+    <div class="test-card" data-test="keyboard">
+      <h3>1. Keyboard operability</h3>
+      <p class="sc">Baseline test · WCAG 2.1.1</p>
+      <p class="asks">The Baseline asks: can every control be reached and used with a keyboard alone? The check looks at whether the control is natively keyboard-focusable.</p>
+      <div class="sample">
+        <div class="broken-only"><span class="fake-btn" onclick="void 0" id="kb-broken">Menu (div)</span></div>
+        <div class="fixed-only" hidden><button type="button" class="real-btn" id="kb-fixed">Menu (button)</button></div>
+      </div>
+      <div class="controls">
+        <button type="button" data-variant="broken" aria-pressed="true">Broken</button>
+        <button type="button" data-variant="fixed" aria-pressed="false">Fixed</button>
+        <button type="button" class="run">Run the check</button>
+      </div>
+      <div class="verdict" role="status"></div>
+    </div>
+
+    <!-- 2. Focus visible -->
+    <div class="test-card" data-test="focus">
+      <h3>2. Visible focus indicator</h3>
+      <p class="sc">Baseline test · WCAG 2.4.7</p>
+      <p class="asks">The Baseline asks: when a keyboard user tabs to this control, is there a visible indicator? The check looks for a removed outline with no <code class="inline">:focus-visible</code> replacement.</p>
+      <div class="sample">
+        <div class="broken-only"><button type="button" class="real-btn no-ring" id="fv-broken">Save</button></div>
+        <div class="fixed-only" hidden><button type="button" class="real-btn ring-btn" id="fv-fixed">Save</button></div>
+      </div>
+      <div class="controls">
+        <button type="button" data-variant="broken" aria-pressed="true">Broken</button>
+        <button type="button" data-variant="fixed" aria-pressed="false">Fixed</button>
+        <button type="button" class="run">Run the check</button>
+      </div>
+      <div class="verdict" role="status"></div>
+    </div>
+
+    <!-- 3. Alt text -->
+    <div class="test-card" data-test="alt">
+      <h3>3. Text alternative for images</h3>
+      <p class="sc">Baseline test · WCAG 1.1.1</p>
+      <p class="asks">The Baseline asks: does this meaningful image expose a text alternative? The check reads the <code class="inline">alt</code> attribute, exactly like a screen reader would.</p>
+      <div class="sample">
+        <div class="broken-only"><img id="alt-broken" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%237c3aed'/%3E%3Ctext x='60' y='45' font-size='14' text-anchor='middle' fill='white'%3EChart%3C/text%3E%3C/svg%3E" alt="" width="120" height="80"></div>
+        <div class="fixed-only" hidden><img id="alt-fixed" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%237c3aed'/%3E%3Ctext x='60' y='45' font-size='14' text-anchor='middle' fill='white'%3EChart%3C/text%3E%3C/svg%3E" alt="Bar chart: quarterly revenue rising from 40k to 95k" width="120" height="80"></div>
+      </div>
+      <div class="controls">
+        <button type="button" data-variant="broken" aria-pressed="true">Broken</button>
+        <button type="button" data-variant="fixed" aria-pressed="false">Fixed</button>
+        <button type="button" class="run">Run the check</button>
+      </div>
+      <div class="verdict" role="status"></div>
+    </div>
+
+    <!-- 4. Contrast -->
+    <div class="test-card" data-test="contrast">
+      <h3>4. Color contrast</h3>
+      <p class="sc">Baseline test · WCAG 1.4.3</p>
+      <p class="asks">The Baseline asks: does normal text hit 4.5:1 against its background? The check computes the real luminance ratio from the rendered colors.</p>
+      <div class="sample">
+        <div class="broken-only"><p class="low-contrast" id="ct-broken" style="margin:0">This text is hard to read</p></div>
+        <div class="fixed-only" hidden><p class="hi-contrast" id="ct-fixed" style="margin:0">This text is easy to read</p></div>
+      </div>
+      <div class="controls">
+        <button type="button" data-variant="broken" aria-pressed="true">Broken</button>
+        <button type="button" data-variant="fixed" aria-pressed="false">Fixed</button>
+        <button type="button" class="run">Run the check</button>
+      </div>
+      <div class="verdict" role="status"></div>
+    </div>
+
+    <!-- 5. Labels -->
+    <div class="test-card" data-test="label">
+      <h3>5. Form labels</h3>
+      <p class="sc">Baseline test · WCAG 3.3.2</p>
+      <p class="asks">The Baseline asks: does this input have an associated label a screen reader can announce? Placeholders do not count. The check inspects the label association.</p>
+      <div class="sample">
+        <div class="broken-only"><input type="text" id="lb-broken" placeholder="Email address"></div>
+        <div class="fixed-only" hidden><label for="lb-fixed">Email address</label><input type="text" id="lb-fixed" autocomplete="email"></div>
+      </div>
+      <div class="controls">
+        <button type="button" data-variant="broken" aria-pressed="true">Broken</button>
+        <button type="button" data-variant="fixed" aria-pressed="false">Fixed</button>
+        <button type="button" class="run">Run the check</button>
+      </div>
+      <div class="verdict" role="status"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Honest notes</h2>
+    <ul>
+      <li><strong>A tasting menu, not the meal.</strong> The full Baseline has 60+ tests across web, software, and documents. These five are simplified versions of real ones.</li>
+      <li><strong>The Baseline is a script, not a certificate.</strong> It tells a tester exactly what to do. The DHS Trusted Tester certification says a person can run it reliably.</li>
+      <li><strong>Automated checkers are the minority report.</strong> They catch roughly a third of issues. Everything above except contrast needs a human or a DOM check like these.</li>
+      <li><strong>Want the real thing?</strong> The DHS Trusted Tester training is free at the Section 508 training portal, and the certification exam is a practical: you test a real page, 85% to pass.</li>
+    </ul>
+  </div>
+
+  <footer><a href="https://dominic.balass.one/">dominic.balass.one</a> · a companion to the accessibility series</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  function parseRGB(s) {
+    var m = String(s).match(/[\d.]+/g);
+    return [+m[0], +m[1], +m[2]];
+  }
+  function luminance(rgb) {
+    var a = rgb.map(function (v) {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+  }
+  function contrastRatio(fg, bg) {
+    var l1 = luminance(parseRGB(fg)), l2 = luminance(parseRGB(bg));
+    var hi = Math.max(l1, l2), lo = Math.min(l1, l2);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+  function hasFocusVisibleRule(el) {
+    var cls = el.className && el.className.baseVal !== undefined ? '' : (el.className || '');
+    try {
+      for (var i = 0; i < document.styleSheets.length; i++) {
+        var rules = document.styleSheets[i].cssRules;
+        for (var j = 0; j < rules.length; j++) {
+          var r = rules[j];
+          if (r.selectorText && r.selectorText.indexOf(':focus-visible') !== -1) {
+            var sel = r.selectorText;
+            if (cls && sel.indexOf('.' + String(cls).split(' ')[0]) !== -1) {
+              var o = r.style.outlineStyle, b = r.style.boxShadow;
+              if ((o && o !== 'none') || (b && b !== 'none')) return true;
+            }
+          }
+        }
+      }
+    } catch (e) { /* cross-origin stylesheet: skip */ }
+    return false;
+  }
+
+  var checks = {
+    keyboard: function (card, variant) {
+      var el = card.querySelector(variant === 'broken' ? '#kb-broken' : '#kb-fixed');
+      var tag = el.tagName.toLowerCase();
+      var native = tag === 'button' ||
+        (tag === 'a' && el.hasAttribute('href')) ||
+        (tag === 'input' && el.type !== 'hidden') ||
+        tag === 'select' || tag === 'textarea';
+      var focusable = native || el.tabIndex >= 0;
+      if (focusable) {
+        return { pass: true, why: 'It is a native <button>: reachable by Tab and operable with Enter/Space. No extra code needed.' };
+      }
+      return { pass: false, why: 'It is a <div> with a click handler and no tabindex: unreachable by keyboard. Fails WCAG 2.1.1.' };
+    },
+    focus: function (card, variant) {
+      var el = card.querySelector(variant === 'broken' ? '#fv-broken' : '#fv-fixed');
+      var outlineGone = getComputedStyle(el).outlineStyle === 'none';
+      var hasReplacement = hasFocusVisibleRule(el);
+      if (!outlineGone || hasReplacement) {
+        return { pass: true, why: 'A visible :focus-visible indicator is present, so keyboard users can track focus.' };
+      }
+      return { pass: false, why: 'outline is removed with no :focus-visible replacement: sighted keyboard users cannot see where focus is. Fails WCAG 2.4.7.' };
+    },
+    alt: function (card, variant) {
+      var el = card.querySelector(variant === 'broken' ? '#alt-broken' : '#alt-fixed');
+      var alt = el.getAttribute('alt');
+      if (alt && alt.trim().length > 0) {
+        return { pass: true, why: 'alt="' + alt.trim().slice(0, 60) + '" gives screen readers the meaning of the image.' };
+      }
+      return { pass: false, why: 'alt is empty on a meaningful image: screen readers announce nothing, so the information is lost. Fails WCAG 1.1.1.' };
+    },
+    contrast: function (card, variant) {
+      var el = card.querySelector(variant === 'broken' ? '#ct-broken' : '#ct-fixed');
+      var cs = getComputedStyle(el);
+      var ratio = contrastRatio(cs.color, cs.backgroundColor === 'rgba(0, 0, 0, 0)' ? '#ffffff' : cs.backgroundColor);
+      var rounded = Math.round(ratio * 10) / 10;
+      if (ratio >= 4.5) {
+        return { pass: true, why: 'Measured contrast is ' + rounded + ':1 against the background, meeting the 4.5:1 minimum.' };
+      }
+      return { pass: false, why: 'Measured contrast is ' + rounded + ':1 against the background, below the 4.5:1 minimum. Fails WCAG 1.4.3.' };
+    },
+    label: function (card, variant) {
+      var el = card.querySelector(variant === 'broken' ? '#lb-broken' : '#lb-fixed');
+      var labelled = (el.labels && el.labels.length > 0) ||
+        el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby');
+      if (labelled) {
+        return { pass: true, why: 'The input has an associated <label>, so screen readers announce "Email address" on focus.' };
+      }
+      return { pass: false, why: 'No label association: a placeholder is not a label, so screen readers announce this as an empty text field. Fails WCAG 3.3.2.' };
+    }
+  };
+
+  var cards = document.querySelectorAll('.test-card');
+  for (var i = 0; i < cards.length; i++) {
+    (function (card) {
+      var test = card.getAttribute('data-test');
+      var variant = 'broken';
+      var brokenOnly = card.querySelector('.broken-only');
+      var fixedOnly = card.querySelector('.fixed-only');
+      var verdict = card.querySelector('.verdict');
+      var variantBtns = card.querySelectorAll('[data-variant]');
+
+      function setVariant(v) {
+        variant = v;
+        brokenOnly.hidden = v !== 'broken';
+        fixedOnly.hidden = v !== 'fixed';
+        for (var k = 0; k < variantBtns.length; k++) {
+          variantBtns[k].setAttribute('aria-pressed', variantBtns[k].getAttribute('data-variant') === v ? 'true' : 'false');
+        }
+        verdict.className = 'verdict';
+        verdict.innerHTML = '';
+      }
+      for (var k = 0; k < variantBtns.length; k++) {
+        variantBtns[k].addEventListener('click', function () {
+          setVariant(this.getAttribute('data-variant'));
+        });
+      }
+      card.querySelector('.run').addEventListener('click', function () {
+        var result = checks[test](card, variant);
+        verdict.className = 'verdict ' + (result.pass ? 'pass' : 'fail');
+        verdict.innerHTML = '';
+        var badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = result.pass ? 'Pass' : 'Fail';
+        var why = document.createElement('span');
+        why.className = 'why';
+        why.textContent = result.why;
+        verdict.appendChild(badge);
+        verdict.appendChild(why);
+      });
+    })(cards[i]);
+  }
+})();
+</script>
+</body>
+</html>
