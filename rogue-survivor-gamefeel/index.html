@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rogue Survivor: Game Feel</title>
+<meta name="description" content="Week 4 of the Rogue Survivor build log: spawn telegraphs, a persistent best score and time, and synthesized sound effects. No audio files, no assets.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/rogue-survivor-gamefeel/">
+<meta property="og:title" content="Rogue Survivor: Game Feel">
+<meta property="og:description" content="Spawn telegraphs, a persistent best score, and synthesized WebAudio sound effects. Week 4 of the Rogue Survivor build log.">
+<meta property="og:image" content="https://dominic.balass.one/rogue-survivor-gamefeel/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rogue Survivor: Game Feel">
+<meta name="twitter:description" content="Spawn telegraphs, a persistent best score, and synthesized WebAudio sound effects.">
+<meta name="twitter:image" content="https://dominic.balass.one/rogue-survivor-gamefeel/og-image.png">
+<style>
+  :root {
+    --bg: #0b0b10;
+    --panel: #14141c;
+    --ink: #e8e8f0;
+    --muted: #9a9ab0;
+    --purple: #a855f7;
+    --green: #4ade80;
+    --line: #262633;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+  header.hero { padding: 64px 0 32px; }
+  .kicker {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 12px; line-height: 1.15; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 720px; }
+  .lede strong { color: var(--ink); }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 32px 0;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat .num { font-size: 30px; font-weight: 700; color: var(--purple); }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  h2 { font-size: 26px; margin: 56px 0 8px; }
+  .section-sub { color: var(--muted); margin: 0 0 24px; max-width: 720px; }
+  .game-frame {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+  .game-frame iframe {
+    display: block;
+    width: 100%;
+    height: 70vh;
+    min-height: 420px;
+    border: 0;
+    background: #000;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .shots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 8px 0 8px;
+  }
+  @media (max-width: 760px) { .shots { grid-template-columns: 1fr; } }
+  .shots figure { margin: 0; }
+  .shots img {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #000;
+  }
+  .shots figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .comp { margin: 0 0 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .comp-head { padding: 20px 20px 4px; }
+  .comp-head h3 { margin: 0 0 6px; font-size: 18px; }
+  .comp-head h3 code { color: var(--purple); font-size: 17px; }
+  .comp-head p { margin: 0 0 4px; color: var(--muted); font-size: 15px; max-width: 760px; }
+  .comp pre {
+    margin: 16px 20px 20px;
+    background: #0a0a0f;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .note {
+    background: rgba(168,85,247,.08);
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 12px 0 36px;
+    font-size: 15px;
+  }
+  .note strong { color: var(--purple); }
+  footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+  footer a { color: var(--purple); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .btn {
+    display: inline-block;
+    background: var(--purple);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 999px;
+  }
+  .btn.ghost { background: transparent; border: 1px solid var(--purple); color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker">Rogue Survivor · Build Log · Week 4</span>
+    <h1>Game Feel</h1>
+    <p class="lede">
+      The base game forgot everything the second you closed the tab. Your best
+      run? Gone. It made no sound, and enemies popped into existence already
+      moving and already dangerous. This week fixed all three:
+      <strong>spawn telegraphs</strong>, a <strong>persistent best score and
+      time</strong>, and <strong>synthesized sound effects</strong> with zero
+      audio files. The playable build is up top.
+    </p>
+    <div class="btn-row">
+      <a class="btn" href="https://dominic.balass.one/rogue-survivor/w4/">Play the week 4 build</a>
+      <a class="btn ghost" href="https://github.com/SydBal/rogue-survivor">Source on GitHub</a>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num">~0.5s</div><div class="lbl">spawn telegraph before an enemy goes live</div></div>
+    <div class="stat"><div class="num">2</div><div class="lbl">bests remembered: score and time, tracked separately</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">synthesized sounds: kill blip, hit thud, game-over sweep</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">audio files, assets, or libraries</div></div>
+  </div>
+
+<h2>Play it</h2>
+<p class="section-sub">The week 4 build, frozen in time. Survive as long as you can. Your best score and best time now survive a page refresh.</p>
+<div class="game-frame">
+  <iframe src="https://dominic.balass.one/rogue-survivor/w4/" title="Rogue Survivor, week 4 build" loading="lazy"></iframe>
+</div>
+<p class="hint">Click the game once so it captures your keyboard and wakes the audio. Keyboard, mouse, gamepad, or touch drag all work.</p>
+
+<h2>Fair spawns</h2>
+<p class="section-sub">Every spawn starts as a telegraph: a ring that shrinks and brightens for about half a second. While the ring shows, the enemy cannot move, cannot hurt you, and cannot be hurt. Getting hit is your mistake now, not the game's.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>telegraphTicks</code></h3>
+<p>Thirty frames of warning, counted down in the enemy update. The ring's radius and alpha come straight from the countdown progress.</p>
+</div>
+<pre>this.telegraphTicksLeft = CONFIG.enemy.telegraphTicks // 30 frames, ~0.5s
+
+if (this.telegraphTicksLeft &gt; 0) {
+  this.telegraphTicksLeft--
+  // inert: no movement, no collision, no damage either way
+  return
+}</pre>
+</div>
+
+<h2>The game remembers</h2>
+<p class="section-sub">Best score and best time persist in localStorage under one key and show on the start screen and the game over screen. Score and time are tracked separately, so a long survival run and a high-score run both count. Every storage access is guarded: if the browser refuses, the game keeps the best in memory for the session instead of crashing.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>recordBestScore</code></h3>
+<p>One guarded write at game over. The load path validates both numbers before trusting them.</p>
+</div>
+<pre>const BEST_SCORE_KEY = 'rogueSurvivorBest'
+
+const recordBestScore = () =&gt; {
+  if (score &lt;= bestScore &amp;&amp; gameOverTime &lt;= bestTime) return
+  bestScore = Math.max(bestScore, score)
+  bestTime = Math.max(bestTime, gameOverTime)
+  try {
+    window.localStorage.setItem(BEST_SCORE_KEY,
+      JSON.stringify({ score: bestScore, time: bestTime }))
+  } catch (error) {
+    // No writable storage: the in-memory best still shows this session.
+  }
+}</pre>
+</div>
+
+<h2>Sound from nothing</h2>
+<p class="section-sub">The game is still one JavaScript file with no assets, so the sound is synthesized with WebAudio: an oscillator, a gain envelope, and a frequency ramp. Three tones cover the whole game. The context wakes on the first key press, click, or tap, which is the gesture that starts the game anyway.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>playTone</code></h3>
+<p>One helper makes every sound in the game. A shield kill is a rising square blip, a hit is a falling sawtooth thud, game over is a long falling sweep.</p>
+</div>
+<pre>const playTone = ({ frequency, endFrequency, duration, type, volume }) =&gt; {
+  const context = ensureAudioContext()
+  if (!context) return
+  const oscillator = context.createOscillator()
+  const gain = context.createGain()
+  oscillator.type = type
+  oscillator.frequency.setValueAtTime(frequency, context.currentTime)
+  if (endFrequency) {
+    oscillator.frequency.exponentialRampToValueAtTime(
+      endFrequency, context.currentTime + duration)
+  }
+  // gain envelope: in fast, out to silence
+  oscillator.connect(gain)
+  gain.connect(context.destination)
+  oscillator.start()
+  oscillator.stop(context.currentTime + duration)
+}
+
+const playShieldKillSound = () =&gt;
+  playTone({ frequency: 620, endFrequency: 980, duration: 0.09,
+            type: 'square', volume: 0.05 })</pre>
+</div>
+
+<h2>Screenshots</h2>
+<p class="section-sub">The start screen now carries your best. The faint rings at the edges are telegraphs: spawns warning before they go live.</p>
+<div class="shots">
+  <figure><img src="start.png" alt="Rogue Survivor start screen showing the persistent best score and time line"><figcaption>Start screen, with the remembered best</figcaption></figure>
+  <figure><img src="telegraph.png" alt="Gameplay with faint telegraph rings at the screen edges"><figcaption>Telegraph rings warning at the edges</figcaption></figure>
+</div>
+
+<footer>
+  <p>Part of the <a href="https://dominic.balass.one">Rogue Survivor Wednesday build log</a>. Previous weeks: <a href="https://dominic.balass.one/rogue-survivor-ai-cleanup/">AI cleanup</a>, <a href="https://dominic.balass.one/rogue-survivor-ui/">real menus</a>, <a href="https://dominic.balass.one/rogue-survivor-acts/">acts and bosses</a>.</p>
+</footer>
+
+</div>
+</body>
+</html>
