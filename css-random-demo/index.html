@@ -116,6 +116,7 @@
   .engine strong { color: var(--ink); }
   footer { border-top: 1px solid var(--border); padding: 2rem 1.25rem; text-align: center; color: var(--muted); font-size: 0.92rem; }
 </style>
+<style id="roll-style"></style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to main content</a>
@@ -185,7 +186,10 @@
   var readout = document.getElementById('readout');
   var note = document.getElementById('readout-note');
   var engine = document.getElementById('engine');
+  var rollStyle = document.getElementById('roll-style');
   var DOT_COUNT = 16;
+  var rollCount = 0;
+  var lastPositions = null;
 
   var supported = false;
   try { supported = CSS.supports('left', 'random(0%, 100%)'); } catch (e) { supported = false; }
@@ -198,6 +202,39 @@
       d.setAttribute('aria-hidden', 'true');
       stage.appendChild(d);
     }
+  }
+
+  // random() caches its rolls under a key. Rebuilt dots with the same key get
+  // the same values back, so each scatter uses fresh per-property seed keys:
+  // a new key has no cached value yet, which forces a genuine re-roll.
+  function applyRoll(n) {
+    rollStyle.textContent =
+      '.dot {' +
+      ' left: random(--roll' + n + 'x element-scoped, 2%, 90%);' +
+      ' top: random(--roll' + n + 'y element-scoped, 4%, 82%);' +
+      ' width: random(--roll' + n + 'w element-scoped, 10px, 28px);' +
+      ' height: random(--roll' + n + 'h element-scoped, 10px, 28px);' +
+      ' border-radius: random(--roll' + n + 'br element-scoped, 25%, 50%);' +
+      ' rotate: random(--roll' + n + 'rot element-scoped, -35deg, 35deg);' +
+      ' background: hsl(random(--roll' + n + 'hue element-scoped, 248, 292) 85% 68%);' +
+      ' }';
+  }
+
+  function snapshot() {
+    var out = [];
+    stage.querySelectorAll('.dot').forEach(function (d) {
+      var cs = getComputedStyle(d);
+      out.push(parseFloat(cs.left) + ',' + parseFloat(cs.top));
+    });
+    return out;
+  }
+
+  function movedCount(before, after) {
+    var moved = 0;
+    for (var i = 0; i < after.length; i++) {
+      if (before[i] !== after[i]) moved++;
+    }
+    return moved;
   }
 
   function jsScatter() {
@@ -214,22 +251,47 @@
     });
   }
 
-  function render() {
-    buildDots();
-    if (supported) {
-      readout.textContent = 'supported';
-      note.textContent = 'Your browser implements random(). The stage below is scattered by pure CSS, and it re-rolls on every load.';
-      engine.innerHTML = 'Scattered by: <strong>CSS random()</strong>';
-    } else {
-      jsScatter();
-      readout.textContent = 'not supported yet';
-      note.textContent = 'Your browser does not implement random() yet. The stage below uses the JavaScript fallback, so you can still see the shape of the thing.';
-      engine.innerHTML = 'Scattered by: <strong>JavaScript fallback</strong> (your browser has no random() yet)';
-    }
+  function clearInline() {
+    stage.querySelectorAll('.dot').forEach(function (d) { d.removeAttribute('style'); });
   }
 
-  document.getElementById('rescatter').addEventListener('click', render);
+  function render() {
+    if (!supported) {
+      jsScatter();
+      lastPositions = snapshot();
+      return;
+    }
+    clearInline();
+    rollCount++;
+    applyRoll(rollCount);
+    void stage.offsetWidth; // settle styles before measuring
+    var now = snapshot();
+    if (lastPositions && movedCount(lastPositions, now) < DOT_COUNT / 2) {
+      // The browser held on to its cached rolls (or does not honor fresh
+      // seed keys). Do this scatter in script so every dot actually moves,
+      // and say so on the label.
+      jsScatter();
+      engine.innerHTML = 'Scattered by: <strong>JavaScript fallback</strong> (this browser held on to its cached random() values)';
+      now = snapshot();
+    } else {
+      engine.innerHTML = 'Scattered by: <strong>CSS random()</strong>';
+    }
+    lastPositions = now;
+  }
+
+  buildDots();
+  if (supported) {
+    readout.textContent = 'supported';
+    note.textContent = 'Your browser implements random(). The stage below is scattered by pure CSS, and it re-rolls on every load.';
+    engine.innerHTML = 'Scattered by: <strong>CSS random()</strong>';
+  } else {
+    readout.textContent = 'not supported yet';
+    note.textContent = 'Your browser does not implement random() yet. The stage below uses the JavaScript fallback, so you can still see the shape of the thing.';
+    engine.innerHTML = 'Scattered by: <strong>JavaScript fallback</strong> (your browser has no random() yet)';
+  }
   render();
+
+  document.getElementById('rescatter').addEventListener('click', render);
 })();
 </script>
 </body>
