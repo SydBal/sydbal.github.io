@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Textheat: Reading Across Paragraphs - What Changed</title>
+<meta name="description" content="Three Textheat fixes: negation now carries across paragraph breaks, emoji reactions retry instead of vanishing, and editable regions are certified in a real browser.">
+<meta property="og:title" content="Textheat: Reading Across Paragraphs">
+<meta property="og:description" content="Negation carries across paragraph breaks, reactions retry instead of vanishing, and the editor behavior is tested in a real browser now.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/textheat-context-demo/">
+<meta property="og:image" content="https://dominic.balass.one/textheat-context-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Textheat: Reading Across Paragraphs">
+<meta name="twitter:description" content="Negation carries across paragraph breaks, reactions retry instead of vanishing, and the editor behavior is tested in a real browser now.">
+<meta name="twitter:image" content="https://dominic.balass.one/textheat-context-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --code-bg: #1d1d26; --code-ink: #eceaf6;
+    --neg-bg: #fecaca; --neg-ink: #991b1b; --pos-bg: #bbf7d0; --pos-ink: #14532d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+      --neg-bg: #7f1d1d; --neg-ink: #fecaca; --pos-bg: #14532d; --pos-ink: #bbf7d0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
+  :focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  a { color: var(--purple); }
+  .hero {
+    background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%);
+    border-bottom: 1px solid var(--border);
+    padding: 4rem 1.25rem 3rem;
+    text-align: center;
+  }
+  .hero h1 { font-size: clamp(1.9rem, 5.5vw, 3.2rem); margin: 0 0 1rem; letter-spacing: -0.02em; }
+  .hero .tagline { font-size: clamp(1.02rem, 2.4vw, 1.25rem); color: var(--muted); max-width: 42rem; margin: 0 auto; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  section { margin-bottom: 3rem; }
+  h2 { font-size: 1.55rem; margin: 0 0 0.75rem; letter-spacing: -0.01em; }
+  p { margin: 0 0 1rem; }
+  .muted { color: var(--muted); }
+  .sample {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(124, 58, 237, 0.14);
+    padding: 1.5rem 1.75rem; margin: 1.25rem 0;
+  }
+  .sample .block { font-size: 1.15rem; margin: 0 0 0.4rem; }
+  .sample .block:last-of-type { margin-bottom: 0; }
+  .hl-neg { background: var(--neg-bg); color: var(--neg-ink); border-radius: 4px; padding: 0 0.2em; font-weight: 600; }
+  .hl-pos { background: var(--pos-bg); color: var(--pos-ink); border-radius: 4px; padding: 0 0.2em; font-weight: 600; }
+  .ctx { border-bottom: 2px dashed var(--purple); }
+  .caption { color: var(--muted); font-size: 0.92rem; margin: 0.75rem 0 0; }
+  .verdict { font-weight: 700; }
+  .toggle-row { display: flex; gap: 0.5rem; margin: 1rem 0 0; }
+  .toggle-row button {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px;
+    padding: 0.5rem 1.1rem; border: 1px solid var(--purple);
+    background: var(--card); color: var(--purple);
+  }
+  .toggle-row button[aria-pressed="true"] { background: var(--purple); color: #fff; }
+  [hidden] { display: none !important; }
+  footer { border-top: 1px solid var(--border); padding: 2rem 1.25rem; text-align: center; color: var(--muted); font-size: 0.92rem; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Textheat learned to read across paragraphs</h1>
+  <p class="tagline">Textheat is my sentiment highlighter. It reads the text on a page and colors the parts that carry feeling. It just got three fixes. The big one is about where a sentence stops.</p>
+</header>
+
+<main class="wrap">
+
+  <section aria-labelledby="s1">
+    <h2 id="s1">1. Negation crosses the break now</h2>
+    <p>People do not write in one block. They write a paragraph, then another one. The feeling can start in the first and land in the second.</p>
+    <p>Before this fix, Textheat read each block on its own. It saw the word "terrible" and colored it negative. It never saw the "not" sitting one line up. Now the end of one block rides along as context when the next block is read. The highlighting still lands only in the block it belongs to, and the context itself is never highlighted.</p>
+
+    <div class="sample" aria-label="Illustration of the cross-block fix">
+      <div id="panel-before">
+        <p class="block">The outlook is not</p>
+        <p class="block"><span class="hl-neg">terrible</span> at all.</p>
+        <p class="caption"><span class="verdict">Before:</span> each block read alone. "Terrible" scores negative, full stop.</p>
+      </div>
+      <div id="panel-after" hidden>
+        <p class="block">The outlook is <span class="ctx">not</span></p>
+        <p class="block"><span class="hl-pos">terrible</span> at all.</p>
+        <p class="caption"><span class="verdict">After:</span> the "not" (underlined) is carried in as context, so "terrible" flips positive. This is an illustration of the shipped behavior, rendered by hand to match what the extension now produces.</p>
+      </div>
+      <div class="toggle-row" role="group" aria-label="Compare before and after">
+        <button type="button" id="btn-before" aria-pressed="true">Before</button>
+        <button type="button" id="btn-after" aria-pressed="false">After</button>
+      </div>
+    </div>
+
+    <p>The same carry also quiets false alarms. End one block with "not" and start the next with "bad", and the warning color goes away entirely, because together they score under the line. Split negation was the most common way the old reading got a sentence exactly backwards.</p>
+  </section>
+
+  <section aria-labelledby="s2">
+    <h2 id="s2">2. Reactions wait their turn</h2>
+    <p>Textheat can pop a small emoji next to strong feelings. Bursts are capped, so a busy page stays calm, and only so many requests can wait in line at once.</p>
+    <p>When that line filled up, new reactions were dropped. Quietly, and for good: a dropped reaction never got another chance, even after the page calmed down. Now overflow waits in a second line and gets promoted as slots free up, on the next scroll or refresh. The caps did not change. The line just stopped eating tickets.</p>
+  </section>
+
+  <section aria-labelledby="s3">
+    <h2 id="s3">3. Tested in a real browser this time</h2>
+    <p>Most of Textheat's tests fake the browser. That is fine for word scoring. It proves nothing about typing in a real editor, so the extension now has a small suite that runs the real, built thing in real Chromium.</p>
+    <p>It checks that your cursor stays on the same characters when highlights land in an editor. It checks that text typed with an IME is left alone mid-composition and picked back up when the composition ends. And it checked undo, with an honest result: after highlights land, Ctrl+Z does nothing in Chrome, because the wrap clears the typing undo entry. The text is never scrambled, and the editor keeps working. That is written down and tested now instead of assumed.</p>
+  </section>
+
+  <section aria-labelledby="try">
+    <h2 id="try">Try the real thing</h2>
+    <p>The playground is live and the extension download is on the same page: <a href="https://dominic.balass.one/textheat">dominic.balass.one/textheat</a>. Everything runs locally in your browser. Your text is never sent anywhere.</p>
+  </section>
+
+</main>
+
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> · <a href="https://dominic.balass.one/textheat">Textheat playground</a>
+</footer>
+
+<script>
+(function () {
+  var before = document.getElementById('panel-before');
+  var after = document.getElementById('panel-after');
+  var btnBefore = document.getElementById('btn-before');
+  var btnAfter = document.getElementById('btn-after');
+  function show(which) {
+    var isBefore = which === 'before';
+    before.hidden = !isBefore;
+    after.hidden = isBefore;
+    btnBefore.setAttribute('aria-pressed', String(isBefore));
+    btnAfter.setAttribute('aria-pressed', String(!isBefore));
+  }
+  btnBefore.addEventListener('click', function () { show('before'); });
+  btnAfter.addEventListener('click', function () { show('after'); });
+})();
+</script>
+</body>
+</html>
