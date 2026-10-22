@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS random() Demo - Scatter elements straight from the stylesheet</title>
+<meta name="description" content="A live demo of the CSS random() function: sixteen dots scattered by the stylesheet alone, no JavaScript positions. With an honest fallback and support readout.">
+<meta property="og:title" content="CSS random() Demo">
+<meta property="og:description" content="Scatter elements straight from the stylesheet with the new CSS random() function. Live demo and honest support notes.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/css-random-demo/">
+<meta property="og:image" content="https://dominic.balass.one/css-random-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CSS random() Demo">
+<meta name="twitter:description" content="Scatter elements straight from the stylesheet with the new CSS random() function. Live demo and honest support notes.">
+<meta name="twitter:image" content="https://dominic.balass.one/css-random-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --code-bg: #1d1d26; --code-ink: #eceaf6;
+    --good: #15803d; --good-bg: #dcfce7; --warn: #b45309; --warn-bg: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+      --good: #4ade80; --good-bg: #14532d; --warn: #fbbf24; --warn-bg: #78350f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
+  :focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  a { color: var(--purple); }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 1rem; top: 1rem; background: var(--card); padding: 0.5rem 1rem; z-index: 10; }
+  header.site { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 0; }
+  .kicker { color: var(--purple); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.5rem; }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); margin: 0 0 0.75rem; letter-spacing: -0.02em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .lede { color: var(--muted); font-size: 1.1rem; margin: 0 0 1rem; max-width: 40rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 1rem 1.25rem 3rem; }
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.45rem; margin: 0 0 0.75rem; }
+  p { margin: 0 0 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem 1.5rem; }
+  .readout { font-size: 1.35rem; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0.25rem 0; }
+  .callout { border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.95rem; }
+  .callout.warn { background: var(--warn-bg); color: var(--warn); }
+  .callout.good { background: var(--good-bg); color: var(--good); }
+  pre { background: var(--code-bg); color: var(--code-ink); border-radius: 12px; padding: 1.1rem 1.25rem; overflow-x: auto; font-size: 0.88rem; line-height: 1.55; }
+  code.inline { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); color: var(--code-ink); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.9em; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; padding: 0.55rem 1.1rem;
+    border: 1px solid var(--purple); background: var(--purple); color: #fff; font-weight: 600;
+  }
+  ul { padding-left: 1.25rem; margin: 0 0 1rem; }
+  li { margin-bottom: 0.5rem; }
+  li::marker { color: var(--purple); }
+
+  /* ---- the scatter stage ---- */
+  .stage {
+    position: relative; height: 340px; border-radius: 16px; overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(167,139,250,0.25) 0 2px, transparent 3px),
+      radial-gradient(circle at 75% 65%, rgba(167,139,250,0.2) 0 2px, transparent 3px),
+      radial-gradient(circle at 55% 15%, rgba(167,139,250,0.18) 0 1.5px, transparent 2.5px),
+      linear-gradient(150deg, #2e1065, #17171c 75%);
+    border: 1px solid var(--border);
+  }
+  .dot {
+    position: absolute; display: block;
+    background: #a78bfa;
+    /* hand-scattered fallback layout, replaced by random() where supported */
+    left: 10%; top: 15%; width: 18px; height: 18px; border-radius: 35%; rotate: 10deg;
+  }
+  .dot:nth-child(2)  { left: 28%; top: 55%; width: 12px; height: 12px; border-radius: 50%; rotate: -15deg; background: #c4b5fd; }
+  .dot:nth-child(3)  { left: 45%; top: 25%; width: 24px; height: 24px; border-radius: 30%; rotate: 25deg; background: #8b5cf6; }
+  .dot:nth-child(4)  { left: 62%; top: 70%; width: 14px; height: 14px; border-radius: 50%; rotate: 0deg;  background: #ddd6fe; }
+  .dot:nth-child(5)  { left: 80%; top: 20%; width: 20px; height: 20px; border-radius: 40%; rotate: -25deg; background: #a78bfa; }
+  .dot:nth-child(6)  { left: 15%; top: 75%; width: 22px; height: 22px; border-radius: 50%; rotate: 15deg; background: #7c3aed; }
+  .dot:nth-child(7)  { left: 35%; top: 10%; width: 11px; height: 11px; border-radius: 30%; rotate: 40deg; background: #c4b5fd; }
+  .dot:nth-child(8)  { left: 52%; top: 50%; width: 17px; height: 17px; border-radius: 45%; rotate: -10deg; background: #a78bfa; }
+  .dot:nth-child(9)  { left: 70%; top: 40%; width: 26px; height: 26px; border-radius: 35%; rotate: 20deg; background: #8b5cf6; }
+  .dot:nth-child(10) { left: 88%; top: 62%; width: 13px; height: 13px; border-radius: 50%; rotate: -35deg; background: #ddd6fe; }
+  .dot:nth-child(11) { left: 5%;  top: 45%; width: 15px; height: 15px; border-radius: 40%; rotate: 5deg;  background: #c4b5fd; }
+  .dot:nth-child(12) { left: 40%; top: 82%; width: 19px; height: 19px; border-radius: 30%; rotate: -20deg; background: #a78bfa; }
+  .dot:nth-child(13) { left: 58%; top: 8%;  width: 12px; height: 12px; border-radius: 50%; rotate: 30deg; background: #7c3aed; }
+  .dot:nth-child(14) { left: 76%; top: 85%; width: 16px; height: 16px; border-radius: 35%; rotate: -5deg; background: #c4b5fd; }
+  .dot:nth-child(15) { left: 22%; top: 32%; width: 21px; height: 21px; border-radius: 45%; rotate: 18deg; background: #8b5cf6; }
+  .dot:nth-child(16) { left: 92%; top: 35%; width: 18px; height: 18px; border-radius: 30%; rotate: -28deg; background: #a78bfa; }
+
+  /* The whole point of the page: where random() is supported, the stylesheet
+     does the scattering. Every dot gets its own values, re-rolled per load. */
+  @supports (left: random(0%, 100%)) {
+    .dot {
+      left: random(2%, 90%);
+      top: random(4%, 82%);
+      width: random(10px, 28px);
+      height: random(10px, 28px);
+      border-radius: random(25%, 50%);
+      rotate: random(-35deg, 35deg);
+      background: hsl(random(248, 292) 85% 68%);
+    }
+  }
+  .stage-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+  .engine { color: var(--muted); font-size: 0.95rem; margin: 0; }
+  .engine strong { color: var(--ink); }
+  footer { border-top: 1px solid var(--border); padding: 2rem 1.25rem; text-align: center; color: var(--muted); font-size: 0.92rem; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="site">
+  <p class="kicker">LinkedIn series demo</p>
+  <h1>CSS random()</h1>
+  <p class="lede">Every scattered layout I have ever built took JavaScript, or a pile of hand-written nth-child rules. CSS is getting a random() function that does it in the stylesheet. This page puts sixteen dots on a stage with it.</p>
+</header>
+
+<main id="main">
+
+  <section aria-labelledby="reports">
+    <h2 id="reports">1. What your browser reports</h2>
+    <div class="card">
+      <p style="margin:0">Support for <code class="inline">random()</code>:</p>
+      <p class="readout" id="readout">Checking...</p>
+      <p style="margin:0" id="readout-note">Reading it live with CSS.supports.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="demo">
+    <h2 id="demo">2. The demo: a scatter with no positions written</h2>
+    <div class="stage" id="stage" aria-label="A dark stage with sixteen purple dots scattered across it"></div>
+    <div class="stage-bar">
+      <p class="engine" id="engine">Scattered by: <strong>checking...</strong></p>
+      <button type="button" id="rescatter">Re-scatter</button>
+    </div>
+    <p style="margin-top:1rem">No dot on that stage has a position written for it individually. Where <code class="inline">random()</code> is supported, the stylesheet rolls each dot's position, size, corner radius, rotation, and hue, per element, fresh on every page load. Reload the page and the field changes. Where it is not supported yet, a small script does the same rolls so the stage still shows what the CSS will do, and the label above tells you honestly which one you are looking at.</p>
+  </section>
+
+  <section aria-labelledby="pattern">
+    <h2 id="pattern">3. The pattern</h2>
+    <p>One rule does the whole stage. Each dot that matches gets its own values:</p>
+<pre><code>.dot {
+  left: random(2%, 90%);
+  top: random(4%, 82%);
+  width: random(10px, 28px);
+  height: random(10px, 28px);
+  border-radius: random(25%, 50%);
+  rotate: random(-35deg, 35deg);
+  background: hsl(random(248, 292) 85% 68%);
+}</code></pre>
+    <p>Two things worth knowing. The arguments must agree on type: percentages with percentages, pixels with pixels. And the optional first argument is a sharing key. Leave it off and every call rolls independently. Give several calls the same key, like <code class="inline">random(--seed, 0, 360)</code>, and they share one roll, which is how you keep a width and a height in step, or a hue consistent across elements.</p>
+  </section>
+
+  <section aria-labelledby="honest">
+    <h2 id="honest">4. Honest notes</h2>
+    <ul>
+      <li><strong>One stable browser today.</strong> Safari 26.2 is the only stable browser shipping <code class="inline">random()</code>, and even there the support is partial. Chrome has it behind the experimental web platform features flag in Chromium builds, not in stable. Firefox does not have it.</li>
+      <li><strong>The spec can still move.</strong> <code class="inline">random()</code> lives in CSS Values and Units Level 5, still an Editor's Draft. The sharing-key syntax is the part most likely to shift.</li>
+      <li><strong>Random is not a design tool by itself.</strong> Rolls can collide, overlap text, or land a low-contrast color on a busy background. Keep it on decoration, in bounded ranges, the way this stage does.</li>
+      <li><strong>It composes with the usual care.</strong> A static scatter like this one moves nothing, so reduced-motion users get the same still picture as everyone else.</li>
+    </ul>
+    <div class="callout warn">Why write it today, then? Because the fallback is tiny. An @supports block for the browsers that have it, a hand-scattered default or a few lines of script for the rest, and the day Chrome ships it, the stylesheet quietly takes over.</div>
+  </section>
+
+</main>
+
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>, a demo for the CSS <code class="inline">random()</code> function.
+</footer>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var readout = document.getElementById('readout');
+  var note = document.getElementById('readout-note');
+  var engine = document.getElementById('engine');
+  var DOT_COUNT = 16;
+
+  var supported = false;
+  try { supported = CSS.supports('left', 'random(0%, 100%)'); } catch (e) { supported = false; }
+
+  function buildDots() {
+    stage.innerHTML = '';
+    for (var i = 0; i < DOT_COUNT; i++) {
+      var d = document.createElement('span');
+      d.className = 'dot';
+      d.setAttribute('aria-hidden', 'true');
+      stage.appendChild(d);
+    }
+  }
+
+  function jsScatter() {
+    var dots = stage.querySelectorAll('.dot');
+    dots.forEach(function (d) {
+      var size = 10 + Math.random() * 18;
+      d.style.left = (2 + Math.random() * 88) + '%';
+      d.style.top = (4 + Math.random() * 78) + '%';
+      d.style.width = size + 'px';
+      d.style.height = size + 'px';
+      d.style.borderRadius = (25 + Math.random() * 25) + '%';
+      d.style.rotate = (-35 + Math.random() * 70) + 'deg';
+      d.style.background = 'hsl(' + (248 + Math.random() * 44) + ' 85% 68%)';
+    });
+  }
+
+  function render() {
+    buildDots();
+    if (supported) {
+      readout.textContent = 'supported';
+      note.textContent = 'Your browser implements random(). The stage below is scattered by pure CSS, and it re-rolls on every load.';
+      engine.innerHTML = 'Scattered by: <strong>CSS random()</strong>';
+    } else {
+      jsScatter();
+      readout.textContent = 'not supported yet';
+      note.textContent = 'Your browser does not implement random() yet. The stage below uses the JavaScript fallback, so you can still see the shape of the thing.';
+      engine.innerHTML = 'Scattered by: <strong>JavaScript fallback</strong> (your browser has no random() yet)';
+    }
+  }
+
+  document.getElementById('rescatter').addEventListener('click', render);
+  render();
+})();
+</script>
+</body>
+</html>
