@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rogue Survivor: Survival Rewards</title>
+<meta name="description" content="The live Rogue Survivor game now pays you for surviving: a permanent shield upgrade every 3 levels, announced on the HUD. Plus auto-pause when the tab hides and a resize handler that no longer advances the game.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/rogue-survivor-rewards/">
+<meta property="og:title" content="Rogue Survivor: Survival Rewards">
+<meta property="og:description" content="A permanent shield upgrade every 3 levels, auto-pause on tab hide, and a resize handler that leaves the run alone. Live in the game now.">
+<meta property="og:image" content="https://dominic.balass.one/rogue-survivor-rewards/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rogue Survivor: Survival Rewards">
+<meta name="twitter:description" content="A permanent shield upgrade every 3 levels, auto-pause on tab hide, and a resize handler that leaves the run alone.">
+<meta name="twitter:image" content="https://dominic.balass.one/rogue-survivor-rewards/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #0b0b10;
+    --panel: #14141c;
+    --ink: #e8e8f0;
+    --muted: #9a9ab0;
+    --purple: #a855f7;
+    --green: #4ade80;
+    --line: #262633;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+  header.hero { padding: 64px 0 32px; }
+  .kicker {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 12px; line-height: 1.15; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 720px; }
+  .lede strong { color: var(--ink); }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 32px 0;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat .num { font-size: 30px; font-weight: 700; color: var(--purple); }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  h2 { font-size: 26px; margin: 56px 0 8px; }
+  .section-sub { color: var(--muted); margin: 0 0 24px; max-width: 720px; }
+  .game-frame {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+  .game-frame iframe {
+    display: block;
+    width: 100%;
+    height: 70vh;
+    min-height: 420px;
+    border: 0;
+    background: #000;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .comp { margin: 0 0 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .comp-head { padding: 20px 20px 4px; }
+  .comp-head h3 { margin: 0 0 6px; font-size: 18px; }
+  .comp-head h3 code { color: var(--purple); font-size: 17px; }
+  .comp-head p { margin: 0 0 4px; color: var(--muted); font-size: 15px; max-width: 760px; }
+  .comp pre {
+    margin: 16px 20px 20px;
+    background: #0a0a0f;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .note {
+    background: rgba(168,85,247,.08);
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 12px 0 36px;
+    font-size: 15px;
+  }
+  .note strong { color: var(--purple); }
+  footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+  footer a { color: var(--purple); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .btn {
+    display: inline-block;
+    background: var(--purple);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 999px;
+  }
+  .btn.ghost { background: transparent; border: 1px solid var(--purple); color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker">Rogue Survivor · Build Log</span>
+    <h1>Survival Rewards</h1>
+    <p class="lede">
+      Surviving used to be its own reward, which is a nice way of saying the
+      game gave you nothing for lasting. The clock was also working against
+      you in two quiet ways: switch tabs and the run kept advancing without
+      you, and resize the window and the game quietly simulated extra time.
+      All three changed today. The headline: <strong>every 3 levels, your
+      shield gets a permanent upgrade</strong> for the rest of the run,
+      announced right on the HUD. It is live in the game below, no frozen
+      build this time.
+    </p>
+    <div class="btn-row">
+      <a class="btn" href="https://dominic.balass.one/rogue-survivor/">Play the live game</a>
+      <a class="btn ghost" href="https://github.com/SydBal/rogue-survivor">Source on GitHub</a>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num">3</div><div class="lbl">levels between rewards, first one lands at level 3</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">reward kinds, cycling: size, orbit radius, orbit speed</div></div>
+    <div class="stat"><div class="num">11</div><div class="lbl">orbit speed cap, still respected after speed rewards</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">extra data saved: rewards live in memory only</div></div>
+  </div>
+
+<h2>Play it</h2>
+<p class="section-sub">The live game, not a snapshot. Reach level 3 and watch the top of the screen: a reward announcement, and a new Rewards count under your score. Switch tabs mid-run and it waits for you, paused.</p>
+<div class="game-frame">
+  <iframe src="https://dominic.balass.one/rogue-survivor/" title="Rogue Survivor, live game" loading="lazy"></iframe>
+</div>
+<p class="hint">Click the game once so it captures your keyboard. Keyboard, mouse, gamepad, or touch drag all work.</p>
+
+<h2>Surviving pays now</h2>
+<p class="section-sub">The design notes always said levels should come with rewards. Now they do. Every third level grants one upgrade, cycling through three kinds: a bigger shield, a wider shield orbit, then a faster shield orbit. Each step is small, about ten percent, and they stack for the rest of the run. Nothing is written to storage, so a fresh run starts clean, same as it always did.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>grantReward</code></h3>
+<p>The grant fires from the level-up check, only while a run is actually live. The toast is drawn by the HUD menu and counts its own ticks down.</p>
+</div>
+<pre>const REWARD_KINDS = [
+  { key: 'size',   label: 'Bigger shield' },
+  { key: 'radius', label: 'Wider shield orbit' },
+  { key: 'speed',  label: 'Faster shield orbit' },
+]
+
+const grantReward = () =&gt; {
+  const kind = REWARD_KINDS[rewardState.total % REWARD_KINDS.length]
+  rewardState[kind.key]++
+  rewardState.total++
+  rewardToast = { text: `Reward: ${kind.label}`, ticksLeft: 240 }
+}</pre>
+</div>
+<div class="note"><strong>One honest substitution:</strong> the design note asked for a shield recharge rate increase. Shields in this build are never destroyed, so there is no recharge timer to speed up. The first reward kind grows the shield itself instead of pretending otherwise. If shields ever get a cooldown, the recharge reward can take that slot.</div>
+
+<h2>The game pauses when you leave</h2>
+<p class="section-sub">Before this, hiding the tab changed nothing: the clock kept ticking, levels kept climbing, and the swarm kept coming, all with nobody playing. Now a hidden tab pauses the run exactly like pressing Escape. Start menus and the game over screen are untouched, and coming back never unpauses on its own.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>visibilitychange</code></h3>
+<p>Four conditions, one assignment. Mid-run only, and only into pause, never out of it.</p>
+</div>
+<pre>document.addEventListener('visibilitychange', () =&gt; {
+  if (document.hidden &amp;&amp; !preGame &amp;&amp; !isGameOver &amp;&amp; !pause) {
+    pause = true
+  }
+})</pre>
+</div>
+
+<h2>Resize without the side effects</h2>
+<p class="section-sub">The old resize handler refit the canvas, then ran a full game update to redraw. Dragging a window edge fired that update dozens of times: free time, free spawns, even behind the pause menu. Positions in this game are normalized, so a refit only needs the new canvas size and fresh offsets. The new handler clamps anything mid-flight back inside the field bounds, draws one frame, and leaves the run exactly where it was. Phone rotation gets the same treatment.</p>
+<div class="comp">
+<div class="comp-head">
+<h3><code>handleResize</code></h3>
+<p>Registered for both resize and orientationchange. No update call, so no simulated time sneaks in.</p>
+</div>
+<pre>const handleResize = () =&gt; {
+  canvas.height = window.innerHeight
+  canvas.width = window.innerWidth
+  gameSize = getGameSize()
+  gameOffset = getGameOffset()
+  clampEntitiesToField()
+  draw()
+}</pre>
+</div>
+
+<footer>
+  <p>Part of the <a href="https://dominic.balass.one">Rogue Survivor build log</a>. Previous entries: <a href="https://dominic.balass.one/rogue-survivor-ai-cleanup/">AI cleanup</a>, <a href="https://dominic.balass.one/rogue-survivor-ui/">real menus</a>, <a href="https://dominic.balass.one/rogue-survivor-acts/">acts and bosses</a>, <a href="https://dominic.balass.one/rogue-survivor-gamefeel/">game feel</a>.</p>
+</footer>
+
+</div>
+</body>
+</html>
