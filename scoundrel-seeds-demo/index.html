@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scoundrel Seeds Demo - Seeds, screen reader announcements, and tab pauses</title>
+<meta name="description" content="Three small fixes in Classic Scoundrel: every run gets a reproducible seed, the game announces itself to screen readers, and hidden tabs stop the clock. Try the same seeded shuffle the game now uses.">
+<meta property="og:title" content="Scoundrel Seeds Demo">
+<meta property="og:description" content="Every run has a seed now. Same seed, same deck. Plus screen reader announcements and a loop that pauses when the tab hides.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/scoundrel-seeds-demo/">
+<meta property="og:image" content="https://dominic.balass.one/scoundrel-seeds-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Scoundrel Seeds Demo">
+<meta name="twitter:description" content="Every run has a seed now. Same seed, same deck. Plus screen reader announcements and a loop that pauses when the tab hides.">
+<meta name="twitter:image" content="https://dominic.balass.one/scoundrel-seeds-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --code-bg: #1d1d26; --code-ink: #eceaf6;
+    --red: #dc2626;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34; --red: #f87171;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
+  :focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+  a { color: var(--purple); }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 1rem; top: 1rem; background: var(--card); padding: 0.5rem 1rem; z-index: 10; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  header.site { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 0; }
+  .kicker { color: var(--purple); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.5rem; }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); margin: 0 0 0.75rem; letter-spacing: -0.02em; }
+  .lede { color: var(--muted); font-size: 1.1rem; margin: 0 0 1rem; max-width: 40rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 1rem 1.25rem 3rem; }
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.45rem; margin: 0 0 0.75rem; }
+  p { margin: 0 0 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem 1.5rem; }
+  code.inline { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); color: var(--code-ink); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.9em; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; padding: 0.55rem 1.1rem;
+    border: 1px solid var(--purple); background: var(--purple); color: #fff; font-weight: 600;
+  }
+  button.secondary { background: var(--card); color: var(--purple); }
+  .controls { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .controls label { font-weight: 600; }
+  .controls input {
+    font: inherit; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink); width: 13rem;
+  }
+  .deck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 0.45rem; margin-top: 1rem; }
+  .chip {
+    border: 1px solid var(--border); border-radius: 10px; background: var(--bg);
+    padding: 0.35rem 0.25rem; text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.95rem; line-height: 1.25;
+  }
+  .chip .pos { display: block; font-size: 0.68rem; color: var(--muted); font-family: system-ui, sans-serif; }
+  .chip.red { color: var(--red); }
+  .chip.red .pos { color: var(--muted); }
+  .seed-note { color: var(--muted); font-size: 0.95rem; margin: 0.75rem 0 0; }
+  .heard {
+    border: 1px dashed var(--purple); border-radius: 12px; padding: 1rem 1.25rem; margin-top: 1rem;
+    background: var(--purple-soft); font-size: 1.05rem; min-height: 3.4rem;
+  }
+  .heard .who { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--purple-deep); margin-bottom: 0.25rem; }
+  @media (prefers-color-scheme: dark) { .heard .who { color: #c4b5fd; } }
+  footer { border-top: 1px solid var(--border); padding: 2rem 1.25rem; text-align: center; color: var(--muted); font-size: 0.92rem; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="site">
+  <p class="kicker">Classic Scoundrel update</p>
+  <h1>Seeds, voices, and pauses</h1>
+  <p class="lede">Three small fixes landed in Classic Scoundrel today. None of them change how the game plays. All three change how it treats the person playing it.</p>
+</header>
+
+<main id="main">
+
+  <section aria-labelledby="seeds">
+    <h2 id="seeds">1. Every run has a seed now</h2>
+    <p>Classic Scoundrel used to shuffle its deck with a plain random call. No memory, no way back. Now each run gets a seed, a single number, and the shuffle runs on a small seeded generator called mulberry32. Same seed, same deck, every time.</p>
+    <p>The seed sits on the game over screen with the rest of your run stats. Tap the seed row and it copies, so you can send a brutal run to a friend and they can deal the exact same dungeon.</p>
+    <div class="card">
+      <div class="controls">
+        <label for="seed-input">Seed</label>
+        <input id="seed-input" type="text" inputmode="numeric" value="20261022" autocomplete="off">
+        <button type="button" id="shuffle-btn">Shuffle</button>
+        <button type="button" id="random-btn" class="secondary">Random seed</button>
+      </div>
+      <p class="seed-note" id="seed-note">The order below is the exact deck this seed deals, front of the deck first.</p>
+      <div class="deck-grid" id="deck-grid" aria-label="Shuffled deck order"></div>
+    </div>
+    <p style="margin-top:1rem">This explorer runs the same mulberry32 shuffle the game now uses, shown with a standard 52 card deck so you can check it against a real one. The game itself deals its 44 card Scoundrel deck. Type the seed from a finished run and you get that run's deck, card for card.</p>
+  </section>
+
+  <section aria-labelledby="voice">
+    <h2 id="voice">2. The game speaks up</h2>
+    <p>The game renders to a canvas. A screen reader cannot see a canvas, so the game used to say nothing at all. There is now a hidden live region on the page, and the game writes short summaries into it as you play. A fight sounds like this: Fought the Queen of Clubs. Your weapon blocked 3. Took 4 damage. Health 12 of 20.</p>
+    <p>Card plays, damage, heals, fleeing, and room changes all get the same treatment. Short, plain, in the game's own words.</p>
+    <div class="card">
+      <div class="controls">
+        <button type="button" data-say="Fought the 9 of Clubs. Took 4 damage. Health 16 of 20.">Fight a monster</button>
+        <button type="button" data-say="Drank the 6 of Hearts. Healed 6. Health 20 of 20.">Drink a potion</button>
+        <button type="button" data-say="You fled the room.">Flee the room</button>
+      </div>
+      <div class="heard" aria-hidden="true"><span class="who">What a screen reader says</span><span id="heard-text">Press a button and the message lands here, the same way it lands in the live region.</span></div>
+      <div id="sr-announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="pause">
+    <h2 id="pause">3. Hidden tabs stop the clock</h2>
+    <p>Switch to another tab mid run and come back, and the game used to take one giant step. The frame timer never clamped its step size, so the hidden minutes tried to land inside a single frame.</p>
+    <p>Now the loop stops when the tab hides and starts fresh when you return. The gap never becomes a frame. Small fix. No more time travel.</p>
+  </section>
+
+</main>
+
+<footer>
+  Play the game at <a href="https://classicscoundrel.com/">classicscoundrel.com</a>. Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>.
+</footer>
+
+<script>
+(function () {
+  // The same mulberry32 generator and Fisher-Yates shuffle the game uses
+  // (src/utils/rng.ts and Deck.shuffle in Classic Scoundrel).
+  function createSeededRng(seed) {
+    var state = seed >>> 0;
+    return function () {
+      state = (state + 0x6d2b79f5) | 0;
+      var t = Math.imul(state ^ (state >>> 15), 1 | state);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var SUITS = [
+    { name: 'Hearts', glyph: '♥', red: true },
+    { name: 'Diamonds', glyph: '♦', red: true },
+    { name: 'Clubs', glyph: '♣', red: false },
+    { name: 'Spades', glyph: '♠', red: false }
+  ];
+  var VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'];
+  var SHORT = { Jack: 'J', Queen: 'Q', King: 'K', Ace: 'A' };
+
+  function buildDeck() {
+    var cards = [];
+    SUITS.forEach(function (suit) {
+      VALUES.forEach(function (value) {
+        cards.push({ label: (SHORT[value] || value) + suit.glyph, name: value + ' of ' + suit.name, red: suit.red });
+      });
+    });
+    return cards;
+  }
+
+  function parseSeed(text) {
+    var trimmed = String(text || '').trim();
+    if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10) >>> 0;
+    // Any other text gets a simple stable hash so words work as seeds too.
+    var h = 2166136261 >>> 0;
+    for (var i = 0; i < trimmed.length; i++) {
+      h ^= trimmed.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  var grid = document.getElementById('deck-grid');
+  var note = document.getElementById('seed-note');
+  var input = document.getElementById('seed-input');
+
+  function render() {
+    var seed = parseSeed(input.value);
+    var rng = createSeededRng(seed);
+    var cards = buildDeck();
+    for (var i = cards.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = cards[i]; cards[i] = cards[j]; cards[j] = tmp;
+    }
+    grid.innerHTML = '';
+    cards.forEach(function (card, idx) {
+      var chip = document.createElement('div');
+      chip.className = 'chip' + (card.red ? ' red' : '');
+      chip.title = card.name;
+      var pos = document.createElement('span');
+      pos.className = 'pos';
+      pos.textContent = String(idx + 1);
+      chip.appendChild(pos);
+      chip.appendChild(document.createTextNode(card.label));
+      grid.appendChild(chip);
+    });
+    note.textContent = 'Seed ' + seed + '. First card dealt: the ' + cards[0].name + '. Same seed, same order, every time.';
+  }
+
+  document.getElementById('shuffle-btn').addEventListener('click', render);
+  input.addEventListener('change', render);
+  document.getElementById('random-btn').addEventListener('click', function () {
+    input.value = String(Math.floor(Math.random() * 4294967296) >>> 0);
+    render();
+  });
+  render();
+
+  // The announcer toy: the same clear-then-set pattern the game uses, so a
+  // repeated message is spoken again instead of swallowed.
+  var heard = document.getElementById('heard-text');
+  var live = document.getElementById('sr-announcer');
+  document.querySelectorAll('[data-say]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var message = btn.getAttribute('data-say');
+      heard.textContent = message;
+      live.textContent = '';
+      window.setTimeout(function () { live.textContent = message; }, 40);
+    });
+  });
+})();
+</script>
+</body>
+</html>
