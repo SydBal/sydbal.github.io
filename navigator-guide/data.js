@@ -829,7 +829,7 @@ const NAV_DATA = {
    "badge": [
     "Standard"
    ],
-   "plain": "A guaranteed-delivery postcard. When you close a tab, ordinary requests get cancelled mid-flight; a beacon is handed to the browser itself, which promises to deliver it even as the page dies. Analytics and 'save my progress' signals ride on this.",
+   "plain": "A guaranteed-delivery postcard. When you close a tab, ordinary requests get canceled mid-flight; a beacon is handed to the browser itself, which promises to deliver it even as the page dies. Analytics and 'save my progress' signals ride on this.",
    "route": "Last-chance routing: the browser becomes the courier for one final message on the page's behalf.",
    "history": [
     [
