@@ -96,21 +96,41 @@ a{color:var(--deep)}
 
 /* controls */
 .controls{position:sticky;top:0;z-index:20;background:var(--bg);
-  padding:14px 0 10px;margin-top:28px;border-bottom:1px solid var(--border)}
+  padding:10px 0 8px;margin-top:28px;border-bottom:1px solid var(--border)}
 .controls .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .controls input[type=search],.controls select{
   font:inherit;font-size:1rem;color:var(--ink);background:var(--card);
   border:1px solid var(--border);border-radius:10px;padding:11px 14px;min-height:48px}
 .controls input[type=search]{flex:1 1 240px}
-.controls .count{color:var(--muted);font-size:.95rem;margin:8px 0 0}
+.countrow{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:space-between;margin-top:10px}
+.countrow .count{color:var(--muted);font-size:.95rem;margin:0}
+.xbtns{display:flex;gap:8px}
+.xbtn{font:inherit;font-size:.9rem;font-weight:600;min-height:44px;padding:8px 14px;
+  border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--deep);cursor:pointer}
+@media (prefers-color-scheme: dark){ .xbtn{color:#c4b5fd} }
 
 /* groups + cards */
 .group{margin-top:44px}
 .group h2{font-size:1.45rem;margin:0 0 4px}
 .group .blurb{color:var(--muted);margin:0 0 18px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;
-  box-shadow:var(--shadow);padding:22px;margin:0 0 18px}
-.card h3{font-family:var(--mono);font-size:1.28rem;margin:0;display:inline}
+  box-shadow:var(--shadow);padding:0;margin:0 0 14px;scroll-margin-top:110px}
+.card h3{margin:0}
+.card-toggle{font:inherit;color:inherit;background:none;border:0;width:100%;cursor:pointer;
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;text-align:left;
+  padding:15px 20px;min-height:56px;border-radius:16px}
+.card-toggle:hover{background:var(--soft)}
+.card-name{font-family:var(--mono);font-weight:700;font-size:1.22rem;overflow-wrap:anywhere;
+  min-width:0;order:1}
+.card-toggle .badges{margin-left:0;order:2}
+.card-live{flex:1 1 120px;min-width:0;order:3;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.card-live.absent{font-style:italic}
+.chev{display:inline-block;order:4;margin-left:auto;flex:0 0 auto;color:var(--purple);
+  font-size:.95rem;transition:transform .18s ease}
+[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.card-body{padding:2px 22px 22px}
+.card-body[hidden],#master-timeline[hidden],ul.timeline[hidden]{display:none}
 .badges{display:inline-flex;flex-wrap:wrap;gap:6px;margin-left:10px;vertical-align:middle}
 .badge{font-size:.74rem;font-weight:600;letter-spacing:.02em;background:var(--soft);
   color:var(--deep);border-radius:999px;padding:3px 10px}
@@ -125,7 +145,7 @@ a{color:var(--deep)}
 .live .lh{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px}
 .live .lv{background:var(--bg);border:1px solid var(--border);border-radius:10px;
   padding:12px 14px;font-family:var(--mono);font-size:.9rem;word-break:break-word;
-  overflow-wrap:anywhere;max-height:220px;overflow:auto;white-space:pre-wrap}
+  overflow-wrap:anywhere;white-space:pre-wrap}
 .live .lv .absent{color:var(--muted);font-style:italic}
 .tryit{margin-top:14px}
 .tryit .th{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
@@ -170,7 +190,7 @@ summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:
 .env-h{font-weight:700;margin:0 0 8px}
 pre.env{font-family:var(--mono);font-size:.86rem;line-height:1.55;background:var(--bg);
   border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:0 0 12px;
-  overflow-x:auto;white-space:pre}
+  white-space:pre-wrap;overflow-wrap:anywhere}
 .env-msg{font-family:var(--mono);font-size:.88rem;word-break:break-word;overflow-wrap:anywhere}
 .env-msg:empty{display:none}
 .env-note{color:var(--muted);font-size:.95rem;margin:12px 0 0}
@@ -187,15 +207,55 @@ pre.env{font-family:var(--mono);font-size:.86rem;line-height:1.55;background:var
 @media (prefers-color-scheme: dark){ .badge.tier-identifying{color:#ddd0ff} }
 
 /* master timeline */
-.master{margin-top:52px}
+.master{margin-top:52px;scroll-margin-top:110px}
 .master h2{font-size:1.55rem;margin:0 0 6px}
+.tl-toggle{font:inherit;color:inherit;background:none;border:0;width:100%;cursor:pointer;
+  display:flex;align-items:center;gap:10px;text-align:left;padding:6px 0;min-height:44px}
+.tl-count{font-size:1rem;font-weight:400;color:var(--muted)}
+.tl-toggle .chev{margin-left:0}
 .decade{font-size:1.18rem;margin:28px 0 10px;color:var(--deep)}
+.decade-toggle{font:inherit;color:inherit;background:none;border:0;cursor:pointer;
+  display:flex;align-items:center;gap:10px;text-align:left;padding:4px 0;min-height:44px}
 @media (prefers-color-scheme: dark){ .decade{color:#c4b5fd} }
-.tl-prop{font-family:var(--mono);font-weight:600}
+.tl-prop{font-family:var(--mono);font-weight:600;overflow-wrap:anywhere}
 
 footer{border-top:1px solid var(--border);margin-top:56px;padding-top:24px;color:var(--muted);font-size:.95rem}
 footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
 .hidden{display:none!important}
+
+/* narrow screens: tighten the stack so the top of the page stays scannable */
+@media (max-width:640px){
+  .hero{padding:32px 16px 24px}
+  .hero .kicker{margin-bottom:10px;font-size:.95rem}
+  .hero h1{font-size:1.78rem}
+  .hero p.lede{font-size:.98rem;line-height:1.45;margin-top:10px}
+  .dash{margin-top:24px}
+  .dash h2{margin-bottom:4px;font-size:1.38rem}
+  .dash .sub{margin-bottom:14px;font-size:.96rem;line-height:1.5}
+  .dash-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .dash .dash-grid .dash-item:first-child{grid-column:1/-1}
+  .dash-item{min-height:0;padding:9px 11px}
+  .dash-item .k{margin-bottom:4px}
+  .dash-item .v{font-size:.8rem;line-height:1.4}
+  .count-banner{padding:11px 13px;font-size:.95rem;line-height:1.5;margin-top:12px}
+  .ident,.routing{padding:20px 16px;margin-top:24px}
+  .controls{padding:8px 0 6px;margin-top:20px}
+  .controls .row{gap:8px}
+  .controls input[type=search]{flex-basis:100%}
+  .controls input[type=search],.controls select{min-height:44px;padding:8px 12px;font-size:.95rem}
+  .controls select{flex:1 1 130px;min-width:0}
+  .chip{min-height:44px;padding:8px 11px;font-size:.95rem;flex:0 0 auto}
+  .group{margin-top:32px}
+  .card{scroll-margin-top:132px}
+  .master{scroll-margin-top:132px}
+  .card-toggle{padding:12px 14px;min-height:52px}
+  .card-name{font-size:1.02rem}
+  .card-toggle .chev{order:3}
+  .card-live{order:4;flex-basis:100%}
+  .card-body{padding:2px 14px 16px}
+  .compat-cell{min-width:96px;padding:7px 10px}
+  .legend{font-size:.88rem}
+}
 </style>
 </head>
 <body>
@@ -264,16 +324,24 @@ footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
       </select>
       <button type="button" class="chip" id="ios-filter" aria-pressed="false">Missing on iPhone</button>
     </div>
-    <p class="count" id="result-count" role="status"></p>
-    <p class="legend">Privacy tags on each card: <strong>Routine</strong> is an ordinary fact or a capability behind a tap. <strong>Identifying</strong> is a value that helps single out your device or profile you. <strong>Sensitive</strong> is access to your location, devices, credentials or clipboard, the things browsers guard with permission prompts. The Missing on iPhone filter shows only the properties iOS Safari does not expose at all.</p>
+  </div>
+  <div class="controls-meta">
+    <div class="countrow">
+      <p class="count" id="result-count" role="status"></p>
+      <div class="xbtns">
+        <button type="button" class="xbtn" id="expand-all">Expand all</button>
+        <button type="button" class="xbtn" id="collapse-all">Collapse all</button>
+      </div>
+    </div>
+    <p class="legend">Privacy tags on each card: <strong>Routine</strong> is an ordinary fact or a capability behind a tap. <strong>Identifying</strong> is a value that helps single out your device or profile you. <strong>Sensitive</strong> is access to your location, devices, credentials or clipboard, the things browsers guard with permission prompts. The Missing on iPhone filter shows only the properties iOS Safari does not expose at all. Tap a property to open its full card.</p>
   </div>
 
   <div id="groups"></div>
 
   <section class="master" id="timeline" aria-labelledby="timeline-h">
-    <h2 id="timeline-h">The whole story, 1993 to today</h2>
-    <p class="section-sub">Every card above carries its own short history. Merged into one stream, sorted by year, they tell a single story: how the browser's introduction grew from a couple of lines of text into the long, contested list on this page. Each beat links back to its property.</p>
-    <div id="master-timeline"></div>
+    <h2 id="timeline-h"><button type="button" class="tl-toggle" id="tl-toggle" aria-expanded="false" aria-controls="master-timeline"><span>The whole story, 1993 to today</span><span class="tl-count" id="tl-count"></span><span class="chev" aria-hidden="true">▸</span></button></h2>
+    <p class="section-sub">Every card above carries its own short history. Merged into one stream, sorted by year, they tell a single story: how the browser's introduction grew from a couple of lines of text into the long, contested list on this page. Each beat links back to its property. Open the timeline, then open a decade at a time.</p>
+    <div id="master-timeline" hidden></div>
   </section>
 
   <footer>
@@ -433,18 +501,31 @@ function compatCell(label, val) {
   const no = (val === 'No' || val === 'See notes');
   return '<div class="compat-cell' + (no ? ' no' : '') + '"><span class="b">' + esc(label) + '</span><span class="n">' + esc(val) + '</span></div>';
 }
+function previewText(e) {
+  const raw = readEntry(e);
+  if (raw === ABSENT) return { text: 'Not exposed by your browser', absent: true };
+  const tmp = document.createElement('div');
+  tmp.innerHTML = raw;
+  return { text: (tmp.textContent || '').replace(/\s+/g, ' ').trim(), absent: false };
+}
 function cardHTML(e) {
   const badges = (e.badge || []).map(b => '<span class="badge">' + esc(b) + '</span>').join('')
     + '<span class="badge tier-' + e.tier.toLowerCase() + '">' + esc(e.tier) + '</span>';
+  const pv = previewText(e);
   let h = '<article class="card" data-name="' + esc(e.name.toLowerCase()) + '" data-plain="' + esc(e.plain.toLowerCase()) + '" data-group="' + e.group + '" data-ios="' + (e.compat.safari_ios === 'No' ? 'no' : 'yes') + '" id="prop-' + e.id + '">';
-  h += '<h3>navigator.' + esc(e.name) + '</h3><span class="badges">' + badges + '</span>';
+  h += '<h3><button type="button" class="card-toggle" id="toggle-' + e.id + '" aria-expanded="false" aria-controls="body-' + e.id + '">'
+    + '<span class="card-name">navigator.' + esc(e.name) + '</span>'
+    + '<span class="badges">' + badges + '</span>'
+    + '<span class="card-live' + (pv.absent ? ' absent' : '') + '" data-preview="' + e.id + '">' + esc(pv.text) + '</span>'
+    + '<span class="chev" aria-hidden="true">▸</span></button></h3>';
+  h += '<div class="card-body" id="body-' + e.id + '" hidden>';
   h += '<p class="plain">' + esc(e.plain) + '</p>';
   if (e.route) h += '<div class="route-callout"><span class="rt">Routing role</span><p>' + esc(e.route) + '</p></div>';
   h += '<div class="live"><p class="lh">Your browser says</p><div class="lv" data-live="' + e.id + '">' + readEntry(e) + '</div></div>';
   if (e.tryit) h += '<div class="tryit"><p class="th">Try it</p><div data-try="' + e.tryit + '" data-entry="' + e.id + '"></div></div>';
   h += '<details><summary>History</summary><ul class="timeline">' + e.history.map(pair => '<li><span class="yr">' + esc(pair[0]) + '</span>' + esc(pair[1]) + '</li>').join('') + '</ul></details>';
   h += '<div class="compat"><p class="ch">Compatibility (source: MDN browser-compat-data)</p><div class="compat-grid">' + BROWSERS.map(pair => compatCell(pair[1], e.compat[pair[0]])).join('') + '</div></div>';
-  h += '</article>';
+  h += '</div></article>';
   return h;
 }
 function renderGroups() {
@@ -459,6 +540,24 @@ function refreshLive(id) {
   const e = NAV_DATA.entries.find(x => x.id === id);
   const el = document.querySelector('[data-live="' + id + '"]');
   if (e && el) el.innerHTML = readEntry(e);
+  const pv = document.querySelector('[data-preview="' + id + '"]');
+  if (e && pv) { const p = previewText(e); pv.textContent = p.text; pv.classList.toggle('absent', p.absent); }
+}
+
+/* ---------- accordion ---------- */
+function setCardOpen(card, open) {
+  const t = card.querySelector('.card-toggle');
+  const b = card.querySelector('.card-body');
+  if (!t || !b) return;
+  t.setAttribute('aria-expanded', String(open));
+  b.hidden = !open;
+}
+function openCard(card) { setCardOpen(card, true); }
+function openFromHash() {
+  const m = /^#prop-(.+)$/.exec(location.hash || '');
+  if (!m) return;
+  const card = document.getElementById('prop-' + m[1]);
+  if (card) { openCard(card); card.scrollIntoView(); }
 }
 let iosOnly = false;
 function applyFilter() {
@@ -853,12 +952,14 @@ function renderTimeline() {
     if (d !== decade) {
       if (decade !== null) h += '</ul>';
       decade = d;
-      h += '<h3 class="decade">The ' + d + 's</h3><ul class="timeline">';
+      h += '<h3 class="decade"><button type="button" class="decade-toggle" aria-expanded="false" aria-controls="tl-' + d + '"><span>The ' + d + 's</span><span class="chev" aria-hidden="true">▸</span></button></h3><ul class="timeline" id="tl-' + d + '" hidden>';
     }
     h += '<li><span class="yr">' + esc(b.label) + '</span><a class="tl-prop" href="#prop-' + b.entry.id + '">navigator.' + esc(b.entry.name) + '</a> ' + esc(b.text) + '</li>';
   });
   if (decade !== null) h += '</ul>';
   $('#master-timeline').innerHTML = h;
+  const tc = $('#tl-count');
+  if (tc) tc.textContent = '(' + beats.length + ' moments)';
 }
 
 /* ---------- init ---------- */
@@ -869,6 +970,38 @@ renderGroups();
 renderTimeline();
 initWidgets();
 applyFilter();
+$('#groups').addEventListener('click', (ev) => {
+  const t = ev.target.closest('.card-toggle');
+  if (t) { const card = t.closest('.card'); if (card) setCardOpen(card, t.getAttribute('aria-expanded') !== 'true'); }
+});
+$('#expand-all').addEventListener('click', () => {
+  document.querySelectorAll('.card:not(.hidden)').forEach(c => setCardOpen(c, true));
+});
+$('#collapse-all').addEventListener('click', () => {
+  document.querySelectorAll('.card:not(.hidden)').forEach(c => setCardOpen(c, false));
+});
+$('#tl-toggle').addEventListener('click', () => {
+  const t = $('#tl-toggle');
+  const open = t.getAttribute('aria-expanded') !== 'true';
+  t.setAttribute('aria-expanded', String(open));
+  $('#master-timeline').hidden = !open;
+});
+$('#master-timeline').addEventListener('click', (ev) => {
+  const b = ev.target.closest('.decade-toggle');
+  if (!b) return;
+  const open = b.getAttribute('aria-expanded') !== 'true';
+  b.setAttribute('aria-expanded', String(open));
+  const ul = document.getElementById(b.getAttribute('aria-controls'));
+  if (ul) ul.hidden = !open;
+});
+document.addEventListener('click', (ev) => {
+  const a = ev.target.closest('a[href^="#prop-"]');
+  if (!a) return;
+  const card = document.getElementById(a.getAttribute('href').slice(1));
+  if (card) openCard(card);
+});
+window.addEventListener('hashchange', openFromHash);
+openFromHash();
 $('#filter').addEventListener('input', applyFilter);
 $('#group-filter').addEventListener('change', applyFilter);
 $('#ios-filter').addEventListener('click', () => {
