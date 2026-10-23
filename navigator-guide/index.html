@@ -153,6 +153,46 @@ summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:
 .compat-cell .b{display:block;font-size:.78rem;color:var(--muted)}
 .compat-cell .n{font-family:var(--mono);font-size:.9rem;font-weight:700}
 .compat-cell.no .n{color:var(--muted)}
+/* identifiability panel */
+.ident{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:28px;margin:36px 0 8px}
+.ident h2{margin-top:0;font-size:1.55rem}
+.ident p{max-width:820px}
+.fp-hash{font-family:var(--mono);font-size:1.08rem;font-weight:700;color:var(--purple);
+  background:var(--soft);border-radius:8px;padding:3px 10px}
+.verdict{font-size:1.08rem}
+.verdict strong{color:var(--deep)}
+@media (prefers-color-scheme: dark){ .verdict strong{color:#c4b5fd} }
+.ident-note{color:var(--muted);font-size:.95rem}
+
+/* envelope */
+.envelope{margin:20px 0 4px;max-width:840px}
+.env-h{font-weight:700;margin:0 0 8px}
+pre.env{font-family:var(--mono);font-size:.86rem;line-height:1.55;background:var(--bg);
+  border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:0 0 12px;
+  overflow-x:auto;white-space:pre}
+.env-msg{font-family:var(--mono);font-size:.88rem;word-break:break-word;overflow-wrap:anywhere}
+.env-msg:empty{display:none}
+.env-note{color:var(--muted);font-size:.95rem;margin:12px 0 0}
+
+/* filter chip + legend + tier badges */
+.chip{font:inherit;font-weight:600;min-height:48px;padding:10px 16px;border-radius:999px;
+  border:1px solid var(--purple);background:transparent;color:var(--purple);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--purple);color:#fff}
+@media (prefers-color-scheme: dark){ .chip{color:#c4b5fd} .chip[aria-pressed="true"]{color:#fff} }
+.legend{color:var(--muted);font-size:.92rem;margin:6px 0 0;max-width:860px}
+.badge.tier-sensitive{background:var(--purple);color:#fff}
+.badge.tier-identifying{background:transparent;border:1px solid var(--purple);color:var(--deep);padding:2px 9px}
+.badge.tier-routine{background:transparent;border:1px solid var(--border);color:var(--muted)}
+@media (prefers-color-scheme: dark){ .badge.tier-identifying{color:#ddd0ff} }
+
+/* master timeline */
+.master{margin-top:52px}
+.master h2{font-size:1.55rem;margin:0 0 6px}
+.decade{font-size:1.18rem;margin:28px 0 10px;color:var(--deep)}
+@media (prefers-color-scheme: dark){ .decade{color:#c4b5fd} }
+.tl-prop{font-family:var(--mono);font-weight:600}
+
 footer{border-top:1px solid var(--border);margin-top:56px;padding-top:24px;color:var(--muted);font-size:.95rem}
 footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
 .hidden{display:none!important}
@@ -178,6 +218,17 @@ footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
     <div class="count-banner" id="count-banner"></div>
   </section>
 
+  <section class="ident" aria-labelledby="ident-h">
+    <h2 id="ident-h">How identifiable are you?</h2>
+    <p>None of the facts above looks private on its own. Knowing your language is how a site greets you correctly. Knowing your processor count is how a game picks its settings. But a fingerprint is not one fact; it is the combination. Stack enough ordinary facts together and the pile stops describing people in general and starts describing one person in particular. This panel adds up the stable, passively readable values from this page's own object, nothing else, and shows you the pile.</p>
+    <div class="dash-grid" id="ident-grid"></div>
+    <p>Fold those values together and hash them, and you get a short calling card: <span class="fp-hash" id="fp-hash"></span></p>
+    <p>Two browsers with the same calling card gave the same introduction. A calling card that almost nobody else shares is a fingerprint in everything but name, and a site does not need your name or an account to recognize the card on your next visit.</p>
+    <p class="verdict">Verdict: <strong id="fp-verdict"></strong></p>
+    <p id="fp-why"></p>
+    <p class="ident-note">Honest limit: this panel only uses values from the navigator object, because that is what this page is about. Real fingerprinting also reads your screen size, installed fonts, graphics behaviour, time zone and dozens of other signals, hundreds of data points in all. What is shown here is the visible tip of that practice, not the whole of it.</p>
+  </section>
+
   <section class="routing" aria-labelledby="routing-h">
     <h2 id="routing-h">First, how anything reaches you at all: routing</h2>
     <p>The internet is a delivery system. When you tap a link, your browser writes a request, essentially a small addressed envelope, and that request is <strong>routed</strong> across a chain of networks until it reaches the one computer that holds the answer. The answer is then routed back to you. Neither end needs to know the whole path; each stop only needs to know the next hop.</p>
@@ -185,6 +236,15 @@ footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
       <span>Your browser</span><i>→</i><span>Your router</span><i>→</i><span>Your provider</span><i>→</i><span>The wider internet</span><i>→</i><span>The website's server</span><i>→</i><span>and back again</span>
     </div>
     <p>Riding inside that outgoing envelope, next to the address, is the introduction. Two of its most important lines are sent as headers on every single request: <code>User-Agent</code>, which comes straight from <code>navigator.userAgent</code>, and <code>Accept-Language</code>, which is <code>navigator.languages</code> written as a list. The server reads the envelope before deciding what to put in the reply.</p>
+    <div class="envelope">
+      <p class="env-h" id="envelope-h">The envelope itself, with your browser's real values filled in</p>
+      <pre class="env" id="envelope-pre" aria-labelledby="envelope-h"></pre>
+      <div class="btnrow">
+        <button type="button" class="btn secondary" id="envelope-copy">Copy this request</button>
+        <span class="env-msg" id="envelope-msg" aria-live="polite"></span>
+      </div>
+      <p class="env-note">Honest note: a web page cannot read the headers of its own request, so this block was assembled here, on the page, from the same navigator values your browser used to build the real one. It is a faithful model of your request, not a capture of it. Lines only appear when they apply to your browser; if your browser sends a privacy signal, you will see it listed, and if it does not, the line is simply not there. The server read lines like these before deciding what to route back to you.</p>
+    </div>
     <p>Because of that, the introduction has quietly steered delivery since the earliest web:</p>
     <ul>
       <li><strong>Mobile or desktop site?</strong> For years, the User-Agent alone decided which layout the server routed you to.</li>
@@ -202,11 +262,19 @@ footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
       <select id="group-filter" aria-label="Filter by group">
         <option value="">All groups</option>
       </select>
+      <button type="button" class="chip" id="ios-filter" aria-pressed="false">Missing on iPhone</button>
     </div>
     <p class="count" id="result-count" role="status"></p>
+    <p class="legend">Privacy tags on each card: <strong>Routine</strong> is an ordinary fact or a capability behind a tap. <strong>Identifying</strong> is a value that helps single out your device or profile you. <strong>Sensitive</strong> is access to your location, devices, credentials or clipboard, the things browsers guard with permission prompts. The Missing on iPhone filter shows only the properties iOS Safari does not expose at all.</p>
   </div>
 
   <div id="groups"></div>
+
+  <section class="master" id="timeline" aria-labelledby="timeline-h">
+    <h2 id="timeline-h">The whole story, 1993 to today</h2>
+    <p class="section-sub">Every card above carries its own short history. Merged into one stream, sorted by year, they tell a single story: how the browser's introduction grew from a couple of lines of text into the long, contested list on this page. Each beat links back to its property.</p>
+    <div id="master-timeline"></div>
+  </section>
 
   <footer>
     <nav aria-label="The prefers family">
@@ -366,8 +434,9 @@ function compatCell(label, val) {
   return '<div class="compat-cell' + (no ? ' no' : '') + '"><span class="b">' + esc(label) + '</span><span class="n">' + esc(val) + '</span></div>';
 }
 function cardHTML(e) {
-  const badges = (e.badge || []).map(b => '<span class="badge">' + esc(b) + '</span>').join('');
-  let h = '<article class="card" data-name="' + esc(e.name.toLowerCase()) + '" data-plain="' + esc(e.plain.toLowerCase()) + '" data-group="' + e.group + '" id="prop-' + e.id + '">';
+  const badges = (e.badge || []).map(b => '<span class="badge">' + esc(b) + '</span>').join('')
+    + '<span class="badge tier-' + e.tier.toLowerCase() + '">' + esc(e.tier) + '</span>';
+  let h = '<article class="card" data-name="' + esc(e.name.toLowerCase()) + '" data-plain="' + esc(e.plain.toLowerCase()) + '" data-group="' + e.group + '" data-ios="' + (e.compat.safari_ios === 'No' ? 'no' : 'yes') + '" id="prop-' + e.id + '">';
   h += '<h3>navigator.' + esc(e.name) + '</h3><span class="badges">' + badges + '</span>';
   h += '<p class="plain">' + esc(e.plain) + '</p>';
   if (e.route) h += '<div class="route-callout"><span class="rt">Routing role</span><p>' + esc(e.route) + '</p></div>';
@@ -391,19 +460,20 @@ function refreshLive(id) {
   const el = document.querySelector('[data-live="' + id + '"]');
   if (e && el) el.innerHTML = readEntry(e);
 }
+let iosOnly = false;
 function applyFilter() {
   const q = $('#filter').value.trim().toLowerCase();
   const gf = $('#group-filter').value;
   let shown = 0;
   document.querySelectorAll('.card').forEach(c => {
-    const show = (!q || c.dataset.name.includes(q) || c.dataset.plain.includes(q)) && (!gf || c.dataset.group === gf);
+    const show = (!q || c.dataset.name.includes(q) || c.dataset.plain.includes(q)) && (!gf || c.dataset.group === gf) && (!iosOnly || c.dataset.ios === 'no');
     c.classList.toggle('hidden', !show);
     if (show) shown++;
   });
   document.querySelectorAll('[data-group-section]').forEach(s => {
     s.classList.toggle('hidden', s.querySelectorAll('.card:not(.hidden)').length === 0);
   });
-  $('#result-count').textContent = 'Showing ' + shown + ' of ' + NAV_DATA.entries.length + ' properties.';
+  $('#result-count').textContent = 'Showing ' + shown + ' of ' + NAV_DATA.entries.length + ' properties.' + (iosOnly ? ' Only the ones missing on iPhone are shown.' : '');
 }
 
 /* ---------- try-it widgets ---------- */
@@ -662,13 +732,150 @@ function renderDashboardSoft() {
   });
 }
 
+/* ---------- identifiability panel ---------- */
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return ('0000000' + (h >>> 0).toString(16)).slice(-8);
+}
+function renderIdentifiability() {
+  /* Scoring (an illustration, deliberately coarse, no percentages and no fake
+     precision). Points are awarded for how many identifying signals are
+     present AND how specific they are:
+       +2  an exact processor thread count is exposed
+       +2  a device memory figure is exposed
+       +2  the user agent string is long and detailed (110+ characters)
+       +1  a user agent string is present but short or reduced
+       +1  structured client hints (userAgentData brands) are exposed
+       +1  three or more languages sit in the preference list
+       +1  a touch point count is exposed
+       +1  a legacy platform string is exposed
+     Withheld signals pull the score down simply by scoring zero: a browser
+     that refuses device memory or client hints is harder to single out.
+     Tiers: 0-3 "Fairly generic", 4-6 "Fairly distinctive", 7+ "Very distinctive". */
+  const sig = [];
+  const push = (label, val) => { if (val !== undefined && val !== null && val !== '') sig.push([label, String(val)]); };
+  try { push('User agent', nav.userAgent); } catch (e) {}
+  if (has(nav, 'userAgentData') && nav.userAgentData) {
+    try {
+      push('Browser brands (client hints)', (nav.userAgentData.brands || []).map(b => b.brand + ' ' + b.version).join(', '));
+      push('Platform (client hints)', nav.userAgentData.platform);
+    } catch (e) {}
+  }
+  try { push('Language', nav.language); } catch (e) {}
+  try { push('All languages', (nav.languages || []).join(', ')); } catch (e) {}
+  try { push('Processor threads', nav.hardwareConcurrency); } catch (e) {}
+  try { push('Device memory', nav.deviceMemory !== undefined ? 'about ' + nav.deviceMemory + ' GB' : undefined); } catch (e) {}
+  try { push('Touch points', nav.maxTouchPoints); } catch (e) {}
+  try { push('Platform (legacy string)', nav.platform); } catch (e) {}
+
+  let score = 0;
+  const contributors = [];
+  const withheld = [];
+  if (nav.hardwareConcurrency !== undefined) { score += 2; contributors.push('an exact processor thread count'); }
+  if (nav.deviceMemory !== undefined) { score += 2; contributors.push('a device memory figure'); } else { withheld.push('a device memory figure'); }
+  const ua = nav.userAgent || '';
+  if (ua.length >= 110) { score += 2; contributors.push('a long, detailed user agent string'); }
+  else if (ua.length > 0) { score += 1; contributors.push('a user agent string'); }
+  if (has(nav, 'userAgentData') && nav.userAgentData) { score += 1; contributors.push('structured client hints'); } else { withheld.push('structured client hints'); }
+  if ((nav.languages || []).length >= 3) { score += 1; contributors.push('a language list of three or more'); }
+  if (nav.maxTouchPoints !== undefined) { score += 1; contributors.push('a touch point count'); }
+  if (nav.platform) { score += 1; contributors.push('a platform string'); }
+
+  const verdict = score >= 7 ? 'Very distinctive' : (score >= 4 ? 'Fairly distinctive' : 'Fairly generic');
+  const verdictTail = score >= 7
+    ? 'The combination of exact values here would single out a small group of people, possibly just you.'
+    : (score >= 4
+      ? 'Together they narrow the crowd down a long way, well past what any one of them does alone.'
+      : 'Your browser keeps most of the telling details to itself, so this combination describes a large crowd rather than a person.');
+
+  $('#ident-grid').innerHTML = sig.length
+    ? sig.map(pair => '<div class="dash-item"><p class="k">' + esc(pair[0]) + '</p><p class="v">' + esc(pair[1]) + '</p></div>').join('')
+    : '<div class="dash-item"><p class="v absent">Your browser exposed none of the stable values this panel reads.</p></div>';
+  $('#fp-hash').textContent = fnv1a(sig.map(pair => pair[0] + '=' + pair[1]).join(' | '));
+  $('#fp-verdict').textContent = verdict + '.';
+  let why = contributors.length ? 'Doing most of the narrowing here: ' + contributors.join(', ') + '. ' : '';
+  why += verdictTail;
+  if (withheld.length) why += ' Pulling the other way, your browser withholds ' + withheld.join(' and ') + ', which is exactly the kind of refusal that makes a browser harder to fingerprint.';
+  $('#fp-why').textContent = why;
+}
+
+/* ---------- the envelope ---------- */
+function buildEnvelope() {
+  const lines = ['GET /navigator-guide/ HTTP/1.1', 'Host: dominic.balass.one'];
+  lines.push('User-Agent: ' + (nav.userAgent || '(not exposed by your browser)'));
+  const langs = (nav.languages && nav.languages.length) ? nav.languages.slice() : (nav.language ? [nav.language] : []);
+  if (langs.length) {
+    lines.push('Accept-Language: ' + langs.map((l, i) => i === 0 ? l : l + ';q=' + Math.max(0.1, 1 - i * 0.1).toFixed(1)).join(', '));
+  }
+  try { if (nav.globalPrivacyControl === true) lines.push('Sec-GPC: 1'); } catch (e) {}
+  try { if (nav.doNotTrack === '1') lines.push('DNT: 1'); } catch (e) {}
+  return lines.join('\n');
+}
+function renderEnvelope() {
+  $('#envelope-pre').textContent = buildEnvelope();
+  $('#envelope-copy').addEventListener('click', async () => {
+    const msg = $('#envelope-msg');
+    if (!nav.clipboard || typeof nav.clipboard.writeText !== 'function') {
+      msg.textContent = 'The async Clipboard API is not available in this browser, so select the block above and copy it by hand.';
+      return;
+    }
+    try {
+      await nav.clipboard.writeText(buildEnvelope());
+      msg.textContent = 'Copied. Paste it anywhere to see the whole request.';
+    } catch (e) {
+      msg.textContent = 'Copy was refused by the browser (' + e.name + '). Browsers gate the clipboard, so select the block above and copy it by hand instead.';
+    }
+  });
+}
+
+/* ---------- master timeline ---------- */
+function beatYear(label, fallback) {
+  const m = /^(\d{4})/.exec(label);
+  if (m) return parseInt(m[1], 10);
+  if (label === 'Today') return new Date().getFullYear(); // a "Today" beat describes the present day, so it sorts at the current year
+  return fallback; // no parseable year: sit with the entry's earliest dated beat (decided by the caller)
+}
+function renderTimeline() {
+  const beats = [];
+  NAV_DATA.entries.forEach((e, ei) => {
+    const dated = e.history.map(pair => beatYear(pair[0], null)).filter(y => y !== null);
+    const earliest = dated.length ? Math.min.apply(null, dated) : new Date().getFullYear();
+    e.history.forEach((pair, bi) => {
+      beats.push({ year: beatYear(pair[0], earliest), label: pair[0], text: pair[1], entry: e, order: ei * 1000 + bi });
+    });
+  });
+  beats.sort((a, b) => (a.year - b.year) || (a.order - b.order));
+  let h = '';
+  let decade = null;
+  beats.forEach(b => {
+    const d = Math.floor(b.year / 10) * 10;
+    if (d !== decade) {
+      if (decade !== null) h += '</ul>';
+      decade = d;
+      h += '<h3 class="decade">The ' + d + 's</h3><ul class="timeline">';
+    }
+    h += '<li><span class="yr">' + esc(b.label) + '</span><a class="tl-prop" href="#prop-' + b.entry.id + '">navigator.' + esc(b.entry.name) + '</a> ' + esc(b.text) + '</li>';
+  });
+  if (decade !== null) h += '</ul>';
+  $('#master-timeline').innerHTML = h;
+}
+
 /* ---------- init ---------- */
 renderDashboard();
+renderIdentifiability();
+renderEnvelope();
 renderGroups();
+renderTimeline();
 initWidgets();
 applyFilter();
 $('#filter').addEventListener('input', applyFilter);
 $('#group-filter').addEventListener('change', applyFilter);
+$('#ios-filter').addEventListener('click', () => {
+  iosOnly = !iosOnly;
+  $('#ios-filter').setAttribute('aria-pressed', String(iosOnly));
+  applyFilter();
+});
 window.addEventListener('online', onNetChange);
 window.addEventListener('offline', onNetChange);
 if (has(nav, 'connection') && nav.connection) nav.connection.addEventListener('change', () => { refreshLive('connection'); renderDashboardSoft(); announce('Connection changed: ' + (nav.connection.effectiveType || 'unknown') + '.'); });
