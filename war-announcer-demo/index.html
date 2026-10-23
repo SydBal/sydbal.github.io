@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>War, Announced: Screen Reader Announcements for a Canvas Game | dominic.balass.one</title>
+<meta name="description" content="A game of War drawn entirely on a canvas, made playable by ear with the same screen reader status zone Classic Scoundrel uses: a hidden aria-live region that speaks every flip, every war, and the score.">
+<link rel="canonical" href="https://dominic.balass.one/war-announcer-demo/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="dominic.balass.one">
+<meta property="og:title" content="War, Announced: Screen Reader Announcements for a Canvas Game">
+<meta property="og:description" content="Canvas is a silent rectangle to a screen reader. This tiny game of War shows the fix: a hidden status zone that announces every event. Cover the canvas and play by ear.">
+<meta property="og:url" content="https://dominic.balass.one/war-announcer-demo/">
+<meta property="og:image" content="https://dominic.balass.one/war-announcer-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="War, Announced: Screen Reader Announcements for a Canvas Game">
+<meta name="twitter:description" content="Canvas is a silent rectangle to a screen reader. This tiny game of War shows the fix: a hidden status zone that announces every event. Cover the canvas and play by ear.">
+<meta name="twitter:image" content="https://dominic.balass.one/war-announcer-demo/og-image.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔊</text></svg>">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+:root{
+  --bg:#fafaf9; --card:#ffffff; --ink:#17171c; --muted:#55555e;
+  --purple:#7c3aed; --deep:#5b21b6; --soft:#ede9fe; --border:#e4e4e7;
+  --shadow:0 12px 32px rgba(124,58,237,0.14);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#101014; --card:#18181e; --ink:#f1f0f5; --muted:#b6b6c0;
+    --soft:#2e1a5e; --border:#2c2c34;
+    --shadow:0 12px 32px rgba(0,0,0,0.45);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.6}
+a{color:var(--deep)}
+@media (prefers-color-scheme: dark){ a{color:#c4b5fd} }
+:focus-visible{outline:3px solid var(--purple);outline-offset:2px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-999px;top:0;background:var(--purple);color:#fff;padding:12px 18px;z-index:50;border-radius:0 0 10px 0}
+.skip:focus{left:0;color:#fff}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px 64px}
+
+/* hero */
+.hero{background:linear-gradient(135deg,var(--soft),var(--bg) 70%);
+  text-align:center;padding:64px 20px 44px;border-bottom:1px solid var(--border)}
+.hero h1{font-family:var(--mono);font-size:clamp(1.9rem,6vw,3.2rem);margin:0 0 6px;letter-spacing:-0.01em}
+.hero .kicker{font-family:var(--mono);color:var(--purple);font-size:1rem;margin:0 0 14px}
+.hero p.lede{max-width:720px;margin:14px auto 0;color:var(--muted);font-size:1.12rem}
+.hero p.lede strong{color:var(--ink)}
+
+/* game panel */
+.game{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:24px;margin:36px 0 8px}
+.game h2{margin:0 0 4px;font-size:1.5rem}
+.game .sub{color:var(--muted);margin:0 0 18px;max-width:760px}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+@media (max-width:860px){ .stage{grid-template-columns:1fr} }
+.canvas-wrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#2e1a5e}
+.canvas-wrap canvas{display:block;width:100%;height:auto}
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;
+  align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:#17171c;color:#f1f0f5}
+.cover[hidden]{display:none}
+.cover p{margin:0;max-width:420px}
+.cover .big{font-family:var(--mono);font-size:1.25rem;font-weight:700}
+.cover .small{color:#b6b6c0;font-size:.98rem}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.btn{font:inherit;font-weight:600;min-height:48px;padding:10px 20px;border-radius:10px;
+  border:1px solid var(--border);background:var(--card);color:var(--deep);cursor:pointer}
+@media (prefers-color-scheme: dark){ .btn{color:#c4b5fd} }
+.btn.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+.btn.primary:hover{background:var(--deep)}
+.btn[aria-pressed="true"]{background:var(--soft);border-color:var(--purple);color:var(--deep)}
+@media (prefers-color-scheme: dark){ .btn[aria-pressed="true"]{color:#c4b5fd} }
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.statusline{font-family:var(--mono);font-size:.98rem;margin:14px 0 0;color:var(--muted)}
+.statusline strong{color:var(--ink)}
+.hint{color:var(--muted);font-size:.95rem;margin:8px 0 0}
+.hint kbd{font-family:var(--mono);background:var(--soft);border:1px solid var(--border);
+  border-radius:6px;padding:.05em .45em;font-size:.9em}
+
+/* transcript */
+.transcript{border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--bg)}
+.transcript h3{margin:0 0 4px;font-size:1.08rem;font-family:var(--mono)}
+.transcript .note{color:var(--muted);font-size:.92rem;margin:0 0 12px}
+.transcript ol{list-style:none;margin:0;padding:0}
+.transcript li{padding:9px 0;border-top:1px solid var(--border);font-size:.97rem}
+.transcript li:first-child{border-top:0;padding-top:2px}
+.transcript li .when{font-family:var(--mono);font-size:.8rem;color:var(--purple);display:block}
+.transcript .empty{color:var(--muted);font-style:italic}
+
+/* explainer */
+.explainer{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:28px;margin:36px 0 8px}
+.explainer h2{margin-top:0;font-size:1.5rem}
+.explainer h3{margin:26px 0 6px;font-size:1.18rem}
+.explainer p,.explainer li{max-width:820px}
+.explainer ul{padding-left:22px}
+.explainer li{margin:8px 0}
+.explainer code{font-family:var(--mono);font-size:.92em;background:var(--soft);
+  padding:.1em .4em;border-radius:6px}
+.explainer pre{font-family:var(--mono);font-size:.88rem;line-height:1.55;background:var(--soft);
+  border:1px solid var(--border);border-radius:10px;padding:16px 18px;
+  white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0;max-width:820px}
+
+footer{margin-top:44px;border-top:1px solid var(--border);padding-top:20px;
+  color:var(--muted);font-size:.95rem}
+footer p{margin:6px 0}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the game</a>
+
+<header class="hero">
+  <p class="kicker">canvas + screen readers</p>
+  <h1>War, Announced</h1>
+  <p class="lede">A game of War drawn entirely on a <strong>canvas</strong>, which a screen reader cannot see at all.
+  So every flip is <strong>announced out loud</strong> through a hidden status zone, the same technique
+  <strong>Classic Scoundrel</strong> uses. Cover the canvas and play it by ear.</p>
+</header>
+
+<div class="wrap">
+<main id="main">
+
+  <section class="game" aria-labelledby="game-h">
+    <h2 id="game-h">The game</h2>
+    <p class="sub">Fifty two cards, split evenly. Flip the top cards, higher rank takes both, ties mean war.
+    Everything that happens is written to a hidden live region, and mirrored into the transcript so sighted visitors can watch an invisible feature work.</p>
+
+    <div class="stage">
+      <div>
+        <div class="canvas-wrap">
+          <canvas id="board" width="720" height="480" role="img"
+            aria-label="The War game board, drawn on canvas. Everything painted here is also announced in text and listed in the transcript.">Your browser needs canvas support to draw the game. The announcements still work: use the Flip button and read the transcript.</canvas>
+          <div class="cover" id="cover" hidden>
+            <p class="big">A screen reader gets nothing from the canvas itself.</p>
+            <p class="small">The game is still fully playable. Flip with the button or the F key, and follow the announcements in the transcript.</p>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="flipBtn" type="button">Flip</button>
+          <button class="btn" id="newBtn" type="button">New game</button>
+          <button class="btn" id="coverBtn" type="button" aria-pressed="false">Cover the canvas</button>
+        </div>
+        <p class="statusline" id="statusLine">Round <strong>0</strong> · You <strong>26</strong> cards · Computer <strong>26</strong> cards</p>
+        <p class="hint">Keyboard: press <kbd>F</kbd> to flip. <kbd>Space</kbd> and <kbd>Enter</kbd> also work when a button is focused.</p>
+      </div>
+
+      <div class="transcript" aria-labelledby="transcript-h">
+        <h3 id="transcript-h">What the screen reader hears</h3>
+        <p class="note">A mirror for sighted visitors only. This list is deliberately not a live region, so screen reader users hear each announcement once, from the hidden status zone, not twice.</p>
+        <ol id="transcriptList">
+          <li class="empty">Nothing yet. Flip a card.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="explainer" aria-labelledby="why-h">
+    <h2 id="why-h">Why this page exists</h2>
+
+    <h3>The problem</h3>
+    <p>A canvas is a rectangle of pixels. Games love it because anything can be drawn there. Screen readers cannot use it,
+    because assistive technology reads the document tree, and a canvas has almost no tree to read. Every card in the game above,
+    every score, every win, is just paint. A blind player can find the buttons on this page and press them, and still learn
+    nothing about what happened, because the results are only ever drawn.</p>
+
+    <h3>The technique</h3>
+    <p>The fix is one hidden element and one habit. The element is a status zone: a visually hidden region marked
+    <code>role="status"</code> with <code>aria-live="polite"</code>, so a screen reader speaks whatever is written into it
+    without interrupting. The habit is to write a short sentence into it for every event that is worth drawing, in the game's
+    own words, with the score attached:</p>
+    <pre>&lt;div id="sr-announcer" class="sr-only" role="status"
+     aria-live="polite" aria-atomic="true"&gt;&lt;/div&gt;</pre>
+    <pre>function announce(message) {
+  const el = document.getElementById('sr-announcer');
+  el.textContent = '';
+  setTimeout(() =&gt; { el.textContent = message; }, 40);
+}</pre>
+
+    <h3>The repeat gotcha</h3>
+    <p>Live regions only speak when their text changes. Flip the same winning card twice in a row and the second announcement
+    is identical to the first, so the screen reader stays silent and the player misses a whole round. That is why
+    <code>announce()</code> clears the region first and writes on a short delay. The clear and rewrite is what makes a repeated
+    event get spoken again. It is a small detail, and it is the difference between a player following the game and a player
+    guessing.</p>
+
+    <h3>Focus tells you where you are. This tells you what happened.</h3>
+    <p>Keyboard support and focus management answer the question "how do I act, and where am I?" They say nothing about
+    outcomes. Announcements close that loop: act by keyboard, hear the result. Neither half is optional. Together they make
+    a canvas game a game again for someone who cannot see it.</p>
+
+    <h3>Exactly what Classic Scoundrel does</h3>
+    <p>This is not a simplified cousin of the real thing. Classic Scoundrel, a full roguelike card game drawn on canvas,
+    uses the same hidden status zone and the same clear-then-write announce call for every card play, potion, room change,
+    and game over. War is just the smallest game that proves the point. If an event is worth drawing, it is worth saying.
+    On canvas, the developer is the accessibility tree. There is nobody else.</p>
+    <p><a href="https://classicscoundrel.com">Play Classic Scoundrel</a>, the game this technique comes from.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>Built by Dominic Balassone. Pixel card art by Dominic Balassone, the same art Classic Scoundrel deals.</p>
+  <p>More demos at <a href="https://dominic.balass.one/">dominic.balass.one</a>.</p>
+</footer>
+</div>
+
+<!-- Screen-reader live region: the game writes short event summaries here
+     via announce(), since the canvas itself is opaque to assistive tech.
+     Same pattern as Classic Scoundrel's #sr-announcer. -->
+<div id="sr-announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+'use strict';
+/* ------------------------------------------------------------------
+   War, Announced.
+   The game is drawn on a canvas, which assistive tech cannot read.
+   Every event is ALSO written to the hidden #sr-announcer live region
+   (role="status", aria-live="polite") via announce(), the same
+   clear-then-set pattern Classic Scoundrel uses. The visible
+   transcript mirrors each message for sighted visitors; it is NOT a
+   live region, so nobody hears anything twice.
+   Card art: cards.png is a spritesheet built from Classic Scoundrel's
+   pixel cards (55x77 per card). Rows are suits S,H,D,C; columns are
+   ranks 2..A; the card back sits at column 0 of row 4.
+------------------------------------------------------------------- */
+
+const SUITS = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
+const SUIT_ROW = { Spades: 0, Hearts: 1, Diamonds: 2, Clubs: 3 };
+const RANKS = [
+  { label: '2', value: 2 }, { label: '3', value: 3 }, { label: '4', value: 4 },
+  { label: '5', value: 5 }, { label: '6', value: 6 }, { label: '7', value: 7 },
+  { label: '8', value: 8 }, { label: '9', value: 9 }, { label: '10', value: 10 },
+  { label: 'Jack', value: 11 }, { label: 'Queen', value: 12 },
+  { label: 'King', value: 13 }, { label: 'Ace', value: 14 }
+];
+const CELL_W = 55, CELL_H = 77;
+
+const sheet = new Image();
+sheet.src = 'cards.png';
+
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+const flipBtn = document.getElementById('flipBtn');
+const newBtn = document.getElementById('newBtn');
+const coverBtn = document.getElementById('coverBtn');
+const cover = document.getElementById('cover');
+const statusLine = document.getElementById('statusLine');
+const transcriptList = document.getElementById('transcriptList');
+
+let state = null;
+
+function cardName(card) { return card.rankLabel + ' of ' + card.suit; }
+
+function buildDeck() {
+  const deck = [];
+  for (const suit of SUITS) {
+    for (let i = 0; i < RANKS.length; i++) {
+      deck.push({ suit: suit, rankLabel: RANKS[i].label, value: RANKS[i].value, col: i });
+    }
+  }
+  return deck;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+
+function cardsWord(n) { return n + (n === 1 ? ' card' : ' cards'); }
+function scoreSentence() {
+  return 'You have ' + cardsWord(state.you.length) + '. Computer has ' + cardsWord(state.cpu.length) + '.';
+}
+
+function announce(message) {
+  if (!message) return;
+  const el = document.getElementById('sr-announcer');
+  if (el) {
+    // Clear first, then set on a short delay, exactly like Scoundrel:
+    // if the new message matches the previous one (two identical rounds
+    // in a row), the clear-and-set is what makes assistive tech speak
+    // it again instead of ignoring a no-change write.
+    el.textContent = '';
+    window.setTimeout(() => { el.textContent = message; }, 40);
+  }
+  // Mirror into the visible transcript for sighted visitors. The
+  // transcript is a plain list, not a live region, on purpose.
+  const empty = transcriptList.querySelector('.empty');
+  if (empty) empty.remove();
+  const li = document.createElement('li');
+  const when = document.createElement('span');
+  when.className = 'when';
+  when.textContent = state && state.round > 0 ? 'Round ' + state.round : 'Start';
+  li.appendChild(when);
+  li.appendChild(document.createTextNode(message));
+  transcriptList.prepend(li);
+  while (transcriptList.children.length > 14) {
+    transcriptList.removeChild(transcriptList.lastElementChild);
+  }
+}
+
+function newGame() {
+  const deck = shuffle(buildDeck());
+  state = {
+    you: deck.slice(0, 26),
+    cpu: deck.slice(26, 52),
+    pot: [],
+    youCard: null,
+    cpuCard: null,
+    warDownYou: 0,
+    warDownCpu: 0,
+    warPending: false,
+    round: 0,
+    over: false,
+    banner: ''
+  };
+  transcriptList.innerHTML = '';
+  flipBtn.disabled = false;
+  updateStatus();
+  draw();
+  announce('New game. The deck is shuffled and split evenly. You have 26 cards. Computer has 26. Press Flip to play the first round.');
+}
+
+function collectPot(winnerDeck) {
+  // Shuffle the pot before it goes to the bottom of the winner's deck;
+  // recycling it in flip order can loop a game of War forever.
+  shuffle(state.pot);
+  for (const c of state.pot) winnerDeck.push(c);
+  state.pot = [];
+}
+
+function finishIfOver(msg) {
+  if (state.you.length === 0 && state.cpu.length === 0) {
+    state.over = true;
+    state.banner = 'A draw';
+    return msg + ' Both sides are out of cards at the same time. The game is a draw after ' + state.round + (state.round === 1 ? ' round.' : ' rounds.');
+  }
+  if (state.cpu.length === 0) {
+    state.over = true;
+    state.banner = 'You win the game';
+    return msg + ' Computer is out of cards. You win the game after ' + state.round + (state.round === 1 ? ' round.' : ' rounds.');
+  }
+  if (state.you.length === 0) {
+    state.over = true;
+    state.banner = 'Computer wins the game';
+    return msg + ' You are out of cards. Computer wins the game after ' + state.round + (state.round === 1 ? ' round.' : ' rounds.');
+  }
+  return msg;
+}
+
+function flip() {
+  if (!state || state.over) return;
+  if (!state.warPending) {
+    if (state.you.length === 0 || state.cpu.length === 0) return;
+    state.round++;
+    state.youCard = state.you.shift();
+    state.cpuCard = state.cpu.shift();
+    state.pot.push(state.youCard, state.cpuCard);
+    state.warDownYou = 0;
+    state.warDownCpu = 0;
+    const y = state.youCard, c = state.cpuCard;
+    let msg;
+    if (y.value > c.value) {
+      collectPot(state.you);
+      state.banner = 'You win the round';
+      msg = 'You flipped the ' + cardName(y) + '. Computer flipped the ' + cardName(c) +
+            '. You win the round and take both cards. ' + scoreSentence();
+    } else if (y.value < c.value) {
+      collectPot(state.cpu);
+      state.banner = 'Computer wins the round';
+      msg = 'You flipped the ' + cardName(y) + '. Computer flipped the ' + cardName(c) +
+            '. Computer wins the round and takes both cards. ' + scoreSentence();
+    } else {
+      state.warPending = true;
+      state.banner = 'WAR';
+      msg = 'You flipped the ' + cardName(y) + '. Computer flipped the ' + cardName(c) +
+            '. A tie. That means war. Press Flip to fight the war. ' + scoreSentence();
+    }
+    msg = finishIfOver(msg);
+    updateStatus();
+    draw();
+    announce(msg);
+    if (state.over) flipBtn.disabled = true;
+    return;
+  }
+
+  // War resolution: three face down each (fewer if a deck is nearly
+  // empty, always keeping one card to flip), then a deciding flip.
+  if (state.you.length === 0 || state.cpu.length === 0) {
+    // A side cannot even flip: the other side takes the pot and the game.
+    let msg;
+    if (state.you.length === 0 && state.cpu.length === 0) {
+      msg = 'War cannot be fought. Neither side has a card left to flip.';
+    } else if (state.you.length === 0) {
+      collectPot(state.cpu);
+      msg = 'War cannot be fought. You have no card left to flip. Computer takes the pot. ' + scoreSentence();
+    } else {
+      collectPot(state.you);
+      msg = 'War cannot be fought. Computer has no card left to flip. You take the pot. ' + scoreSentence();
+    }
+    state.warPending = false;
+    msg = finishIfOver(msg);
+    updateStatus();
+    draw();
+    announce(msg);
+    if (state.over) flipBtn.disabled = true;
+    return;
+  }
+  const downYou = Math.min(3, state.you.length - 1);
+  const downCpu = Math.min(3, state.cpu.length - 1);
+  for (let i = 0; i < downYou; i++) state.pot.push(state.you.shift());
+  for (let i = 0; i < downCpu; i++) state.pot.push(state.cpu.shift());
+  state.warDownYou += downYou;
+  state.warDownCpu += downCpu;
+  const y = state.you.shift();
+  const c = state.cpu.shift();
+  state.youCard = y;
+  state.cpuCard = c;
+  state.pot.push(y, c);
+  const downPhrase = (downYou === 3 && downCpu === 3)
+    ? 'Three cards face down.'
+    : 'You put ' + cardsWord(downYou) + ' face down. Computer put ' + cardsWord(downCpu) + ' face down.';
+  let msg;
+  if (y.value > c.value) {
+    const taken = state.pot.length;
+    collectPot(state.you);
+    state.warPending = false;
+    state.banner = 'You win the war';
+    msg = 'War. ' + downPhrase + ' You flipped the ' + cardName(y) + '. Computer flipped the ' +
+          cardName(c) + '. You win the war and take ' + cardsWord(taken) + '. ' + scoreSentence();
+  } else if (y.value < c.value) {
+    const taken = state.pot.length;
+    collectPot(state.cpu);
+    state.warPending = false;
+    state.banner = 'Computer wins the war';
+    msg = 'War. ' + downPhrase + ' You flipped the ' + cardName(y) + '. Computer flipped the ' +
+          cardName(c) + '. Computer wins the war and takes ' + cardsWord(taken) + '. ' + scoreSentence();
+  } else {
+    state.banner = 'WAR again';
+    msg = 'War. ' + downPhrase + ' You flipped the ' + cardName(y) + '. Computer flipped the ' +
+          cardName(c) + '. Another tie. The pot is now ' + cardsWord(state.pot.length) +
+          '. Press Flip to fight again. ' + scoreSentence();
+  }
+  msg = finishIfOver(msg);
+  updateStatus();
+  draw();
+  announce(msg);
+  if (state.over) flipBtn.disabled = true;
+}
+
+function updateStatus() {
+  statusLine.innerHTML = 'Round <strong>' + state.round + '</strong> · You <strong>' +
+    state.you.length + '</strong> ' + (state.you.length === 1 ? 'card' : 'cards') +
+    ' · Computer <strong>' + state.cpu.length + '</strong> ' + (state.cpu.length === 1 ? 'card' : 'cards') +
+    (state.pot.length > 0 ? ' · Pot <strong>' + state.pot.length + '</strong>' : '');
+}
+
+/* ------------------------- canvas drawing ------------------------- */
+
+function drawCardFace(card, x, y, w, h) {
+  if (sheet.complete && sheet.naturalWidth > 0) {
+    ctx.drawImage(sheet, card.col * CELL_W, SUIT_ROW[card.suit] * CELL_H, CELL_W, CELL_H, x, y, w, h);
+  } else {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = '#17171c';
+    ctx.font = '700 28px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(card.rankLabel, x + w / 2, y + h / 2);
+  }
+}
+
+function drawCardBack(x, y, w, h) {
+  if (sheet.complete && sheet.naturalWidth > 0) {
+    ctx.drawImage(sheet, 0, 4 * CELL_H, CELL_W, CELL_H, x, y, w, h);
+  } else {
+    ctx.fillStyle = '#b91c1c';
+    ctx.fillRect(x, y, w, h);
+  }
+}
+
+function drawDeckStack(x, y, count, w, h) {
+  if (count <= 0) {
+    ctx.strokeStyle = 'rgba(241,240,245,0.4)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.strokeRect(x, y, w, h);
+    ctx.setLineDash([]);
+    return;
+  }
+  drawCardBack(x + 6, y + 6, w, h);
+  drawCardBack(x + 3, y + 3, w, h);
+  drawCardBack(x, y, w, h);
+}
+
+function draw() {
+  if (!state) return;
+  const W = 720, H = 480, CW = 110, CH = 154;
+  ctx.clearRect(0, 0, W, H);
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, '#3b1470');
+  grad.addColorStop(1, '#241243');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+  ctx.imageSmoothingEnabled = false;
+
+  ctx.fillStyle = '#f1f0f5';
+  ctx.font = '700 20px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Computer', 60, 30);
+  ctx.textAlign = 'right';
+  ctx.fillText(state.cpu.length + (state.cpu.length === 1 ? ' card' : ' cards'), 285, 30);
+  ctx.textAlign = 'left';
+  ctx.fillText('You', 60, 286);
+  ctx.textAlign = 'right';
+  ctx.fillText(state.you.length + (state.you.length === 1 ? ' card' : ' cards'), 285, 286);
+
+  // Decks
+  drawDeckStack(60, 44, state.cpu.length, CW, CH);
+  drawDeckStack(60, 300, state.you.length, CW, CH);
+
+  // Face-up cards
+  if (state.cpuCard) drawCardFace(state.cpuCard, 305, 44, CW, CH);
+  if (state.youCard) drawCardFace(state.youCard, 305, 300, CW, CH);
+
+  // War face-down cards beside each deck, overlapped, capped for space.
+  // The counts themselves are carried by the announcements.
+  if (state.warDownCpu > 0) {
+    const n = Math.min(state.warDownCpu, 6);
+    for (let i = 0; i < n; i++) drawCardBack(190 + i * 18, 44, 55, 77);
+  }
+  if (state.warDownYou > 0) {
+    const n = Math.min(state.warDownYou, 6);
+    for (let i = 0; i < n; i++) drawCardBack(190 + i * 18, 300, 55, 77);
+  }
+
+  // Result banner
+  if (state.banner) {
+    ctx.fillStyle = '#f1f0f5';
+    ctx.font = '700 24px ui-monospace, Menlo, Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.banner, 520, 258);
+  }
+  if (!state.youCard && !state.cpuCard && !state.over) {
+    ctx.fillStyle = '#c4b5fd';
+    ctx.font = '600 18px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Press Flip to play', 440, 250);
+  }
+}
+
+function fitCanvas() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = 720 * dpr;
+  canvas.height = 480 * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+
+/* --------------------------- wiring --------------------------- */
+
+flipBtn.addEventListener('click', flip);
+newBtn.addEventListener('click', newGame);
+coverBtn.addEventListener('click', () => {
+  const covered = cover.hasAttribute('hidden');
+  if (covered) {
+    cover.removeAttribute('hidden');
+    coverBtn.setAttribute('aria-pressed', 'true');
+    coverBtn.textContent = 'Uncover the canvas';
+    announce('Canvas covered. From here, the announcements are the whole game.');
+  } else {
+    cover.setAttribute('hidden', '');
+    coverBtn.setAttribute('aria-pressed', 'false');
+    coverBtn.textContent = 'Cover the canvas';
+    announce('Canvas uncovered.');
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    flip();
+  }
+});
+window.addEventListener('resize', fitCanvas);
+sheet.addEventListener('load', draw);
+
+newGame();
+fitCanvas();
+
+/* Test hook: lets the headless checks drive the game deterministically. */
+window.warGame = {
+  getState: () => state,
+  forceDecks: (you, cpu) => {
+    state.you = you; state.cpu = cpu;
+    state.pot = []; state.youCard = null; state.cpuCard = null;
+    state.warPending = false; state.warDownYou = 0; state.warDownCpu = 0;
+    state.over = false; state.banner = '';
+    flipBtn.disabled = false;
+    updateStatus(); draw();
+  },
+  makeCard: (suit, rankLabel) => {
+    const i = RANKS.findIndex(r => r.label === rankLabel);
+    return { suit: suit, rankLabel: rankLabel, value: RANKS[i].value, col: i };
+  },
+  flip: flip
+};
+</script>
+</body>
+</html>
