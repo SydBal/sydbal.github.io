@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Navigator Object, Explained | dominic.balass.one</title>
+<meta name="description" content="Every property of the browser's navigator object, explained in plain language: what your own browser reports right now, the history of each one, and honest compatibility. Your browser introduces you to every website. This is the introduction.">
+<link rel="canonical" href="https://dominic.balass.one/navigator-guide/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="dominic.balass.one">
+<meta property="og:title" content="The Navigator Object, Explained">
+<meta property="og:description" content="What your browser tells every website: every navigator property with a live readout from your own browser, its history, and honest compatibility.">
+<meta property="og:url" content="https://dominic.balass.one/navigator-guide/">
+<meta property="og:image" content="https://dominic.balass.one/navigator-guide/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Navigator Object, Explained">
+<meta name="twitter:description" content="What your browser tells every website: every navigator property with a live readout from your own browser, its history, and honest compatibility.">
+<meta name="twitter:image" content="https://dominic.balass.one/navigator-guide/og-image.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+:root{
+  --bg:#fafaf9; --card:#ffffff; --ink:#17171c; --muted:#55555e;
+  --purple:#7c3aed; --deep:#5b21b6; --soft:#ede9fe; --border:#e4e4e7;
+  --shadow:0 12px 32px rgba(124,58,237,0.14);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#101014; --card:#18181e; --ink:#f1f0f5; --muted:#b6b6c0;
+    --soft:#2e1a5e; --border:#2c2c34;
+    --shadow:0 12px 32px rgba(0,0,0,0.45);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.6}
+a{color:var(--deep)}
+@media (prefers-color-scheme: dark){ a{color:#c4b5fd} }
+:focus-visible{outline:3px solid var(--purple);outline-offset:2px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:-999px;top:0;background:var(--purple);color:#fff;padding:12px 18px;z-index:50;border-radius:0 0 10px 0}
+.skip:focus{left:0;color:#fff}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px 64px}
+
+/* hero */
+.hero{background:linear-gradient(135deg,var(--soft),var(--bg) 70%);
+  text-align:center;padding:64px 20px 44px;border-bottom:1px solid var(--border)}
+.hero h1{font-family:var(--mono);font-size:clamp(1.9rem,6vw,3.4rem);margin:0 0 6px;letter-spacing:-0.01em}
+.hero .kicker{font-family:var(--mono);color:var(--purple);font-size:1rem;margin:0 0 14px}
+.hero p.lede{max-width:720px;margin:14px auto 0;color:var(--muted);font-size:1.12rem}
+.hero p.lede strong{color:var(--ink)}
+
+/* dashboard */
+.dash{margin:36px auto 8px}
+.dash h2,.section-head{font-size:1.55rem;margin:0 0 6px}
+.dash .sub,.section-sub{color:var(--muted);margin:0 0 20px;max-width:760px}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.dash-item{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:14px 16px;min-height:96px}
+.dash-item .k{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px}
+.dash-item .v{font-family:var(--mono);font-size:.92rem;word-break:break-word;overflow-wrap:anywhere}
+.dash-item .v.absent{color:var(--muted);font-style:italic}
+.count-banner{margin-top:16px;background:var(--soft);border:1px solid var(--border);
+  border-radius:16px;padding:16px 20px;font-size:1.05rem}
+.count-banner strong{font-family:var(--mono)}
+
+/* routing section */
+.routing{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:28px;margin:36px 0 8px}
+.routing h2{margin-top:0}
+.routing p{max-width:820px}
+.routing ul{max-width:820px;padding-left:22px}
+.routing li{margin:8px 0}
+.routing code{font-family:var(--mono);font-size:.92em;background:var(--soft);
+  padding:.1em .4em;border-radius:6px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0;
+  font-family:var(--mono);font-size:.85rem}
+.flow span{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:6px 10px}
+.flow i{color:var(--purple);font-style:normal;font-weight:700}
+
+/* controls */
+.controls{position:sticky;top:0;z-index:20;background:var(--bg);
+  padding:14px 0 10px;margin-top:28px;border-bottom:1px solid var(--border)}
+.controls .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.controls input[type=search],.controls select{
+  font:inherit;font-size:1rem;color:var(--ink);background:var(--card);
+  border:1px solid var(--border);border-radius:10px;padding:11px 14px;min-height:48px}
+.controls input[type=search]{flex:1 1 240px}
+.controls .count{color:var(--muted);font-size:.95rem;margin:8px 0 0}
+
+/* groups + cards */
+.group{margin-top:44px}
+.group h2{font-size:1.45rem;margin:0 0 4px}
+.group .blurb{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:22px;margin:0 0 18px}
+.card h3{font-family:var(--mono);font-size:1.28rem;margin:0;display:inline}
+.badges{display:inline-flex;flex-wrap:wrap;gap:6px;margin-left:10px;vertical-align:middle}
+.badge{font-size:.74rem;font-weight:600;letter-spacing:.02em;background:var(--soft);
+  color:var(--deep);border-radius:999px;padding:3px 10px}
+@media (prefers-color-scheme: dark){ .badge{color:#ddd0ff} }
+.card .plain{margin:12px 0 0;max-width:840px}
+.route-callout{border-left:4px solid var(--purple);background:var(--soft);
+  border-radius:0 10px 10px 0;padding:12px 16px;margin:16px 0 0;max-width:840px}
+.route-callout .rt{font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--deep)}
+@media (prefers-color-scheme: dark){ .route-callout .rt{color:#ddd0ff} }
+.route-callout p{margin:4px 0 0}
+.live{margin-top:16px}
+.live .lh{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px}
+.live .lv{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;font-family:var(--mono);font-size:.9rem;word-break:break-word;
+  overflow-wrap:anywhere;max-height:220px;overflow:auto;white-space:pre-wrap}
+.live .lv .absent{color:var(--muted);font-style:italic}
+.tryit{margin-top:14px}
+.tryit .th{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:600;min-height:44px;padding:10px 18px;border-radius:10px;
+  border:1px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--purple)}
+@media (prefers-color-scheme: dark){ .btn.secondary{color:#c4b5fd} }
+.btn:active{transform:translateY(1px)}
+.tryout{font-family:var(--mono);font-size:.88rem;margin-top:10px;word-break:break-word;
+  overflow-wrap:anywhere;white-space:pre-wrap}
+.tryout:empty{display:none}
+.tryit input[type=text]{font:inherit;padding:10px 12px;border:1px solid var(--border);
+  border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px;flex:1 1 200px}
+details{margin-top:16px}
+summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center;color:var(--deep)}
+@media (prefers-color-scheme: dark){ summary{color:#c4b5fd} }
+.timeline{list-style:none;margin:6px 0 0;padding:0 0 0 16px;border-left:2px solid var(--border)}
+.timeline li{margin:0 0 12px;position:relative;max-width:840px}
+.timeline .yr{font-family:var(--mono);font-weight:700;color:var(--purple);display:block;font-size:.92rem}
+.compat{margin-top:14px}
+.compat .ch{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+.compat-grid{display:flex;flex-wrap:wrap;gap:8px}
+.compat-cell{border:1px solid var(--border);border-radius:10px;padding:8px 12px;min-width:104px;background:var(--bg)}
+.compat-cell .b{display:block;font-size:.78rem;color:var(--muted)}
+.compat-cell .n{font-family:var(--mono);font-size:.9rem;font-weight:700}
+.compat-cell.no .n{color:var(--muted)}
+footer{border-top:1px solid var(--border);margin-top:56px;padding-top:24px;color:var(--muted);font-size:.95rem}
+footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="sr-only" id="announcer" aria-live="polite"></div>
+
+<header class="hero">
+  <p class="kicker">window.navigator</p>
+  <h1>The Navigator Object</h1>
+  <p class="lede">Every time you visit a website, your browser introduces you first. It says what device you are on, what language you read, whether you are holding a phone or sitting at a desk, and a surprising amount more. That introduction lives in a JavaScript object called <strong>navigator</strong>, and this page is a complete tour of it.</p>
+  <p class="lede">Nothing below is a screenshot or a guess. Every value on this page is read <strong>live from the browser you are using right now</strong>, so open it on your phone and on your computer and compare. The differences are the story.</p>
+</header>
+
+<main class="wrap" id="main">
+
+  <section class="dash" aria-labelledby="dash-h">
+    <h2 id="dash-h">Your browser, right now</h2>
+    <p class="sub">This is the introduction your browser just gave this page. No server was asked; the page simply read its own <span style="font-family:var(--mono)">navigator</span> object. Anything marked absent is something your browser chooses not to share, and that choice varies a lot between browsers.</p>
+    <div class="dash-grid" id="dash-grid"></div>
+    <div class="count-banner" id="count-banner"></div>
+  </section>
+
+  <section class="routing" aria-labelledby="routing-h">
+    <h2 id="routing-h">First, how anything reaches you at all: routing</h2>
+    <p>The internet is a delivery system. When you tap a link, your browser writes a request, essentially a small addressed envelope, and that request is <strong>routed</strong> across a chain of networks until it reaches the one computer that holds the answer. The answer is then routed back to you. Neither end needs to know the whole path; each stop only needs to know the next hop.</p>
+    <div class="flow" aria-hidden="true">
+      <span>Your browser</span><i>→</i><span>Your router</span><i>→</i><span>Your provider</span><i>→</i><span>The wider internet</span><i>→</i><span>The website's server</span><i>→</i><span>and back again</span>
+    </div>
+    <p>Riding inside that outgoing envelope, next to the address, is the introduction. Two of its most important lines are sent as headers on every single request: <code>User-Agent</code>, which comes straight from <code>navigator.userAgent</code>, and <code>Accept-Language</code>, which is <code>navigator.languages</code> written as a list. The server reads the envelope before deciding what to put in the reply.</p>
+    <p>Because of that, the introduction has quietly steered delivery since the earliest web:</p>
+    <ul>
+      <li><strong>Mobile or desktop site?</strong> For years, the User-Agent alone decided which layout the server routed you to.</li>
+      <li><strong>Which language?</strong> Accept-Language is how a site you have never visited greets you in your own language without being asked.</li>
+      <li><strong>Which download?</strong> The introduction names your operating system, so the big button offers the right installer for your machine.</li>
+      <li><strong>How heavy a page?</strong> Hints about your device and connection let a server route you to a lighter or richer version of the same page.</li>
+    </ul>
+    <p>And one member of this object goes further: <code>serviceWorker</code> is a router that lives inside the browser itself. It can intercept each request a page makes and decide, on the spot, whether the answer comes from the network or from storage on your device. That is the whole trick behind web apps that open instantly and work on a plane. You will find it in the capability shelf below.</p>
+    <p>So learning this one object is not a developer trivia exercise. It is learning what your browser says about you at the start of every delivery, and how that shapes what gets delivered back.</p>
+  </section>
+
+  <div class="controls" role="search">
+    <div class="row">
+      <input type="search" id="filter" placeholder="Filter properties by name, e.g. battery, share, language" aria-label="Filter properties by name">
+      <select id="group-filter" aria-label="Filter by group">
+        <option value="">All groups</option>
+      </select>
+    </div>
+    <p class="count" id="result-count" role="status"></p>
+  </div>
+
+  <div id="groups"></div>
+
+  <footer>
+    <nav aria-label="The prefers family">
+      <a href="https://prefers-reduced-motion.com">prefers-reduced-motion</a>
+      <a href="https://prefers-color-scheme.com">prefers-color-scheme</a>
+      <a href="https://prefers-reduced-data.com">prefers-reduced-data</a>
+      <a href="https://prefers-reduced-transparency.com">prefers-reduced-transparency</a>
+      <a href="https://prefers-contrast.com">prefers-contrast</a>
+    </nav>
+    <p>Compatibility data is baked in from <a href="https://github.com/mdn/browser-compat-data">MDN's browser-compat-data</a>, the same open dataset behind MDN Web Docs, extracted at build time rather than typed from memory. Where a member is missing from that dataset, the card says so and explains why. History beats are deliberately conservative; when a precise date is not solid, the compat table's first-shipped version is the anchor instead.</p>
+    <p>Built by Dominic Balassone. Companion to the five prefers-* reference sites.</p>
+  </footer>
+</main>
+
+<script src="data.js"></script>
+<script>
+"use strict";
+const nav = window.navigator || {};
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ABSENT = '<span class="absent">Not exposed by your browser</span>';
+const has = (o, k) => { try { return k in o; } catch (e) { return false; } };
+const fmtVal = (v) => {
+  if (v === undefined || v === null) return null;
+  if (typeof v === 'string') return v === '' ? '(empty string)' : v;
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  if (typeof v === 'function') return 'Available in your browser';
+  return undefined; // object: handled by caller
+};
+const announce = (msg) => { const a = $('#announcer'); if (a) { a.textContent = ''; setTimeout(() => { a.textContent = msg; }, 40); } };
+
+/* ---------- generic + special live readers ---------- */
+function genericRead(e) {
+  const p = e.prop;
+  if (!p) return ABSENT;
+  if (!has(nav, p)) return ABSENT;
+  let v;
+  try { v = nav[p]; } catch (err) { return ABSENT; }
+  const f = fmtVal(v);
+  if (f !== undefined && f !== null) return esc(f);
+  if (f === null) return ABSENT;
+  return 'Present in your browser';
+}
+const SUB = {
+  connection: ['effectiveType', 'downlink', 'rtt', 'saveData', 'type'],
+  userAgentData: null, // special below
+  devicePosture: ['type'],
+  userActivation: ['hasBeenActive', 'isActive'],
+  windowControlsOverlay: ['visible'],
+  virtualKeyboard: ['overlaysContent'],
+  scheduling: null,
+  storage: null,
+};
+function readEntry(e) {
+  const id = e.id;
+  if (id === 'languages') {
+    try { return esc((nav.languages || []).join(', ') || '(none reported)'); } catch (err) { return ABSENT; }
+  }
+  if (id === 'plugins') {
+    if (!has(nav, 'plugins')) return ABSENT;
+    try {
+      const names = Array.from(nav.plugins).map(p => p.name);
+      return esc(names.length + ' reported: ' + names.join(' · '));
+    } catch (err) { return 'Present in your browser'; }
+  }
+  if (id === 'mimeTypes') {
+    if (!has(nav, 'mimeTypes')) return ABSENT;
+    try { return esc(nav.mimeTypes.length + ' MIME types reported (frozen list, same in every modern browser)'); } catch (err) { return 'Present'; }
+  }
+  if (id === 'userAgentData') {
+    if (!has(nav, 'userAgentData') || !nav.userAgentData) return ABSENT;
+    try {
+      const d = nav.userAgentData;
+      const brands = (d.brands || []).map(b => b.brand + ' ' + b.version).join(', ');
+      return esc('brands: ' + brands + '\nmobile: ' + d.mobile + '\nplatform: ' + d.platform);
+    } catch (err) { return 'Present in your browser'; }
+  }
+  if (id === 'javaEnabled') {
+    if (typeof nav.javaEnabled !== 'function') return ABSENT;
+    try { return esc('javaEnabled() returns ' + nav.javaEnabled()); } catch (err) { return ABSENT; }
+  }
+  if (id === 'connection') {
+    if (!has(nav, 'connection') || !nav.connection) return ABSENT;
+    const c = nav.connection;
+    return esc('effectiveType: ' + (c.effectiveType || '?') + '\ndownlink: ' + (c.downlink !== undefined ? c.downlink + ' Mbps (estimate)' : '?') + '\nrtt: ' + (c.rtt !== undefined ? c.rtt + ' ms (estimate)' : '?') + '\nsaveData: ' + !!c.saveData);
+  }
+  if (id === 'storage') {
+    if (!has(nav, 'storage') || !nav.storage) return ABSENT;
+    return 'Present. Use the try-it below to ask for an estimate: usage, quota, and whether this site\'s storage is persisted.';
+  }
+  if (id === 'devicePosture') {
+    if (!has(nav, 'devicePosture') || !nav.devicePosture) return ABSENT;
+    try { return esc('current posture: ' + nav.devicePosture.type); } catch (err) { return 'Present in your browser'; }
+  }
+  if (id === 'scheduling') {
+    if (!has(nav, 'scheduling') || !nav.scheduling) return ABSENT;
+    return esc('Present. isInputPending() available: ' + (typeof nav.scheduling.isInputPending === 'function'));
+  }
+  if (SUB[id]) {
+    const p = e.prop;
+    if (!has(nav, p) || nav[p] == null) return ABSENT;
+    try {
+      const parts = SUB[id].map(k => k + ': ' + nav[p][k]).join('\n');
+      return esc(parts);
+    } catch (err) { return 'Present in your browser'; }
+  }
+  return genericRead(e);
+}
+
+/* ---------- dashboard ---------- */
+function dashValue(kind) {
+  try {
+    switch (kind) {
+      case 'ua': return nav.userAgent || null;
+      case 'platform': return nav.platform || null;
+      case 'language': return nav.language || null;
+      case 'languages': return (nav.languages || []).join(', ') || null;
+      case 'cores': return nav.hardwareConcurrency !== undefined ? nav.hardwareConcurrency + ' threads' : null;
+      case 'memory': return nav.deviceMemory !== undefined ? 'about ' + nav.deviceMemory + ' GB' : null;
+      case 'touch': return nav.maxTouchPoints !== undefined ? nav.maxTouchPoints + ' touch points' : null;
+      case 'online': return nav.onLine !== undefined ? (nav.onLine ? 'Online' : 'Offline') : null;
+      case 'conn': return (has(nav,'connection') && nav.connection) ? (nav.connection.effectiveType || 'unknown') + (nav.connection.saveData ? ', data saver on' : '') : null;
+      case 'cookies': return nav.cookieEnabled !== undefined ? String(nav.cookieEnabled) : null;
+      case 'pdf': return nav.pdfViewerEnabled !== undefined ? String(nav.pdfViewerEnabled) : null;
+      case 'vendor': return nav.vendor !== undefined ? (nav.vendor || '(empty string)') : null;
+      case 'webdriver': return nav.webdriver !== undefined ? String(nav.webdriver) : null;
+      case 'gpu': return has(nav, 'gpu') ? 'WebGPU entry point present' : null;
+      case 'share': return typeof nav.share === 'function' ? 'Share sheet available' : null;
+      case 'battery': return typeof nav.getBattery === 'function' ? 'Battery readable' : null;
+    }
+  } catch (e) { return null; }
+  return null;
+}
+const DASH = [
+  ['User agent', 'ua'], ['Platform', 'platform'], ['Language', 'language'],
+  ['All languages', 'languages'], ['Processor', 'cores'], ['Device memory', 'memory'],
+  ['Touch', 'touch'], ['Online?', 'online'], ['Connection', 'conn'],
+  ['Cookies enabled', 'cookies'], ['Built-in PDF viewer', 'pdf'], ['Vendor', 'vendor'],
+  ['Driven by a robot?', 'webdriver'], ['Graphics (WebGPU)', 'gpu'],
+  ['Native share sheet', 'share'], ['Battery access', 'battery'],
+];
+function renderDashboard() {
+  const g = $('#dash-grid');
+  g.innerHTML = DASH.map(([label, kind]) => {
+    const v = dashValue(kind);
+    return '<div class="dash-item"><p class="k">' + esc(label) + '</p><p class="v' + (v === null ? ' absent' : '') + '" data-dash="' + kind + '">' + (v === null ? 'Not exposed by your browser' : esc(v)) + '</p></div>';
+  }).join('');
+  const total = NAV_DATA.entries.length;
+  const present = NAV_DATA.entries.filter(e => e.prop && has(nav, e.prop)).length;
+  $('#count-banner').innerHTML = 'Of the <strong>' + total + '</strong> properties catalogued below, your browser exposes <strong>' + present + '</strong> of them on this page. The rest are absent, renamed, or were never implemented here, and each card explains which.';
+}
+
+/* ---------- card rendering ---------- */
+const BROWSERS = [['chrome','Chrome'],['edge','Edge'],['firefox','Firefox'],['safari','Safari (macOS)'],['safari_ios','Safari (iOS)']];
+function compatCell(label, val) {
+  const no = (val === 'No' || val === 'See notes');
+  return '<div class="compat-cell' + (no ? ' no' : '') + '"><span class="b">' + esc(label) + '</span><span class="n">' + esc(val) + '</span></div>';
+}
+function cardHTML(e) {
+  const badges = (e.badge || []).map(b => '<span class="badge">' + esc(b) + '</span>').join('');
+  let h = '<article class="card" data-name="' + esc(e.name.toLowerCase()) + '" data-plain="' + esc(e.plain.toLowerCase()) + '" data-group="' + e.group + '" id="prop-' + e.id + '">';
+  h += '<h3>navigator.' + esc(e.name) + '</h3><span class="badges">' + badges + '</span>';
+  h += '<p class="plain">' + esc(e.plain) + '</p>';
+  if (e.route) h += '<div class="route-callout"><span class="rt">Routing role</span><p>' + esc(e.route) + '</p></div>';
+  h += '<div class="live"><p class="lh">Your browser says</p><div class="lv" data-live="' + e.id + '">' + readEntry(e) + '</div></div>';
+  if (e.tryit) h += '<div class="tryit"><p class="th">Try it</p><div data-try="' + e.tryit + '" data-entry="' + e.id + '"></div></div>';
+  h += '<details><summary>History</summary><ul class="timeline">' + e.history.map(pair => '<li><span class="yr">' + esc(pair[0]) + '</span>' + esc(pair[1]) + '</li>').join('') + '</ul></details>';
+  h += '<div class="compat"><p class="ch">Compatibility (source: MDN browser-compat-data)</p><div class="compat-grid">' + BROWSERS.map(pair => compatCell(pair[1], e.compat[pair[0]])).join('') + '</div></div>';
+  h += '</article>';
+  return h;
+}
+function renderGroups() {
+  const sel = $('#group-filter');
+  $('#groups').innerHTML = NAV_DATA.groups.map(g => {
+    const entries = NAV_DATA.entries.filter(e => e.group === g.id);
+    return '<section class="group" data-group-section="' + g.id + '" aria-labelledby="g-' + g.id + '"><h2 id="g-' + g.id + '">' + esc(g.title) + '</h2><p class="blurb">' + esc(g.blurb) + '</p>' + entries.map(cardHTML).join('') + '</section>';
+  }).join('');
+  NAV_DATA.groups.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.title; sel.appendChild(o); });
+}
+function refreshLive(id) {
+  const e = NAV_DATA.entries.find(x => x.id === id);
+  const el = document.querySelector('[data-live="' + id + '"]');
+  if (e && el) el.innerHTML = readEntry(e);
+}
+function applyFilter() {
+  const q = $('#filter').value.trim().toLowerCase();
+  const gf = $('#group-filter').value;
+  let shown = 0;
+  document.querySelectorAll('.card').forEach(c => {
+    const show = (!q || c.dataset.name.includes(q) || c.dataset.plain.includes(q)) && (!gf || c.dataset.group === gf);
+    c.classList.toggle('hidden', !show);
+    if (show) shown++;
+  });
+  document.querySelectorAll('[data-group-section]').forEach(s => {
+    s.classList.toggle('hidden', s.querySelectorAll('.card:not(.hidden)').length === 0);
+  });
+  $('#result-count').textContent = 'Showing ' + shown + ' of ' + NAV_DATA.entries.length + ' properties.';
+}
+
+/* ---------- try-it widgets ---------- */
+function mkBtn(label, secondary) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (secondary ? ' secondary' : ''); b.textContent = label; return b; }
+function mkOut() { const d = document.createElement('div'); d.className = 'tryout'; d.setAttribute('aria-live', 'polite'); return d; }
+function mkRow() { const d = document.createElement('div'); d.className = 'btnrow'; return d; }
+const MB = (n) => (n / 1048576).toFixed(1) + ' MB';
+
+const WIDGETS = {
+  share(c) {
+    const out = mkOut();
+    const b = mkBtn('Share this page');
+    b.addEventListener('click', async () => {
+      if (typeof nav.share !== 'function') { out.textContent = 'navigator.share does not exist in this browser, so there is no share sheet to open. On an iPhone it would open here.'; return; }
+      try { await nav.share({ title: document.title, text: 'The Navigator Object, explained: what your browser tells every website.', url: location.href }); out.textContent = 'The share sheet opened and you picked a destination (or it was delivered).'; }
+      catch (e) { out.textContent = 'Share ended without sending: ' + e.name + '. Cancelling counts as a no, and the page is told so.'; }
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  canShare(c) {
+    const out = mkOut();
+    const b = mkBtn('Run the capability checks');
+    b.addEventListener('click', () => {
+      if (typeof nav.canShare !== 'function') { out.textContent = 'navigator.canShare does not exist in this browser.'; return; }
+      const lines = [];
+      try { lines.push('share text/links: ' + nav.canShare({ text: 'hello', url: location.href })); } catch (e) { lines.push('text check errored: ' + e.name); }
+      try {
+        const f = new File(['x'], 'note.txt', { type: 'text/plain' });
+        lines.push('share files: ' + nav.canShare({ files: [f] }));
+      } catch (e) { lines.push('file check unavailable: ' + e.name); }
+      out.textContent = lines.join('\n');
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  clipboard(c) {
+    const out = mkOut();
+    const input = document.createElement('input');
+    input.type = 'text'; input.value = 'Copied by navigator.clipboard'; input.setAttribute('aria-label', 'Text to copy');
+    const b = mkBtn('Copy that text');
+    b.addEventListener('click', async () => {
+      if (!nav.clipboard || typeof nav.clipboard.writeText !== 'function') { out.textContent = 'The async Clipboard API is not available here (it needs a secure context and, in some browsers, the right permissions).'; return; }
+      try { await nav.clipboard.writeText(input.value); out.textContent = 'Copied. Paste it anywhere to prove it: "' + input.value + '"'; }
+      catch (e) { out.textContent = 'Copy refused: ' + e.name + '. Browsers only allow this from a real tap or click, which is the point.'; }
+    });
+    const b2 = mkBtn('Try reading the clipboard', true);
+    b2.addEventListener('click', async () => {
+      if (!nav.clipboard || typeof nav.clipboard.readText !== 'function') { out.textContent = 'clipboard.readText is not available in this browser.'; return; }
+      try { const t = await nav.clipboard.readText(); out.textContent = t ? 'Clipboard currently holds: "' + t + '"' : 'Clipboard is empty, or holds something that is not text.'; }
+      catch (e) { out.textContent = 'Read refused: ' + e.name + '. Reading the clipboard needs your permission, and browsers guard it jealously.'; }
+    });
+    const r = mkRow(); r.append(input, b, b2); c.append(r, out);
+  },
+  geolocation(c) {
+    const out = mkOut();
+    const b = mkBtn('Ask for my location');
+    b.addEventListener('click', () => {
+      if (!nav.geolocation) { out.textContent = 'Geolocation is not available in this browser.'; return; }
+      out.textContent = 'Asking the browser... watch for the permission prompt.';
+      nav.geolocation.getCurrentPosition(
+        (pos) => { out.textContent = 'Latitude ' + pos.coords.latitude.toFixed(5) + ', longitude ' + pos.coords.longitude.toFixed(5) + ', accurate to about ' + Math.round(pos.coords.accuracy) + ' metres. This went no further than your screen; this page has no server to send it to.'; },
+        (err) => { out.textContent = 'No location shared: ' + err.message + '. A denial is a complete answer, and the page has to live with it.'; },
+        { timeout: 15000 });
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  storage(c) {
+    const out = mkOut();
+    const b = mkBtn('Measure this site\'s storage');
+    b.addEventListener('click', async () => {
+      if (!nav.storage) { out.textContent = 'The Storage API is not available here.'; return; }
+      try {
+        const est = await nav.storage.estimate();
+        const per = typeof nav.storage.persisted === 'function' ? await nav.storage.persisted() : 'unknown';
+        out.textContent = 'Used by this origin: ' + MB(est.usage || 0) + ' of a quota of about ' + MB(est.quota || 0) + '. Protected from automatic cleanup (persisted): ' + per + '.';
+      } catch (e) { out.textContent = 'Estimate failed: ' + e.name; }
+    });
+    const b2 = mkBtn('Request persistence', true);
+    b2.addEventListener('click', async () => {
+      if (!nav.storage || typeof nav.storage.persist !== 'function') { out.textContent = 'storage.persist() is not available here.'; return; }
+      try { const r = await nav.storage.persist(); out.textContent = 'Persistence request answered: ' + r + '. Browsers grant this based on how much you use and trust a site, usually without asking you.'; }
+      catch (e) { out.textContent = 'Request failed: ' + e.name; }
+    });
+    const r = mkRow(); r.append(b, b2); c.append(r, out);
+  },
+  permissions(c) {
+    const out = mkOut();
+    const b = mkBtn('Read permission states');
+    b.addEventListener('click', async () => {
+      if (!nav.permissions || typeof nav.permissions.query !== 'function') { out.textContent = 'The Permissions API is not available here.'; return; }
+      const names = ['geolocation', 'notifications', 'camera', 'microphone', 'clipboard-read', 'clipboard-write'];
+      const lines = [];
+      for (const n of names) {
+        try { const s = await nav.permissions.query({ name: n }); lines.push(n + ': ' + s.state); }
+        catch (e) { lines.push(n + ': this browser does not report it (' + e.name + ')'); }
+      }
+      out.textContent = lines.join('\n');
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  wakelock(c) {
+    const out = mkOut();
+    let lock = null;
+    const b = mkBtn('Keep the screen awake');
+    b.addEventListener('click', async () => {
+      if (!has(nav, 'wakeLock')) { out.textContent = 'navigator.wakeLock does not exist in this browser, so the screen sleeps on the system schedule, whatever the page wants.'; return; }
+      try {
+        if (lock) { await lock.release(); lock = null; b.textContent = 'Keep the screen awake'; out.textContent = 'Wake lock released.'; return; }
+        lock = await nav.wakeLock.request('screen');
+        b.textContent = 'Let the screen sleep again';
+        out.textContent = 'Wake lock held: the screen will stay on while this page is visible. Switch tabs and the browser takes the lock back.';
+        lock.addEventListener('release', () => { lock = null; b.textContent = 'Keep the screen awake'; out.textContent = 'The browser released the wake lock (this happens when the page is hidden or the system decides otherwise).'; });
+      } catch (e) { out.textContent = 'Wake lock refused: ' + e.name + '. It is only granted to a visible page after you have interacted with it.'; }
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  mediacap(c) {
+    const out = mkOut();
+    const b = mkBtn('Ask about 1080p H.264 video');
+    b.addEventListener('click', async () => {
+      if (!nav.mediaCapabilities || typeof nav.mediaCapabilities.decodingInfo !== 'function') { out.textContent = 'Media Capabilities is not available here.'; return; }
+      try {
+        const info = await nav.mediaCapabilities.decodingInfo({ type: 'file', video: { contentType: 'video/mp4; codecs="avc1.640028"', width: 1920, height: 1080, bitrate: 5000000, framerate: 30 } });
+        out.textContent = 'Supported: ' + info.supported + '. Smooth: ' + info.smooth + '. Power efficient: ' + info.powerEfficient + '. A streaming site uses exactly this answer to decide which encoding to route to you.';
+      } catch (e) { out.textContent = 'Query failed: ' + e.name; }
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  battery(c) {
+    const out = mkOut();
+    if (typeof nav.getBattery !== 'function') { out.textContent = 'navigator.getBattery does not exist in this browser. That absence is the privacy debate made visible.'; c.appendChild(out); return; }
+    out.textContent = 'Reading the battery...';
+    nav.getBattery().then((bat) => {
+      const show = () => {
+        const t = (sec) => sec === Infinity ? 'not reported' : (sec >= 0 ? Math.round(sec / 60) + ' minutes' : 'calculating');
+        out.textContent = 'Level: ' + Math.round(bat.level * 100) + '%. Charging: ' + bat.charging + '. Time to full: ' + t(bat.chargingTime) + '. Time to empty: ' + t(bat.dischargingTime) + '.';
+      };
+      show();
+      ['levelchange', 'chargingchange'].forEach(ev => bat.addEventListener(ev, () => { show(); announce('Battery status updated: ' + Math.round(bat.level * 100) + ' percent, charging: ' + bat.charging + '.'); }));
+    }).catch((e) => { out.textContent = 'Battery read failed: ' + e.name; });
+    c.appendChild(out);
+  },
+  vibrate(c) {
+    const out = mkOut();
+    const mk = (label, pattern) => {
+      const b = mkBtn(label, pattern === 0);
+      b.addEventListener('click', () => {
+        if (typeof nav.vibrate !== 'function') { out.textContent = 'navigator.vibrate does not exist in this browser. On an iPhone that is permanent; on Android Chrome the buttons above would be buzzing now.'; return; }
+        const ok = nav.vibrate(pattern);
+        out.textContent = ok ? 'Vibration pattern sent: ' + JSON.stringify(pattern) + ' (milliseconds on/off). If the device is on silent or has no vibration motor, you feel nothing, which the page cannot detect.' : 'Vibration was blocked, likely because the page is not engaged or the system forbids it.';
+      });
+      return b;
+    };
+    const r = mkRow(); r.append(mk('One buzz', [120]), mk('Double buzz', [80, 50, 80]), mk('Stop', 0)); c.append(r, out);
+  },
+  badge(c) {
+    const out = mkOut();
+    const b = mkBtn('Set a badge of 7');
+    b.addEventListener('click', async () => {
+      if (typeof nav.setAppBadge !== 'function') { out.textContent = 'App badging is not available in this browser or context.'; return; }
+      try { await nav.setAppBadge(7); out.textContent = 'Badge set to 7. You will only see it if this site is installed as an app; in a regular tab the call succeeds silently into the void.'; }
+      catch (e) { out.textContent = 'Badge refused: ' + e.name + '. Typically it only works for installed web apps.'; }
+    });
+    const b2 = mkBtn('Clear the badge', true);
+    b2.addEventListener('click', async () => {
+      if (typeof nav.clearAppBadge !== 'function') { out.textContent = 'clearAppBadge is not available here.'; return; }
+      try { await nav.clearAppBadge(); out.textContent = 'Badge cleared.'; } catch (e) { out.textContent = 'Clear refused: ' + e.name; }
+    });
+    const r = mkRow(); r.append(b, b2); c.append(r, out);
+  },
+  gamepads(c) {
+    const out = mkOut();
+    const b = mkBtn('Check for controllers');
+    b.addEventListener('click', () => {
+      if (typeof nav.getGamepads !== 'function') { out.textContent = 'The Gamepad API is not available here.'; return; }
+      const pads = Array.from(nav.getGamepads() || []).filter(Boolean);
+      out.textContent = pads.length
+        ? pads.map(p => 'Slot ' + p.index + ': ' + p.id + ' (' + p.buttons.length + ' buttons, ' + p.axes.length + ' axes, connected: ' + p.connected + ')').join('\n')
+        : 'No controllers visible. Browsers hide gamepads until you press a button on them, so connect one, press anything, and check again.';
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  midi(c) {
+    const out = mkOut();
+    const b = mkBtn('Ask for MIDI access');
+    b.addEventListener('click', async () => {
+      if (typeof nav.requestMIDIAccess !== 'function') { out.textContent = 'Web MIDI is not available in this browser.'; return; }
+      try {
+        const acc = await nav.requestMIDIAccess();
+        out.textContent = 'Access granted. Inputs: ' + acc.inputs.size + ', outputs: ' + acc.outputs.size + '. (Zero of each usually just means no MIDI gear is plugged in.)';
+      } catch (e) { out.textContent = 'MIDI access ended: ' + e.name + '. Denial and unavailability both land here.'; }
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  mediakeys(c) {
+    const out = mkOut();
+    const b = mkBtn('Probe for Widevine DRM');
+    b.addEventListener('click', async () => {
+      if (typeof nav.requestMediaKeySystemAccess !== 'function') { out.textContent = 'Encrypted Media Extensions are not exposed here under that name.'; return; }
+      try {
+        const access = await nav.requestMediaKeySystemAccess('com.widevine.alpha', [{ initDataTypes: ['cenc'], videoCapabilities: [{ contentType: 'video/mp4; codecs="avc1.640028"', robustness: 'SW_SECURE_CRYPTO' }] }]);
+        out.textContent = 'Widevine is available, key system: ' + access.keySystem + '. A streaming service would now be allowed to route encrypted video to this browser.';
+      } catch (e) { out.textContent = 'Widevine not available here (' + e.name + '). On Apple devices the answer is usually FairPlay instead; on this browser, premium streams may be limited or refused.'; }
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  beacon(c) {
+    const out = mkOut();
+    const b = mkBtn('Send a test beacon');
+    b.addEventListener('click', () => {
+      if (typeof nav.sendBeacon !== 'function') { out.textContent = 'sendBeacon is not available here.'; return; }
+      const ok = nav.sendBeacon('https://dominic.balass.one/navigator-guide/', new Blob(['navigator-guide beacon test'], { type: 'text/plain' }));
+      out.textContent = ok ? 'The browser accepted the beacon and queued it for delivery, even if you close this tab right now. That acceptance is all a page ever learns; there is no delivery receipt.' : 'The browser refused to queue the beacon (queue full or payload too large).';
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+  online(c) {
+    const out = mkOut();
+    out.setAttribute('data-online-status', '');
+    out.textContent = 'Right now your browser says: ' + (nav.onLine ? 'online' : 'offline') + '. Toggle airplane mode, or unplug the network, and watch this line and the card above update on their own. The announcement region for screen readers reports the change too.';
+    c.appendChild(out);
+  },
+  uadata(c) {
+    const out = mkOut();
+    const b = mkBtn('Ask for the high-entropy details');
+    b.addEventListener('click', async () => {
+      if (!has(nav, 'userAgentData') || !nav.userAgentData || typeof nav.userAgentData.getHighEntropyValues !== 'function') { out.textContent = 'userAgentData does not exist in this browser, which is itself the Safari and Firefox position on the question.'; return; }
+      try {
+        const v = await nav.userAgentData.getHighEntropyValues(['architecture', 'bitness', 'model', 'platformVersion', 'fullVersionList', 'wow64']);
+        out.textContent = JSON.stringify(v, null, 1);
+      } catch (e) { out.textContent = 'Request refused: ' + e.name + '. Even in Chromium, the detailed facts are gated.'; }
+    });
+    const r = mkRow(); r.appendChild(b); c.append(r, out);
+  },
+};
+function initWidgets() {
+  document.querySelectorAll('[data-try]').forEach((c) => {
+    const fn = WIDGETS[c.dataset.try];
+    if (fn) { try { fn(c); } catch (e) { /* a broken try-it must never break the page */ } }
+  });
+}
+
+/* ---------- live change listeners ---------- */
+function onNetChange() {
+  renderDashboardSoft();
+  refreshLive('onLine'); refreshLive('connection');
+  document.querySelectorAll('[data-online-status]').forEach(el => {
+    el.textContent = 'Right now your browser says: ' + (nav.onLine ? 'online' : 'offline') + '. Toggle airplane mode, or unplug the network, and watch this line and the card above update on their own.';
+  });
+  announce('Your browser now reports it is ' + (nav.onLine ? 'online' : 'offline') + '.');
+}
+function renderDashboardSoft() {
+  document.querySelectorAll('[data-dash]').forEach(el => {
+    const v = dashValue(el.dataset.dash);
+    el.textContent = v === null ? 'Not exposed by your browser' : v;
+    el.classList.toggle('absent', v === null);
+  });
+}
+
+/* ---------- init ---------- */
+renderDashboard();
+renderGroups();
+initWidgets();
+applyFilter();
+$('#filter').addEventListener('input', applyFilter);
+$('#group-filter').addEventListener('change', applyFilter);
+window.addEventListener('online', onNetChange);
+window.addEventListener('offline', onNetChange);
+if (has(nav, 'connection') && nav.connection) nav.connection.addEventListener('change', () => { refreshLive('connection'); renderDashboardSoft(); announce('Connection changed: ' + (nav.connection.effectiveType || 'unknown') + '.'); });
+if (has(nav, 'devicePosture') && nav.devicePosture) nav.devicePosture.addEventListener('change', () => refreshLive('devicePosture'));
+</script>
+</body>
+</html>
