@@ -76,7 +76,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "userAgentData",
@@ -110,7 +111,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "platform",
@@ -142,7 +144,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "language",
@@ -174,7 +177,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "languages",
@@ -202,7 +206,8 @@ const NAV_DATA = {
     "firefox": "32+",
     "safari": "10.1+",
     "safari_ios": "10.1+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "vendor",
@@ -233,7 +238,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "product",
@@ -261,7 +267,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "appName",
@@ -293,7 +300,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "appVersion",
@@ -320,7 +328,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "appCodeName",
@@ -352,7 +361,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "oscpu",
@@ -380,7 +390,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "webdriver",
@@ -407,7 +418,8 @@ const NAV_DATA = {
     "firefox": "60+",
     "safari": "10.1+",
     "safari_ios": "10.1+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "pdfViewerEnabled",
@@ -435,7 +447,8 @@ const NAV_DATA = {
     "firefox": "99+",
     "safari": "16.4+",
     "safari_ios": "16.4+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "cookieEnabled",
@@ -462,7 +475,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "18+",
     "safari_ios": "18+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "hardwareConcurrency",
@@ -493,7 +507,8 @@ const NAV_DATA = {
     "firefox": "48+",
     "safari": "15.4+",
     "safari_ios": "15.4+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "deviceMemory",
@@ -523,7 +538,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "maxTouchPoints",
@@ -551,7 +567,8 @@ const NAV_DATA = {
     "firefox": "59+",
     "safari": "13+",
     "safari_ios": "13+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "gpu",
@@ -583,7 +600,8 @@ const NAV_DATA = {
     "firefox": "Partial 141+",
     "safari": "26+",
     "safari_ios": "26+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "getGamepads",
@@ -615,7 +633,8 @@ const NAV_DATA = {
     "firefox": "29+",
     "safari": "10.1+",
     "safari_ios": "10.1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "keyboard",
@@ -643,7 +662,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "virtualKeyboard",
@@ -671,7 +691,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "ink",
@@ -699,7 +720,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "devicePosture",
@@ -727,7 +749,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "27 (flag only)"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "onLine",
@@ -760,7 +783,8 @@ const NAV_DATA = {
     "firefox": "1.5+",
     "safari": "4+",
     "safari_ios": "4+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "connection",
@@ -794,7 +818,8 @@ const NAV_DATA = {
     "firefox": "31+ (removed in 32)",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "sendBeacon",
@@ -823,7 +848,8 @@ const NAV_DATA = {
     "firefox": "31+",
     "safari": "11.1+",
     "safari_ios": "11.1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "share",
@@ -856,7 +882,8 @@ const NAV_DATA = {
     "firefox": "71 (flag only)",
     "safari": "12.1+",
     "safari_ios": "12.1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "canShare",
@@ -884,7 +911,8 @@ const NAV_DATA = {
     "firefox": "96 (flag only)",
     "safari": "14+",
     "safari_ios": "14+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "clipboard",
@@ -916,7 +944,8 @@ const NAV_DATA = {
     "firefox": "63+",
     "safari": "13.1+",
     "safari_ios": "13.1+"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "geolocation",
@@ -953,7 +982,8 @@ const NAV_DATA = {
     "firefox": "3.5+",
     "safari": "5+",
     "safari_ios": "≤3+"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "mediaDevices",
@@ -984,7 +1014,8 @@ const NAV_DATA = {
     "firefox": "36+",
     "safari": "11+",
     "safari_ios": "11+"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "serviceWorker",
@@ -1016,7 +1047,8 @@ const NAV_DATA = {
     "firefox": "44+",
     "safari": "11.1+",
     "safari_ios": "11.1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "storage",
@@ -1049,7 +1081,8 @@ const NAV_DATA = {
     "firefox": "57+",
     "safari": "15.2+",
     "safari_ios": "15.2+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "permissions",
@@ -1077,7 +1110,8 @@ const NAV_DATA = {
     "firefox": "46+",
     "safari": "16+",
     "safari_ios": "16+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "credentials",
@@ -1108,7 +1142,8 @@ const NAV_DATA = {
     "firefox": "60+",
     "safari": "13+",
     "safari_ios": "13+"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "locks",
@@ -1135,7 +1170,8 @@ const NAV_DATA = {
     "firefox": "96+",
     "safari": "15.4+",
     "safari_ios": "15.4+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "wakeLock",
@@ -1171,7 +1207,8 @@ const NAV_DATA = {
     "firefox": "126+",
     "safari": "16.4+",
     "safari_ios": "18.4+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "mediaSession",
@@ -1198,7 +1235,8 @@ const NAV_DATA = {
     "firefox": "82+",
     "safari": "15+",
     "safari_ios": "15+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "mediaCapabilities",
@@ -1227,7 +1265,8 @@ const NAV_DATA = {
     "firefox": "63+",
     "safari": "13+",
     "safari_ios": "13+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "getBattery",
@@ -1264,7 +1303,8 @@ const NAV_DATA = {
     "firefox": "43+ (removed in 52)",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "vibrate",
@@ -1297,7 +1337,8 @@ const NAV_DATA = {
     "firefox": "16+ (removed in 129)",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "setAppBadge",
@@ -1325,7 +1366,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "17+",
     "safari_ios": "16.4+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "requestMIDIAccess",
@@ -1353,7 +1395,8 @@ const NAV_DATA = {
     "firefox": "108+",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "requestMediaKeySystemAccess",
@@ -1386,7 +1429,8 @@ const NAV_DATA = {
     "firefox": "38+",
     "safari": "12.1+",
     "safari_ios": "12.1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "scheduling",
@@ -1414,7 +1458,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "userActivation",
@@ -1441,7 +1486,8 @@ const NAV_DATA = {
     "firefox": "120+",
     "safari": "16.4+",
     "safari_ios": "16.4+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "bluetooth",
@@ -1470,7 +1516,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "hid",
@@ -1498,7 +1545,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "serial",
@@ -1526,7 +1574,8 @@ const NAV_DATA = {
     "firefox": "151+",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "usb",
@@ -1554,7 +1603,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "xr",
@@ -1582,7 +1632,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "presentation",
@@ -1610,7 +1661,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "windowControlsOverlay",
@@ -1638,7 +1690,8 @@ const NAV_DATA = {
     "firefox": "No",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "registerProtocolHandler",
@@ -1671,7 +1724,8 @@ const NAV_DATA = {
     "firefox": "2+",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "getUserMedia",
@@ -1703,7 +1757,8 @@ const NAV_DATA = {
     "firefox": "17+",
     "safari": "11+ (removed in 12)",
     "safari_ios": "11+ (removed in 12)"
-   }
+   },
+   "tier": "Sensitive"
   },
   {
    "id": "doNotTrack",
@@ -1743,7 +1798,8 @@ const NAV_DATA = {
     "firefox": "9+",
     "safari": "5.1+ (removed in 7)",
     "safari_ios": "5.1+ (removed in 7)"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "globalPrivacyControl",
@@ -1775,7 +1831,8 @@ const NAV_DATA = {
     "firefox": "120+",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "plugins",
@@ -1811,7 +1868,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "mimeTypes",
@@ -1839,7 +1897,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "javaEnabled",
@@ -1870,7 +1929,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "taintEnabled",
@@ -1901,7 +1961,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "standalone",
@@ -1933,7 +1994,8 @@ const NAV_DATA = {
     "firefox": "See notes",
     "safari": "See notes",
     "safari_ios": "See notes"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "buildID",
@@ -1961,7 +2023,8 @@ const NAV_DATA = {
     "firefox": "2+",
     "safari": "No",
     "safari_ios": "No"
-   }
+   },
+   "tier": "Identifying"
   },
   {
    "id": "productSub",
@@ -1989,7 +2052,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "1+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   },
   {
    "id": "vendorSub",
@@ -2017,7 +2081,8 @@ const NAV_DATA = {
     "firefox": "1+",
     "safari": "3+",
     "safari_ios": "1+"
-   }
+   },
+   "tier": "Routine"
   }
  ]
 };
