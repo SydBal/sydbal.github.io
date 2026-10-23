@@ -226,7 +226,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}
     <p>Two browsers with the same calling card gave the same introduction. A calling card that almost nobody else shares is a fingerprint in everything but name, and a site does not need your name or an account to recognize the card on your next visit.</p>
     <p class="verdict">Verdict: <strong id="fp-verdict"></strong></p>
     <p id="fp-why"></p>
-    <p class="ident-note">Honest limit: this panel only uses values from the navigator object, because that is what this page is about. Real fingerprinting also reads your screen size, installed fonts, graphics behaviour, time zone and dozens of other signals, hundreds of data points in all. What is shown here is the visible tip of that practice, not the whole of it.</p>
+    <p class="ident-note">Honest limit: this panel only uses values from the navigator object, because that is what this page is about. Real fingerprinting also reads your screen size, installed fonts, graphics behavior, time zone and dozens of other signals, hundreds of data points in all. What is shown here is the visible tip of that practice, not the whole of it.</p>
   </section>
 
   <section class="routing" aria-labelledby="routing-h">
@@ -533,7 +533,7 @@ const WIDGETS = {
       if (!nav.geolocation) { out.textContent = 'Geolocation is not available in this browser.'; return; }
       out.textContent = 'Asking the browser... watch for the permission prompt.';
       nav.geolocation.getCurrentPosition(
-        (pos) => { out.textContent = 'Latitude ' + pos.coords.latitude.toFixed(5) + ', longitude ' + pos.coords.longitude.toFixed(5) + ', accurate to about ' + Math.round(pos.coords.accuracy) + ' metres. This went no further than your screen; this page has no server to send it to.'; },
+        (pos) => { out.textContent = 'Latitude ' + pos.coords.latitude.toFixed(5) + ', longitude ' + pos.coords.longitude.toFixed(5) + ', accurate to about ' + Math.round(pos.coords.accuracy) + ' meters. This went no further than your screen; this page has no server to send it to.'; },
         (err) => { out.textContent = 'No location shared: ' + err.message + '. A denial is a complete answer, and the page has to live with it.'; },
         { timeout: 15000 });
     });
