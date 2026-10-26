@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100dvh: a hero that fits your phone</title>
+<meta name="description" content="Why 100vh cuts off your hero on iPhone, and the one-line CSS fix: 100dvh, with svh and lvh for the cases that need them. Live viewport readouts included.">
+<meta property="og:title" content="100dvh: a hero that fits your phone">
+<meta property="og:description" content="Why 100vh cuts off your hero on iPhone, and the one-line CSS fix: 100dvh, with svh and lvh for the cases that need them.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/dvh-demo/">
+<meta property="og:image" content="https://dominic.balass.one/dvh-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="100dvh: a hero that fits your phone">
+<meta name="twitter:description" content="Why 100vh cuts off your hero on iPhone, and the one-line CSS fix: 100dvh, with svh and lvh for the cases that need them.">
+<meta name="twitter:image" content="https://dominic.balass.one/dvh-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  .hero { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1rem; padding: 1.5rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  .hero[data-unit="vh"] { height: 100vh; }
+  .hero[data-unit="svh"] { height: 100svh; }
+  .hero[data-unit="lvh"] { height: 100lvh; }
+  .hero[data-unit="dvh"] { height: 100vh; height: 100dvh; }
+  .hero h1 { margin: 0; font-size: clamp(2rem, 9vw, 3.5rem); line-height: 1.1; }
+  .hero h1 span { color: var(--purple); }
+  .hero p { margin: 0; max-width: 34rem; color: var(--muted); }
+  .toggle { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+  .toggle button { font: inherit; font-family: ui-monospace, monospace; cursor: pointer; border: 2px solid var(--purple); background: transparent; color: var(--ink); padding: 0.5rem 1rem; }
+  .toggle button[aria-pressed="true"] { background: var(--purple); color: #fff; }
+  .readout { background: var(--card); border: 1px solid var(--border); padding: 0.75rem 1rem; font-family: ui-monospace, monospace; font-size: 0.95rem; }
+  .readout b { color: var(--purple); }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+  section { margin-bottom: 2.5rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  pre { background: #1d1d26; color: #eceaf6; padding: 1rem; overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: ui-monospace, monospace; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .note { background: var(--purple-soft); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+  .livebar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--border); padding: 0.5rem 1rem; font-family: ui-monospace, monospace; font-size: 0.82rem; text-align: center; }
+  .livebar b { color: var(--purple); }
+</style>
+</head>
+<body>
+
+<header class="hero" id="hero" data-unit="dvh">
+  <h1>A hero that <span>fits your phone</span></h1>
+  <p>This hero is sized with the unit you pick below. On a desktop they all look the same. On a phone, scroll and watch the toolbar change what fits.</p>
+  <div class="toggle" role="group" aria-label="Viewport unit for the hero">
+    <button type="button" data-set-unit="vh" aria-pressed="false">100vh</button>
+    <button type="button" data-set-unit="svh" aria-pressed="false">100svh</button>
+    <button type="button" data-set-unit="lvh" aria-pressed="false">100lvh</button>
+    <button type="button" data-set-unit="dvh" aria-pressed="true">100dvh</button>
+  </div>
+  <div class="readout" id="heroReadout" aria-live="off">Hero height: measuring…</div>
+</header>
+
+<main>
+  <section>
+    <h2>The problem with 100vh</h2>
+    <p>On a phone, the browser toolbar takes space, then retracts as you scroll. The old <span class="mono">vh</span> unit measures the largest possible viewport, toolbars retracted. So a <span class="mono">100vh</span> hero is taller than the visible screen on first load. The bottom of it, usually the button you most want tapped, sits under the toolbar.</p>
+    <p>The old fix was JavaScript: measure <span class="mono">window.innerHeight</span> on resize and set a custom property. It worked, but it was a workaround for something CSS should have known.</p>
+  </section>
+
+  <section>
+    <h2>Three units for three toolbar states</h2>
+    <table>
+      <tr><th>Unit</th><th>Means</th><th>Use it for</th></tr>
+      <tr><td class="mono">svh</td><td>Small viewport, toolbars fully visible</td><td>Content that must never be cut off</td></tr>
+      <tr><td class="mono">lvh</td><td>Large viewport, toolbars retracted</td><td>Immersive backgrounds, same as old vh</td></tr>
+      <tr><td class="mono">dvh</td><td>Dynamic viewport, follows the toolbar as it moves</td><td>Most full-height sections</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>The one-line fix</h2>
+    <pre><code>.hero {
+  height: 100vh;   /* fallback for older browsers */
+  height: 100dvh;  /* modern browsers use this */
+}</code></pre>
+    <p>Keep the <span class="mono">vh</span> line first. Browsers that do not know <span class="mono">dvh</span> ignore the second line and keep the fallback. Browsers that do know it override with the dynamic value.</p>
+    <div class="note">
+      <strong>Honest note:</strong> <span class="mono">dvh</span> resizes the element as the toolbar moves, which can cause visible reflow mid-scroll. If the section must never jump, <span class="mono">svh</span> is the stable choice: it always fits, even with the toolbar fully visible.
+    </div>
+  </section>
+
+  <section>
+    <h2>Support</h2>
+    <p>Dynamic viewport units shipped in Chrome 108, Firefox 101, and Safari 15.4, so they work on iOS Safari, not just Chromium. Older browsers fall back to the <span class="mono">vh</span> line above.</p>
+  </section>
+
+  <section>
+    <h2>Try it</h2>
+    <p>Scroll this page on your phone. Watch the bar pinned to the bottom: <span class="mono">visualViewport.height</span> grows as the toolbar retracts. Switch the hero to <span class="mono">100vh</span> and notice the hero is taller than that number on first load. Switch to <span class="mono">100dvh</span> and the hero tracks it.</p>
+    <p>Keep scrolling. There is nothing more below except this paragraph and the footer, which is the point: the whole demo is the viewport itself.</p>
+  </section>
+</main>
+
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>
+</footer>
+
+<div class="livebar" id="livebar">measuring viewport…</div>
+
+<script>
+  var hero = document.getElementById('hero');
+  var heroReadout = document.getElementById('heroReadout');
+  var livebar = document.getElementById('livebar');
+  var buttons = document.querySelectorAll('[data-set-unit]');
+
+  function update() {
+    var vv = window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a';
+    heroReadout.textContent = 'Hero height: ' + hero.offsetHeight + 'px  (unit: 100' + hero.getAttribute('data-unit') + ')';
+    livebar.innerHTML = 'innerHeight: <b>' + window.innerHeight + 'px</b> &nbsp; visualViewport: <b>' + vv + 'px</b> &nbsp; hero: <b>' + hero.offsetHeight + 'px</b>';
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      hero.setAttribute('data-unit', btn.getAttribute('data-set-unit'));
+      buttons.forEach(function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+      update();
+    });
+  });
+
+  window.addEventListener('resize', update);
+  window.addEventListener('scroll', update, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', update);
+    window.visualViewport.addEventListener('scroll', update);
+  }
+  update();
+</script>
+</body>
+</html>
