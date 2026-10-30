@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>:has() is the parent selector CSS never had</title>
+<meta name="description" content="CSS could never style a parent from its child, so card highlights and form warnings needed JavaScript. :has() fixes that in three lines. Try all three examples live, plus a support readout from your own browser.">
+<meta property="og:title" content=":has() is the parent selector CSS never had">
+<meta property="og:description" content="CSS could never style a parent from its child, so card highlights and form warnings needed JavaScript. :has() fixes that in three lines. Try all three examples live.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/has-demo/">
+<meta property="og:image" content="https://dominic.balass.one/has-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content=":has() is the parent selector CSS never had">
+<meta name="twitter:description" content="CSS could never style a parent from its child, so card highlights and form warnings needed JavaScript. :has() fixes that in three lines. Try all three examples live.">
+<meta name="twitter:image" content="https://dominic.balass.one/has-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --good: #15803d; --bad: #b91c1c; --good-soft: #dcfce7; --bad-soft: #fee2e2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+      --good: #4ade80; --bad: #f87171; --good-soft: #14532d; --bad-soft: #450a0a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  .hero { padding: 2.5rem 1.5rem 2rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  .hero-inner { max-width: 42rem; margin: 0 auto; }
+  .hero h1 { margin: 0 0 0.75rem; font-size: clamp(2rem, 9vw, 3.25rem); line-height: 1.1; }
+  .hero h1 span { color: var(--purple); font-family: ui-monospace, monospace; }
+  .hero p { margin: 0; max-width: 34rem; color: var(--muted); }
+  .readout { margin-top: 1.25rem; background: var(--card); border: 1px solid var(--border); padding: 0.75rem 1rem; font-family: ui-monospace, monospace; font-size: 0.95rem; }
+  .readout b { color: var(--purple); }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  section > p { color: var(--muted); }
+  pre { background: #1d1d26; color: #eceaf6; padding: 1rem; overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: ui-monospace, monospace; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .note { background: var(--purple-soft); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; }
+  .note + .note { margin-top: 0.75rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+
+  /* Demo 1: pick cards */
+  .picks { display: grid; gap: 0.75rem; }
+  .pick { display: flex; align-items: center; gap: 0.75rem; background: var(--card); border: 2px solid var(--border); padding: 1rem; cursor: pointer; }
+  .pick input { width: 1.25rem; height: 1.25rem; accent-color: var(--purple); flex: none; }
+  .pick .label { font-weight: 600; }
+  .pick .sub { color: var(--muted); font-size: 0.92rem; }
+  .pick .badge { display: none; margin-left: auto; flex: none; background: var(--purple); color: #fff; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.55rem; }
+
+  /* Demo 2: email field */
+  .field { background: var(--card); border: 2px solid var(--border); padding: 1rem; }
+  .field label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+  .field input { width: 100%; font: inherit; padding: 0.6rem 0.75rem; border: 1px solid var(--border); background: var(--bg); color: var(--ink); }
+  .field input:focus { outline: 2px solid var(--purple); outline-offset: 1px; }
+  .field .hint, .field .ok { display: none; margin: 0.6rem 0 0; font-size: 0.92rem; }
+  .field .hint { color: var(--bad); }
+  .field .ok { color: var(--good); }
+
+  /* Demo 3: figure with image */
+  figure.demo-figure { margin: 0; background: var(--card); border: 2px solid var(--border); padding: 1rem; }
+  figure.demo-figure img { display: block; width: 100%; height: auto; }
+  figure.demo-figure figcaption { display: none; margin-top: 0.75rem; font-size: 0.92rem; color: var(--muted); }
+  .figure-status { margin: 0 0 0.75rem; color: var(--muted); }
+  .demo-button { font: inherit; cursor: pointer; border: 2px solid var(--purple); background: transparent; color: var(--ink); padding: 0.5rem 1rem; margin-top: 0.75rem; }
+  .demo-button:hover { background: var(--purple-soft); }
+
+  /* The :has() rules, guarded so older browsers get the plain fallback */
+  @supports selector(:has(*)) {
+    .pick:has(input:checked) { border-color: var(--purple); background: var(--purple-soft); }
+    .pick:has(input:checked) .badge { display: inline-block; }
+    .pick:has(input:focus-visible) { outline: 2px solid var(--purple); outline-offset: 2px; }
+    .field:has(input:invalid) { border-color: var(--bad); }
+    .field:has(input:invalid) .hint { display: block; }
+    .field:has(input:not(:placeholder-shown):valid) { border-color: var(--good); }
+    .field:has(input:not(:placeholder-shown):valid) .ok { display: block; }
+    figure.demo-figure:has(img) { border-color: var(--purple); }
+    figure.demo-figure:has(img) figcaption { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1><span>:has()</span> is the parent selector CSS never had</h1>
+    <p>For years, styling a parent based on its child meant JavaScript: listen for a change, toggle a class, keep the two in sync. Now the stylesheet can ask the question itself. Check a box below, type a bad email, remove the image. No JavaScript styles any of it. Only the support check and the image button run a few lines of script.</p>
+    <div class="readout" id="supportReadout">Checking this browser…</div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>1. Highlight the card you picked</h2>
+    <p>Tap a card. The checkbox lives inside the card, and the card styles itself when the box is checked. The old way was a change listener and a class.</p>
+    <div class="picks">
+      <label class="pick">
+        <input type="checkbox">
+        <span><span class="label">Email</span><br><span class="sub">A digest when something ships</span></span>
+        <span class="badge">Selected</span>
+      </label>
+      <label class="pick">
+        <input type="checkbox">
+        <span><span class="label">Text message</span><br><span class="sub">Only for the urgent stuff</span></span>
+        <span class="badge">Selected</span>
+      </label>
+      <label class="pick">
+        <input type="checkbox">
+        <span><span class="label">Nothing at all</span><br><span class="sub">Peace and quiet</span></span>
+        <span class="badge">Selected</span>
+      </label>
+    </div>
+    <pre><code>.pick:has(input:checked) {
+  border-color: #7c3aed;
+  background: #ede9fe;
+}</code></pre>
+  </section>
+
+  <section>
+    <h2>2. Flag the field with the bad input</h2>
+    <p>Type something that is not an email address. The box around the field turns red and the hint appears, from one selector. Type a real address and it turns green.</p>
+    <div class="field">
+      <label for="email-demo">Email address</label>
+      <input type="email" id="email-demo" placeholder="you@example.com" autocomplete="off">
+      <p class="hint">That does not look like an email address yet.</p>
+      <p class="ok">Looks good.</p>
+    </div>
+    <pre><code>.field:has(input:invalid) {
+  border-color: #b91c1c;
+}
+.field:has(input:invalid) .hint {
+  display: block;
+}</code></pre>
+  </section>
+
+  <section>
+    <h2>3. Style the figure only when it has an image</h2>
+    <p>The button adds and removes the image element itself. The caption bar and the purple border exist only while the image is in the figure. Nothing re-renders. The stylesheet notices the image is gone.</p>
+    <p class="figure-status" id="figureStatus">The figure has an image right now.</p>
+    <figure class="demo-figure" id="demoFigure">
+      <img id="demoImage" src="figure.png" alt="A purple panel with the text :has() on it" width="640" height="360">
+      <figcaption>This caption and the purple border are styled by <span class="mono">figure:has(img)</span>. Remove the image and they go away with it.</figcaption>
+    </figure>
+    <button type="button" class="demo-button" id="toggleImage" aria-pressed="true">Remove the image</button>
+    <pre><code>figure:has(img) {
+  border-color: #7c3aed;
+}
+figure:has(img) figcaption {
+  display: block;
+}</code></pre>
+  </section>
+
+  <section>
+    <h2>On this device</h2>
+    <p>The readout at the top is a live check run in your browser, not a claim from a table. It evaluates <span class="mono">CSS.supports('selector(:has(*))')</span>. If it says yes, every example above is really running on <span class="mono">:has()</span>.</p>
+    <table>
+      <tr><th>Browser</th><th>:has() shipped in</th></tr>
+      <tr><td>Chrome</td><td class="mono">105</td></tr>
+      <tr><td>Edge</td><td class="mono">105</td></tr>
+      <tr><td>Firefox</td><td class="mono">121</td></tr>
+      <tr><td>Safari</td><td class="mono">15.4</td></tr>
+    </table>
+    <p>Safari 15.4 covers macOS and iOS, so this works in Safari on iPhone, not just Chromium. The readout above is the ground truth for whatever browser you are in right now.</p>
+  </section>
+
+  <section>
+    <h2>The fallback pattern</h2>
+    <p>A browser that does not know <span class="mono">:has()</span> ignores the whole rule, so the page just looks plain. Nothing breaks. When the styled version needs a deliberate fallback, wrap the rule in a feature query. The <span class="mono">selector()</span> check is older than <span class="mono">:has()</span> itself, so it works everywhere <span class="mono">:has()</span> does.</p>
+    <pre><code>@supports selector(:has(*)) {
+  .pick:has(input:checked) {
+    border-color: #7c3aed;
+  }
+}</code></pre>
+    <div class="note"><strong>Worth knowing:</strong> <span class="mono">:has()</span> cannot contain another <span class="mono">:has()</span>, and pseudo-elements are not allowed inside it.</div>
+    <div class="note"><strong>Worth knowing:</strong> scope it to a class. <span class="mono">.card:has(img)</span> asks the browser to check far less than a bare <span class="mono">:has(img)</span> on its own.</div>
+  </section>
+</main>
+
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>
+</footer>
+
+<script>
+  var supported = false;
+  try { supported = CSS.supports('selector(:has(*))'); } catch (e) { supported = false; }
+  document.getElementById('supportReadout').innerHTML =
+    'CSS.supports(\'selector(:has(*))\') = <b>' + supported + '</b>' +
+    (supported ? ' &nbsp; This browser supports :has(). The examples above are live.' : ' &nbsp; This browser does not support :has(). The examples above show their plain fallback.');
+
+  var figure = document.getElementById('demoFigure');
+  var image = document.getElementById('demoImage');
+  var button = document.getElementById('toggleImage');
+  var statusEl = document.getElementById('figureStatus');
+  button.addEventListener('click', function () {
+    if (figure.contains(image)) {
+      figure.removeChild(image);
+      button.textContent = 'Add the image back';
+      button.setAttribute('aria-pressed', 'false');
+      statusEl.textContent = 'The figure has no image right now.';
+    } else {
+      figure.insertBefore(image, figure.firstChild);
+      button.textContent = 'Remove the image';
+      button.setAttribute('aria-pressed', 'true');
+      statusEl.textContent = 'The figure has an image right now.';
+    }
+  });
+</script>
+</body>
+</html>
