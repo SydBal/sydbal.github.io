@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scoundrel CLI, in your browser</title>
+<meta name="description" content="Play Scoundrel, the single-player roguelike card game, in a browser terminal or a tiny React UI. Both run the same pure game logic as the Node CLI.">
+<meta property="og:title" content="Scoundrel CLI, in your browser">
+<meta property="og:description" content="The card game as a command line game, simulated in your browser, plus a tiny React component powered by the same core.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/scoundrel-cli-demo/">
+<meta property="og:image" content="https://dominic.balass.one/scoundrel-cli-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Scoundrel CLI, in your browser">
+<meta name="twitter:description" content="The card game as a command line game, simulated in your browser, plus a tiny React component powered by the same core.">
+<meta name="twitter:image" content="https://dominic.balass.one/scoundrel-cli-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --deep: #5b21b6; --soft: #ede9fe; --border: #e4e4e7;
+    --term-bg: #101014; --term-ink: #d4f5d4; --term-green: #8be89b; --term-dim: #9a9aa5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --soft: #2e1a5e; --border: #2c2c34;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55;
+  }
+  main { max-width: 56rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  header { text-align: center; margin-bottom: 2.5rem; }
+  h1 {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 2.4rem; margin: 0 0 0.5rem; letter-spacing: -0.02em;
+  }
+  h1 .suit { color: var(--purple); }
+  .lede { color: var(--muted); font-size: 1.1rem; max-width: 38rem; margin: 0 auto; }
+  h2 { font-size: 1.4rem; margin: 0 0 0.4rem; }
+  section { margin-bottom: 3rem; }
+  section > p { color: var(--muted); margin-top: 0; }
+  a { color: var(--purple); }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--soft); padding: 0.1em 0.35em; font-size: 0.92em;
+  }
+  pre {
+    background: var(--term-bg); color: var(--term-ink); padding: 1rem 1.25rem;
+    overflow-x: auto; font-size: 0.9rem; line-height: 1.5; margin: 1rem 0 0;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  /* Terminal */
+  .terminal { background: var(--term-bg); border: 2px solid var(--purple); }
+  .term-output {
+    height: 340px; overflow-y: auto; padding: 1rem 1.25rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9rem; line-height: 1.5; color: var(--term-ink);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .term-output .echo { color: var(--term-green); }
+  .term-output .dim { color: var(--term-dim); }
+  .term-form { display: flex; border-top: 1px solid #2c2c34; }
+  .term-form span {
+    color: var(--term-green); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 0.7rem 0 0.7rem 1rem;
+  }
+  .term-form input {
+    flex: 1; background: none; border: 0; outline: none; color: var(--term-ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95rem;
+    padding: 0.7rem 1rem 0.7rem 0.5rem; min-width: 0;
+  }
+  .term-form input:disabled { color: var(--term-dim); }
+  .term-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+  .term-buttons button, .seed-row button {
+    font: inherit; cursor: pointer; border: 2px solid var(--purple);
+    background: var(--purple); color: #fff; padding: 0.45rem 1rem;
+  }
+  .term-buttons button:disabled { opacity: 0.4; cursor: default; }
+  .term-buttons button.ghost, .seed-row button.ghost {
+    background: var(--card); color: var(--purple);
+  }
+  .seed-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; align-items: center; }
+  .seed-row label { color: var(--muted); }
+  .seed-row input {
+    font: inherit; padding: 0.45rem 0.6rem; width: 8rem;
+    border: 2px solid var(--border); background: var(--card); color: var(--ink);
+  }
+
+  /* React demo */
+  .rg { border: 2px solid var(--border); background: var(--card); padding: 1.25rem; }
+  .rg-status { margin-bottom: 1rem; }
+  .rg-hp { display: flex; gap: 0.75rem; align-items: center; font-weight: 600; }
+  .rg-bar { flex: 1; height: 12px; background: var(--border); }
+  .rg-fill { height: 100%; background: var(--purple); transition: width 0.2s; }
+  .rg-meta { color: var(--muted); font-size: 0.92rem; margin-top: 0.4rem; }
+  .rg-banner {
+    background: var(--soft); border: 2px solid var(--purple);
+    padding: 0.6rem 0.9rem; margin-bottom: 1rem; font-weight: 600;
+  }
+  .rg-banner button {
+    font: inherit; cursor: pointer; margin-left: 0.5rem;
+    border: 2px solid var(--purple); background: var(--purple); color: #fff; padding: 0.2rem 0.8rem;
+  }
+  .rg-room { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.6rem; }
+  .rg-card {
+    font: inherit; cursor: pointer; text-align: left; padding: 0.8rem;
+    background: var(--card); color: var(--ink); border: 2px solid var(--border);
+  }
+  .rg-card:hover:not(:disabled) { border-color: var(--purple); }
+  .rg-card:disabled { opacity: 0.55; cursor: default; }
+  .rg-card-name {
+    display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1.5rem; font-weight: 700;
+  }
+  .rg-card-sub { display: block; font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+  .rg-actions { margin-top: 0.9rem; }
+  .rg-actions button {
+    font: inherit; cursor: pointer; border: 2px solid var(--purple);
+    background: var(--card); color: var(--purple); padding: 0.45rem 1rem;
+  }
+  .rg-actions button:disabled { opacity: 0.4; cursor: default; }
+  .rg-log { list-style: none; margin: 1rem 0 0; padding: 0; color: var(--muted); font-size: 0.92rem; }
+  .rg-log li { padding: 0.2rem 0; border-top: 1px solid var(--border); }
+  .muted { color: var(--muted); }
+
+  .howto li { margin-bottom: 0.5rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; }
+</style>
+<!-- React 18.3.1 and htm are vendored in ./vendor/ so the demo has no runtime CDN dependency. -->
+</head>
+<body>
+<main>
+  <header>
+    <h1>Scoundrel <span class="suit">CLI</span></h1>
+    <p class="lede">The card game from Classic Scoundrel, as a command line game. This page runs the same logic two ways: a terminal simulation, and a tiny React component. One core, no rewrites.</p>
+  </header>
+
+  <section aria-labelledby="term-heading">
+    <h2 id="term-heading">Play it in the terminal</h2>
+    <p>Type commands just like the Node CLI. Cards are numbered, <code>f</code> flees, <code>h</code> helps, <code>q</code> quits. The buttons below the terminal send the same commands, for tapping.</p>
+    <div class="terminal">
+      <div class="term-output" id="term-output" role="log" aria-live="polite" aria-label="Game terminal output"></div>
+      <form class="term-form" id="term-form">
+        <span aria-hidden="true">&gt;</span>
+        <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command" placeholder="type a command, then Enter">
+      </form>
+    </div>
+    <div class="term-buttons" aria-label="Command buttons">
+      <button type="button" data-cmd="1">[1]</button>
+      <button type="button" data-cmd="2">[2]</button>
+      <button type="button" data-cmd="3">[3]</button>
+      <button type="button" data-cmd="4">[4]</button>
+      <button type="button" data-cmd="f" class="ghost">Flee (f)</button>
+      <button type="button" data-cmd="h" class="ghost">Help (h)</button>
+      <button type="button" data-cmd="q" class="ghost">Quit (q)</button>
+    </div>
+    <div class="seed-row">
+      <label for="seed-input">Seed</label>
+      <input id="seed-input" type="text" inputmode="numeric" placeholder="optional">
+      <button type="button" id="new-game-btn">New game</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="react-heading">
+    <h2 id="react-heading">Same game, React UI</h2>
+    <p>The component below holds one game state and calls the same three functions: <code>newGame</code>, <code>playCard</code>, <code>flee</code>. No game logic lives in the component. Click a card to play it.</p>
+    <div id="react-root"><p class="muted">Loading the React demo...</p></div>
+    <pre><code>const [game, setGame] = useState(() =&gt; newGame());
+
+function doPlay(i) {
+  const next = structuredClone(game);
+  playCard(next, i);
+  setGame(next);
+}</code></pre>
+  </section>
+
+  <section aria-labelledby="how-heading">
+    <h2 id="how-heading">How it fits together</h2>
+    <ul class="howto">
+      <li><code>game-core.js</code> is the whole game as pure functions: no DOM, no Node APIs, no input or output. It is the ES module twin of <code>scoundrel.js</code>, and an equivalence check runs the same seeds and moves through both and requires identical results.</li>
+      <li>The terminal above is a thin shell around the core: it prints <code>render(game)</code> and feeds typed commands to <code>playCard</code> and <code>flee</code>, exactly like the Node CLI.</li>
+      <li>The React component is a thinner shell: one <code>useState</code>, one clone per move, and the same three core calls. Swap the shell and the game does not notice.</li>
+      <li>Get the CLI itself at <a href="https://github.com/SydBal/scoundrel-CLI">github.com/SydBal/scoundrel-CLI</a>. The full graphical game is <a href="https://classicscoundrel.com">classicscoundrel.com</a>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>. Scoundrel is a single-player roguelike card game. Clear all 44 cards to win.</p>
+  </footer>
+</main>
+
+<script type="module">
+import { newGame, playCard, flee, canFlee, render, statsLine } from './game-core.js';
+
+const out = document.getElementById('term-output');
+const input = document.getElementById('term-input');
+const form = document.getElementById('term-form');
+const seedInput = document.getElementById('seed-input');
+let game, seed, awaitingAgain = false, quit = false;
+
+function print(lines, cls) {
+  for (const line of lines) {
+    for (const part of String(line).split('\n')) {
+      const div = document.createElement('div');
+      if (cls) div.className = cls;
+      div.textContent = part;
+      out.appendChild(div);
+    }
+  }
+  out.scrollTop = out.scrollHeight;
+}
+
+function syncButtons() {
+  document.querySelectorAll('[data-cmd]').forEach((b) => {
+    const c = b.dataset.cmd;
+    if (c === 'f') {
+      const check = game ? canFlee(game) : { ok: false };
+      b.disabled = quit || awaitingAgain || !game || game.over || !check.ok;
+      b.textContent = check.ok ? 'Flee (f)' : 'Flee (locked)';
+    } else if (c === 'h' || c === 'q') {
+      b.disabled = quit && c === 'q';
+    } else {
+      const n = Number(c);
+      b.disabled = quit || awaitingAgain || !game || game.over || n > game.room.length;
+    }
+  });
+}
+
+function startGame(seedArg) {
+  seed = seedArg;
+  game = newGame(seed);
+  awaitingAgain = false;
+  quit = false;
+  out.innerHTML = '';
+  input.disabled = false;
+  print([
+    'SCOUNDREL, in your browser. 20 HP, 44 cards, rooms of 4.' + (seed !== undefined ? ' Seed ' + seed + '.' : ''),
+    render(game),
+  ]);
+  syncButtons();
+}
+
+function handleCommand(raw) {
+  const cmd = raw.trim().toLowerCase();
+  if (!cmd) return;
+  print(['> ' + raw.trim()], 'echo');
+
+  if (quit) {
+    print(['Start a new game to play again.'], 'dim');
+    return;
+  }
+
+  if (awaitingAgain) {
+    if (cmd === 'y' || cmd === 'yes') {
+      if (seed !== undefined) seed += 1;
+      startGame(seed);
+    } else if (cmd === 'n' || cmd === 'no') {
+      print(['You walk away from the dungeon.']);
+      quit = true;
+      input.disabled = true;
+    } else {
+      print(['Answer y or n.']);
+    }
+    syncButtons();
+    return;
+  }
+
+  if (cmd === 'q' || cmd === 'quit') {
+    print(['You walk away from the dungeon.']);
+    quit = true;
+    input.disabled = true;
+    syncButtons();
+    return;
+  }
+
+  if (cmd === 'h' || cmd === 'help') {
+    print(['Pick a card by number. Hearts heal once per room. Diamonds equip as your weapon. Clubs and Spades are monsters; your weapon blocks a monster only if it is weaker than the last one the weapon slew (a fresh weapon blocks anything once). Flee (f) only works in a fresh room, before you touch a card, and never twice in a row. Each refill (1 card left, 3 dealt) is a fresh room: healing and flee unlock again.']);
+    syncButtons();
+    return;
+  }
+
+  if (cmd === 'f' || cmd === 'flee') {
+    print([...flee(game), render(game)]);
+    syncButtons();
+    return;
+  }
+
+  const n = Number(cmd);
+  if (Number.isInteger(n) && n >= 1 && n <= game.room.length) {
+    const events = playCard(game, n - 1);
+    print(events);
+    if (game.over) {
+      print([
+        game.won ? 'YOU WIN. The dungeon is clear.' : 'YOU DIED. The dungeon keeps your bones.',
+        statsLine(game),
+        'Play again? (y/n)',
+      ]);
+      awaitingAgain = true;
+    } else {
+      print([render(game)]);
+    }
+    syncButtons();
+    return;
+  }
+
+  print(['Unknown command. Use a card number, f, h, or q.']);
+  syncButtons();
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const value = input.value;
+  input.value = '';
+  handleCommand(value);
+  input.focus();
+});
+
+document.querySelectorAll('[data-cmd]').forEach((b) => {
+  b.addEventListener('click', () => {
+    handleCommand(b.dataset.cmd);
+    input.focus();
+  });
+});
+
+document.getElementById('new-game-btn').addEventListener('click', () => {
+  const v = seedInput.value.trim();
+  if (v === '') {
+    startGame(undefined);
+    return;
+  }
+  const s = Number(v);
+  if (!Number.isInteger(s)) {
+    print(['Seed must be a whole number.'], 'dim');
+    return;
+  }
+  startGame(s);
+});
+
+startGame(undefined);
+</script>
+
+<script src="./vendor/react.production.min.js"></script>
+<script src="./vendor/react-dom.production.min.js"></script>
+<script src="./vendor/htm.umd.js"></script>
+
+<script type="module">
+import { newGame, playCard, flee, canFlee, cardName, cardPreview, weaponStatus } from './game-core.js';
+
+const { useState } = React;
+const html = htm.bind(React.createElement);
+
+function ScoundrelGame() {
+  const [game, setGame] = useState(() => newGame());
+  const [log, setLog] = useState(['A new run begins. Good luck.']);
+
+  function doPlay(i) {
+    const next = structuredClone(game);
+    const events = playCard(next, i);
+    setLog((l) => [...events, ...l].slice(0, 5));
+    setGame(next);
+  }
+
+  function doFlee() {
+    const next = structuredClone(game);
+    const events = flee(next);
+    setLog((l) => [...events, ...l].slice(0, 5));
+    setGame(next);
+  }
+
+  function doAgain() {
+    setGame(newGame());
+    setLog(['A new run begins. Good luck.']);
+  }
+
+  const fleeCheck = canFlee(game);
+
+  return html`
+    <div className="rg">
+      <div className="rg-status">
+        <div className="rg-hp">
+          <span>HP ${game.hp}/${game.maxHp}</span>
+          <div className="rg-bar"><div className="rg-fill" style=${{ width: (game.hp / game.maxHp * 100) + '%' }}></div></div>
+        </div>
+        <div className="rg-meta">Weapon: ${weaponStatus(game)} | Deck: ${game.deck.length} | Discard: ${game.discard.length} | Rooms: ${game.roomsCleared} | Flees: ${game.fleeCount}</div>
+      </div>
+      ${game.over && html`
+        <div className="rg-banner">
+          ${game.won ? 'You cleared the dungeon.' : 'You died.'}
+          <button onClick=${doAgain}>Play again</button>
+        </div>
+      `}
+      <div className="rg-room">
+        ${game.room.map((card, i) => html`
+          <button key=${i} className="rg-card" disabled=${game.over} onClick=${() => doPlay(i)}>
+            <span className="rg-card-name">${cardName(card)}</span>
+            <span className="rg-card-sub">${cardPreview(game, card)}</span>
+          </button>
+        `)}
+      </div>
+      <div className="rg-actions">
+        <button disabled=${!fleeCheck.ok || game.over} onClick=${doFlee} title=${fleeCheck.ok ? 'Flee this room' : fleeCheck.why}>
+          ${fleeCheck.ok ? 'Flee this room' : 'Flee: ' + fleeCheck.why}
+        </button>
+      </div>
+      <ul className="rg-log">
+        ${log.map((line, i) => html`<li key=${i}>${line}</li>`)}
+      </ul>
+    </div>
+  `;
+}
+
+ReactDOM.createRoot(document.getElementById('react-root')).render(html`<${ScoundrelGame} />`);
+</script>
+</body>
+</html>
