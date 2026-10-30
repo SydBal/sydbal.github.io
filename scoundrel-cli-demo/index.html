@@ -332,7 +332,10 @@ form.addEventListener('submit', (e) => {
 document.querySelectorAll('[data-cmd]').forEach((b) => {
   b.addEventListener('click', () => {
     handleCommand(b.dataset.cmd);
-    input.focus();
+    // Only refocus the input on devices with a fine pointer (mouse).
+    // On phones, focusing the text input pops the virtual keyboard,
+    // which is not what a button tap should do.
+    if (window.matchMedia('(pointer: fine)').matches) input.focus();
   });
 });
 
