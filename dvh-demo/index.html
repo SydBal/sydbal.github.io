@@ -110,6 +110,7 @@
   <section>
     <h2>Support</h2>
     <p>Dynamic viewport units shipped in Chrome 108, Firefox 101, and Safari 15.4, so they work on iOS Safari, not just Chromium. Older browsers fall back to the <span class="mono">vh</span> line above.</p>
+    <p>One iPhone caveat: only Safari shows the difference. Firefox, Chrome, and Edge on iPhone all run in a webview whose toolbar sits outside the page, so the viewport never splits into small and large there, and all four units measure the same.</p>
   </section>
 
   <section>
@@ -164,7 +165,7 @@
     document.getElementById('measure-lvh').textContent = lvh + 'px';
     document.getElementById('measure-dvh').textContent = dvh + 'px';
     if (vh === svh && svh === lvh && lvh === dvh) {
-      measureNote.textContent = 'All four measure the same here. That means the toolbar in this browser does not move (desktop, an in-app browser, or a tablet), or the new units are not supported, so there is nothing for the units to differ on. Try full Safari on an iPhone and scroll: svh and dvh will drop below lvh while the toolbar is showing.';
+      measureNote.textContent = 'All four measure the same here. That means the toolbar in this browser does not move (desktop, a tablet, an in-app browser, or Firefox, Chrome, or Edge on iPhone, where the toolbar sits outside the webview), or the new units are not supported, so there is nothing for the units to differ on. Try full Safari on an iPhone and scroll: svh and dvh will drop below lvh while the toolbar is showing.';
     } else {
       measureNote.textContent = 'They differ by ' + (lvh - svh) + 'px right now. That gap is the toolbar. Scroll and watch dvh move between svh and lvh as the toolbar retracts.';
     }
