@@ -113,6 +113,19 @@
   </section>
 
   <section>
+    <h2>Measured on this device</h2>
+    <p>These four numbers are measured live from hidden elements, one per unit. No toggling or scrolling needed. If they differ, the gap is the toolbar.</p>
+    <table>
+      <tr><th>Unit</th><th>Measured</th></tr>
+      <tr><td class="mono">100vh</td><td class="mono" id="measure-vh">measuring…</td></tr>
+      <tr><td class="mono">100svh</td><td class="mono" id="measure-svh">measuring…</td></tr>
+      <tr><td class="mono">100lvh</td><td class="mono" id="measure-lvh">measuring…</td></tr>
+      <tr><td class="mono">100dvh</td><td class="mono" id="measure-dvh">measuring…</td></tr>
+    </table>
+    <div class="note" id="measureNote" style="margin-top: 1rem;">measuring…</div>
+  </section>
+
+  <section>
     <h2>Try it</h2>
     <p>Scroll this page on your phone. Watch the bar pinned to the bottom: <span class="mono">visualViewport.height</span> grows as the toolbar retracts. Switch the hero to <span class="mono">100vh</span> and notice the hero is taller than that number on first load. Switch to <span class="mono">100dvh</span> and the hero tracks it.</p>
     <p>Keep scrolling. There is nothing more below except this paragraph and the footer, which is the point: the whole demo is the viewport itself.</p>
@@ -125,16 +138,36 @@
 
 <div class="livebar" id="livebar">measuring viewport…</div>
 
+<div aria-hidden="true" style="position: fixed; left: -9999px; top: 0; visibility: hidden; pointer-events: none;">
+  <div id="m-vh" style="height: 100vh;"></div>
+  <div id="m-svh" style="height: 100vh; height: 100svh;"></div>
+  <div id="m-lvh" style="height: 100vh; height: 100lvh;"></div>
+  <div id="m-dvh" style="height: 100vh; height: 100dvh;"></div>
+</div>
+
 <script>
   var hero = document.getElementById('hero');
   var heroReadout = document.getElementById('heroReadout');
   var livebar = document.getElementById('livebar');
   var buttons = document.querySelectorAll('[data-set-unit]');
 
+  var measureNote = document.getElementById('measureNote');
+  function measured(id) { var el = document.getElementById(id); return el ? el.offsetHeight : 0; }
+
   function update() {
     var vv = window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a';
     heroReadout.textContent = 'Hero height: ' + hero.offsetHeight + 'px  (unit: 100' + hero.getAttribute('data-unit') + ')';
     livebar.innerHTML = 'innerHeight: <b>' + window.innerHeight + 'px</b> &nbsp; visualViewport: <b>' + vv + 'px</b> &nbsp; hero: <b>' + hero.offsetHeight + 'px</b>';
+    var vh = measured('m-vh'), svh = measured('m-svh'), lvh = measured('m-lvh'), dvh = measured('m-dvh');
+    document.getElementById('measure-vh').textContent = vh + 'px';
+    document.getElementById('measure-svh').textContent = svh + 'px';
+    document.getElementById('measure-lvh').textContent = lvh + 'px';
+    document.getElementById('measure-dvh').textContent = dvh + 'px';
+    if (vh === svh && svh === lvh && lvh === dvh) {
+      measureNote.textContent = 'All four measure the same here. That means the toolbar in this browser does not move (desktop, an in-app browser, or a tablet), or the new units are not supported, so there is nothing for the units to differ on. Try full Safari on an iPhone and scroll: svh and dvh will drop below lvh while the toolbar is showing.';
+    } else {
+      measureNote.textContent = 'They differ by ' + (lvh - svh) + 'px right now. That gap is the toolbar. Scroll and watch dvh move between svh and lvh as the toolbar retracts.';
+    }
   }
 
   buttons.forEach(function (btn) {
