@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herd: move every animal into its pen</title>
+<meta name="description" content="A top-down herding game. Walk the yard and push sheep, goats, pigs, and chickens into their target pens. Each species has its own AI: sheep flock, goats wander, pigs root, chickens scatter.">
+<meta property="og:title" content="Herd: move every animal into its pen">
+<meta property="og:description" content="A top-down herding game. Push sheep, goats, pigs, and chickens into their target pens. Each species has its own AI.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/herd/">
+<meta property="og:image" content="https://dominic.balass.one/herd/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Herd: move every animal into its pen">
+<meta name="twitter:description" content="A top-down herding game. Push sheep, goats, pigs, and chickens into their target pens. Each species has its own AI.">
+<meta name="twitter:image" content="https://dominic.balass.one/herd/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --grass: #7da05c; --dirt: #c7a26e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  .hero { padding: 2.5rem 1.5rem 1.5rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  .hero-inner { max-width: 62rem; margin: 0 auto; }
+  .hero h1 { margin: 0 0 0.5rem; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.1; }
+  .hero h1 span { color: var(--purple); }
+  .hero p { margin: 0; max-width: 36rem; color: var(--muted); }
+  main { max-width: 62rem; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .hud { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center; background: var(--card); border: 1px solid var(--border); padding: 0.6rem 1rem; margin-bottom: 0.75rem; font-size: 0.95rem; }
+  .hud .level { font-weight: 700; }
+  .hud .targets { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
+  .hud .targets b { color: var(--purple); }
+  .hud .spacer { flex: 1; }
+  .hud button { font: inherit; cursor: pointer; border: 2px solid var(--purple); background: transparent; color: var(--ink); padding: 0.3rem 0.8rem; }
+  .hud button:hover { background: var(--purple-soft); }
+  .stage { position: relative; max-width: 1000px; margin: 0 auto; border: 1px solid var(--border); background: var(--grass); }
+  canvas { display: block; width: 100%; height: auto; touch-action: none; }
+  .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(16, 16, 20, 0.62); padding: 1rem; }
+  .overlay[hidden] { display: none; }
+  .panel { background: var(--card); color: var(--ink); border: 1px solid var(--border); max-width: 30rem; width: 100%; padding: 1.5rem; text-align: center; }
+  .panel h2 { margin: 0 0 0.5rem; font-size: 1.6rem; }
+  .panel p { color: var(--muted); margin: 0.5rem 0; }
+  .panel .big { font-size: 1.15rem; color: var(--ink); }
+  .panel button { font: inherit; font-size: 1.05rem; cursor: pointer; border: 2px solid var(--purple); background: var(--purple); color: #fff; padding: 0.6rem 1.5rem; margin-top: 1rem; }
+  .panel button:hover { background: var(--purple-deep); }
+  .controls-note { color: var(--muted); font-size: 0.92rem; margin-top: 0.75rem; text-align: center; }
+  h2.section { font-size: 1.4rem; margin: 2.5rem 0 0.5rem; }
+  .guide { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+  .guide article { background: var(--card); border: 1px solid var(--border); padding: 1rem; }
+  .guide h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+  .guide .dot { display: inline-block; width: 0.9rem; height: 0.9rem; border-radius: 50%; vertical-align: -0.1rem; margin-right: 0.35rem; border: 1px solid rgba(0,0,0,0.25); }
+  .guide p { margin: 0; color: var(--muted); font-size: 0.93rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1><span>Herd</span></h1>
+    <p>You are the herder. Walk the yard and push every animal into its target pen. The animals do the rest: they flock, wander, root, and scatter, each in their own way.</p>
+  </div>
+</header>
+
+<main>
+  <div class="hud" aria-live="off">
+    <span class="level" id="hudLevel">Level 1</span>
+    <span class="targets" id="hudTargets"></span>
+    <span class="spacer"></span>
+    <span class="mono" id="hudTimer">0:00</span>
+    <button type="button" id="btnPause">Pause</button>
+    <button type="button" id="btnRestart">Restart</button>
+  </div>
+
+  <div class="stage">
+    <canvas id="game" width="1000" height="640" aria-label="Top-down herding yard. Use WASD or arrow keys to move the herder, or drag on touch screens."></canvas>
+    <div class="overlay" id="startOverlay">
+      <div class="panel">
+        <h2>Herd</h2>
+        <p class="big">Get every animal into its target pen before the yard wins.</p>
+        <p>Walk into the herd to push animals ahead of you. Run with Shift to push harder, but running spooks them. Fences stop everyone. Gates are the gaps.</p>
+        <p><span class="mono">WASD</span> or <span class="mono">arrows</span> to walk &middot; <span class="mono">Shift</span> to run &middot; <span class="mono">R</span> restart &middot; <span class="mono">P</span> pause<br>On touch: drag anywhere to steer, push far to run.</p>
+        <button type="button" id="btnStart">Start herding</button>
+      </div>
+    </div>
+    <div class="overlay" id="winOverlay" hidden>
+      <div class="panel">
+        <h2 id="winTitle">Pen closed</h2>
+        <p class="big" id="winText">Every target met.</p>
+        <p id="winTime" class="mono"></p>
+        <button type="button" id="btnNext">Next level</button>
+      </div>
+    </div>
+  </div>
+  <p class="controls-note">Tip: approach slowly from behind the flock and walk them through the gate. Charging in splits the flock and sends chickens everywhere.</p>
+
+  <h2 class="section">Four animals, four brains</h2>
+  <div class="guide">
+    <article>
+      <h3><span class="dot" style="background:#f5f2e8"></span>Sheep</h3>
+      <p>Flock hard. They stick together, match each other's direction, and flee from you as one mass. Steer the flock, not the sheep.</p>
+    </article>
+    <article>
+      <h3><span class="dot" style="background:#b08954"></span>Goats</h3>
+      <p>Stubborn wanderers. They barely flock, ignore you until you are close, dash off at random, and stop to nibble. Patience beats speed.</p>
+    </article>
+    <article>
+      <h3><span class="dot" style="background:#e8a7a0"></span>Pigs</h3>
+      <p>Slow and heavy. They take a while to get moving, keep going once they do, and stop to root in the dirt. Gentle, steady pressure works.</p>
+    </article>
+    <article>
+      <h3><span class="dot" style="background:#f7f3e3"></span>Chickens</h3>
+      <p>Fast and panicky. Huge flight radius, erratic turns, no flocking at all. One wrong rush and they scatter to every corner of the yard.</p>
+    </article>
+  </div>
+</main>
+
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>
+</footer>
+
+<script>
+'use strict';
+/* Herd: top-down herding. Fixed yard, fence segments, pen polygons, boid-ish AI per species. */
+var W = 1000, H = 640;
+var canvas = document.getElementById('game');
+var ctx = canvas.getContext('2d');
+var dpr = Math.min(2, window.devicePixelRatio || 1);
+canvas.width = W * dpr;
+canvas.height = H * dpr;
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ---------- yard: fences and pens ---------- */
+/* Fence segments: {x1,y1,x2,y2}. Gaps are simply absent segments. */
+var segments = [];
+function wall(x1, y1, x2, y2, gaps) {
+  var dx = x2 - x1, dy = y2 - y1;
+  var len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+  var cuts = [[0, len]];
+  (gaps || []).forEach(function (g) {
+    var next = [];
+    cuts.forEach(function (c) {
+      if (g[1] <= c[0] || g[0] >= c[1]) { next.push(c); return; }
+      if (g[0] > c[0]) next.push([c[0], g[0]]);
+      if (g[1] < c[1]) next.push([g[1], c[1]]);
+    });
+    cuts = next;
+  });
+  cuts.forEach(function (c) {
+    if (c[1] - c[0] < 2) return;
+    segments.push({ x1: x1 + ux * c[0], y1: y1 + uy * c[0], x2: x1 + ux * c[1], y2: y1 + uy * c[1] });
+  });
+}
+function arc(cx, cy, r, a0, a1, n) {
+  var prev = null;
+  for (var i = 0; i <= n; i++) {
+    var a = a0 + (a1 - a0) * (i / n);
+    var p = { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r };
+    if (prev) segments.push({ x1: prev.x, y1: prev.y, x2: p.x, y2: p.y });
+    prev = p;
+  }
+  return prev;
+}
+
+/* Outer boundary: rect 60..840 x 60..580, round pen bulging right of x=840. */
+wall(60, 60, 840, 60);            /* top */
+wall(60, 580, 840, 580);          /* bottom */
+wall(60, 60, 60, 580);            /* left */
+wall(840, 60, 840, 580, [[230, 290]]); /* right chord, gate gap y 290..350 */
+arc(840, 320, 120, -Math.PI / 2, Math.PI / 2, 12); /* round pen arc */
+/* Interior: x=460 divider with two gates; y=290 divider, no gap. */
+wall(460, 60, 460, 580, [[80, 140], [320, 380]]);
+wall(60, 290, 460, 290);
+
+var ARC_POINTS = [];
+(function () {
+  for (var i = 0; i <= 12; i++) {
+    var a = -Math.PI / 2 + Math.PI * (i / 12);
+    ARC_POINTS.push([840 + Math.cos(a) * 120, 320 + Math.sin(a) * 120]);
+  }
+})();
+var PENS = [
+  { name: 'North Pen', poly: [[60, 60], [460, 60], [460, 290], [60, 290]], tint: '#cda978', label: [260, 130] },
+  { name: 'South Pen', poly: [[60, 290], [460, 290], [460, 580], [60, 580]], tint: '#c4a06a', label: [260, 470] },
+  { name: 'Round Pen', poly: [[840, 200]].concat(ARC_POINTS).concat([[840, 440]]), tint: '#d0ac7a', label: [898, 320], labelSize: 15 }
+];
+
+function pointInPoly(x, y, poly) {
+  var inside = false;
+  for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    var xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function collideCircle(e) {
+  for (var i = 0; i < segments.length; i++) {
+    var s = segments[i];
+    var dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+    var len2 = dx * dx + dy * dy;
+    var t = len2 ? ((e.x - s.x1) * dx + (e.y - s.y1) * dy) / len2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    var px = s.x1 + dx * t, py = s.y1 + dy * t;
+    var ox = e.x - px, oy = e.y - py;
+    var d = Math.hypot(ox, oy);
+    if (d < e.r && d > 0.0001) {
+      e.x = px + (ox / d) * e.r;
+      e.y = py + (oy / d) * e.r;
+    } else if (d <= 0.0001) {
+      e.x += e.r; /* exactly on the line: nudge out */
+    }
+  }
+}
+/* ---------- species: four different brains ---------- */
+var SPECIES = {
+  sheep:   { r: 7, speed: 105, fleeR: 95,  flee: 1.0,  cohesion: 1.0,  align: 0.55, sep: 1.3, wander: 0.7, turn: 3.0, body: '#f5f2e8', head: '#3a3230' },
+  goat:    { r: 7, speed: 92,  fleeR: 52,  flee: 0.8,  cohesion: 0.25, align: 0.10, sep: 1.0, wander: 1.5, turn: 3.4, body: '#b08954', head: '#5b4632' },
+  pig:     { r: 9, speed: 62,  fleeR: 78,  flee: 0.7,  cohesion: 0.40, align: 0.20, sep: 1.0, wander: 0.5, turn: 1.3, body: '#e8a7a0', head: '#c97f78' },
+  chicken: { r: 5, speed: 165, fleeR: 140, flee: 1.25, cohesion: 0.10, align: 0.00, sep: 0.8, wander: 1.9, turn: 5.0, body: '#f7f3e3', head: '#c0392b' }
+};
+var LEVELS = [
+  { name: 'First flock', animals: [['sheep', 10]],
+    targets: [{ pen: 0, species: 'sheep', count: 8 }] },
+  { name: 'Mixed herd', animals: [['sheep', 8], ['goat', 6]],
+    targets: [{ pen: 0, species: 'sheep', count: 6 }, { pen: 1, species: 'goat', count: 4 }] },
+  { name: 'Full yard', animals: [['sheep', 8], ['goat', 5], ['pig', 6], ['chicken', 8]],
+    targets: [{ pen: 0, species: 'sheep', count: 6 }, { pen: 0, species: 'chicken', count: 4 },
+              { pen: 1, species: 'goat', count: 4 }, { pen: 2, species: 'pig', count: 5 }] }
+];
+
+/* ---------- state ---------- */
+var state = 'ready';
+var levelIndex = 0;
+var animals = [];
+var player = { x: 720, y: 320, vx: 0, vy: 0, r: 10, heading: -Math.PI / 2, speedNow: 0 };
+var timer = 0, holdT = 0, lastCounts = '';
+
+function spawnAnimals(spec) {
+  var list = [];
+  spec.forEach(function (entry) {
+    for (var i = 0; i < entry[1]; i++) {
+      var x = 0, y = 0, ok = false, tries = 0;
+      while (!ok && tries < 200) {
+        tries++;
+        x = 480 + Math.random() * 340;
+        y = 80 + Math.random() * 480;
+        ok = true;
+        for (var p = 0; p < PENS.length; p++) if (pointInPoly(x, y, PENS[p].poly)) { ok = false; break; }
+        if (ok) for (var j = 0; j < list.length; j++) {
+          if (Math.hypot(list[j].x - x, list[j].y - y) < 24) { ok = false; break; }
+        }
+      }
+      list.push({ species: entry[0], x: x, y: y, vx: 0, vy: 0, r: SPECIES[entry[0]].r,
+        heading: Math.random() * Math.PI * 2, timer: 1 + Math.random() * 3,
+        mode: '', modeT: 0, modeAng: 0 });
+    }
+  });
+  return list;
+}
+
+function startLevel(idx, autostart) {
+  levelIndex = idx;
+  animals = spawnAnimals(LEVELS[idx].animals);
+  player.x = 720; player.y = 320; player.vx = 0; player.vy = 0;
+  timer = 0; holdT = 0; lastCounts = '';
+  document.getElementById('hudLevel').textContent = 'Level ' + (idx + 1) + ': ' + LEVELS[idx].name;
+  var rows = LEVELS[idx].targets.map(function (t, i) {
+    return '<span data-target="' + i + '">' + PENS[t.pen].name + ': <b>0/' + t.count + '</b> ' + t.species + '</span>';
+  }).join('');
+  document.getElementById('hudTargets').innerHTML = rows;
+  document.getElementById('hudTimer').textContent = '0:00';
+  document.getElementById('startOverlay').hidden = true;
+  document.getElementById('winOverlay').hidden = true;
+  state = autostart ? 'playing' : 'ready';
+  if (!autostart) document.getElementById('startOverlay').hidden = false;
+}
+
+function winLevel() {
+  state = 'won';
+  var last = levelIndex === LEVELS.length - 1;
+  document.getElementById('winTitle').textContent = last ? 'Yard clear' : 'Pen closed';
+  document.getElementById('winText').textContent = last
+    ? 'Every animal in every pen. The whole yard is sorted.'
+    : 'Every target met. The next yard is bigger.';
+  document.getElementById('winTime').textContent = 'Time: ' + fmtTime(timer);
+  document.getElementById('btnNext').textContent = last ? 'Play again' : 'Next level';
+  document.getElementById('winOverlay').hidden = false;
+}
+function fmtTime(t) {
+  var m = Math.floor(t / 60), s = Math.floor(t % 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+/* ---------- input ---------- */
+var keys = {};
+var joy = { active: false, id: null, bx: 0, by: 0, dx: 0, dy: 0, mag: 0 };
+window.addEventListener('keydown', function (e) {
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].indexOf(e.code) >= 0) e.preventDefault();
+  if (e.repeat) return;
+  keys[e.code] = true;
+  if (e.code === 'KeyR' && state !== 'ready') startLevel(levelIndex, true);
+  if ((e.code === 'KeyP' || e.code === 'Escape' || e.code === 'Space') && (state === 'playing' || state === 'paused')) togglePause();
+});
+window.addEventListener('keyup', function (e) { keys[e.code] = false; });
+function togglePause() {
+  if (state === 'playing') { state = 'paused'; document.getElementById('btnPause').textContent = 'Resume'; }
+  else if (state === 'paused') { state = 'playing'; document.getElementById('btnPause').textContent = 'Pause'; }
+}
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden && state === 'playing') togglePause();
+});
+function canvasPos(e) {
+  var r = canvas.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+}
+canvas.addEventListener('pointerdown', function (e) {
+  var p = canvasPos(e);
+  joy.active = true; joy.id = e.pointerId; joy.bx = p.x; joy.by = p.y; joy.dx = 0; joy.dy = 0; joy.mag = 0;
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', function (e) {
+  if (!joy.active || e.pointerId !== joy.id) return;
+  var p = canvasPos(e);
+  var dx = p.x - joy.bx, dy = p.y - joy.by;
+  var len = Math.hypot(dx, dy);
+  joy.mag = Math.min(1, len / 55);
+  if (len > 1) { joy.dx = dx / len; joy.dy = dy / len; } else { joy.dx = 0; joy.dy = 0; }
+});
+function joyEnd(e) {
+  if (e.pointerId !== joy.id) return;
+  joy.active = false; joy.dx = 0; joy.dy = 0; joy.mag = 0;
+}
+canvas.addEventListener('pointerup', joyEnd);
+canvas.addEventListener('pointercancel', joyEnd);
+document.getElementById('btnStart').addEventListener('click', function () {
+  document.getElementById('startOverlay').hidden = true;
+  state = 'playing';
+});
+document.getElementById('btnNext').addEventListener('click', function () {
+  startLevel((levelIndex + 1) % LEVELS.length, true);
+});
+document.getElementById('btnRestart').addEventListener('click', function () {
+  if (state !== 'ready') startLevel(levelIndex, true);
+});
+document.getElementById('btnPause').addEventListener('click', function () {
+  if (state === 'playing' || state === 'paused') togglePause();
+});
+
+/* ---------- update ---------- */
+function update(dt) {
+  timer += dt;
+  /* player */
+  var ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+  var iy = (keys.KeyS || keys.ArrowDown ? 1 : 0) - (keys.KeyW || keys.ArrowUp ? 1 : 0);
+  if (joy.active) { ix = joy.dx * joy.mag; iy = joy.dy * joy.mag; }
+  var mag = Math.hypot(ix, iy);
+  if (mag > 1) { ix /= mag; iy /= mag; mag = 1; }
+  var running = !!(keys.ShiftLeft || keys.ShiftRight || (joy.active && joy.mag > 0.85));
+  var spd = running ? 250 : 160;
+  var k = Math.min(1, 10 * dt);
+  player.vx += (ix * spd - player.vx) * k;
+  player.vy += (iy * spd - player.vy) * k;
+  player.x += player.vx * dt;
+  player.y += player.vy * dt;
+  player.speedNow = Math.hypot(player.vx, player.vy);
+  if (player.speedNow > 20) player.heading = Math.atan2(player.vy, player.vx);
+  collideCircle(player);
+
+  /* animals */
+  var n = animals.length;
+  var agg = [];
+  for (var i = 0; i < n; i++) {
+    var a = animals[i], sp = SPECIES[a.species];
+    var ag = { n: 0, cx: 0, cy: 0, avx: 0, avy: 0, sx: 0, sy: 0 };
+    for (var j = 0; j < n; j++) {
+      if (j === i) continue;
+      var b = animals[j];
+      var dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+      if (d < 70) {
+        ag.n++; ag.cx += b.x; ag.cy += b.y; ag.avx += b.vx; ag.avy += b.vy;
+        var minD = a.r + b.r + 6;
+        if (d < minD && d > 0.01) { ag.sx -= (dx / d) * (minD - d); ag.sy -= (dy / d) * (minD - d); }
+      }
+    }
+    agg.push(ag);
+  }
+  for (i = 0; i < n; i++) {
+    a = animals[i]; sp = SPECIES[a.species]; ag = agg[i];
+    a.heading += (Math.random() - 0.5) * sp.wander * 3.0 * dt;
+    var desX = Math.cos(a.heading) * sp.speed;
+    var desY = Math.sin(a.heading) * sp.speed;
+    if (ag.n > 0) {
+      desX += (ag.cx / ag.n - a.x) * sp.cohesion * 1.1;
+      desY += (ag.cy / ag.n - a.y) * sp.cohesion * 1.1;
+      desX += (ag.avx / ag.n) * sp.align * 0.9;
+      desY += (ag.avy / ag.n) * sp.align * 0.9;
+      desX += ag.sx * sp.sep * 2.2;
+      desY += ag.sy * sp.sep * 2.2;
+    }
+    var pdx = a.x - player.x, pdy = a.y - player.y;
+    var pd = Math.hypot(pdx, pdy);
+    var fleeR = sp.fleeR * (running ? 1.35 : 1);
+    var fleeing = false;
+    if (pd < fleeR && pd > 0.01) {
+      fleeing = true;
+      var wgt = (1 - pd / fleeR) * sp.flee;
+      desX += (pdx / pd) * wgt * sp.speed * 2.8;
+      desY += (pdy / pd) * wgt * sp.speed * 2.8;
+      var ps = player.speedNow;
+      if (ps > 40) {
+        var dot = (pdx * player.vx + pdy * player.vy) / (pd * ps);
+        if (dot < 0) { desX += (pdx / pd) * (-dot) * sp.speed * 0.9; desY += (pdy / pd) * (-dot) * sp.speed * 0.9; }
+      }
+    }
+    /* quirks: goat dash/nibble, pig rooting */
+    a.timer -= dt;
+    if (a.timer <= 0) {
+      var r = Math.random();
+      if (a.species === 'goat') {
+        if (r < 0.35) { a.mode = 'dash'; a.modeT = 0.6; a.modeAng = Math.random() * Math.PI * 2; a.timer = 0.6; }
+        else if (r < 0.6) { a.mode = 'idle'; a.modeT = 1.4; a.timer = 1.4; }
+        else { a.mode = ''; a.timer = 2 + Math.random() * 4; }
+      } else if (a.species === 'pig') {
+        if (r < 0.5) { a.mode = 'idle'; a.modeT = 1 + Math.random() * 1.5; a.timer = a.modeT; }
+        else { a.mode = ''; a.timer = 2 + Math.random() * 3; }
+      } else { a.mode = ''; a.timer = 1 + Math.random() * 2; }
+    }
+    if (a.mode === 'dash') {
+      a.modeT -= dt;
+      desX = Math.cos(a.modeAng) * sp.speed * 2.2;
+      desY = Math.sin(a.modeAng) * sp.speed * 2.2;
+      if (a.modeT <= 0) a.mode = '';
+    } else if (a.mode === 'idle') {
+      a.modeT -= dt;
+      var idleK = (a.species === 'pig' && pd < 35) ? 0.6 : 0.12;
+      desX *= idleK; desY *= idleK;
+      if (a.modeT <= 0) a.mode = '';
+    }
+    if (a.species === 'chicken') {
+      var ja = (Math.random() - 0.5) * 1.1;
+      var rx = desX, ry = desY;
+      desX = rx * Math.cos(ja) - ry * Math.sin(ja);
+      desY = rx * Math.sin(ja) + ry * Math.cos(ja);
+    }
+    var kk = Math.min(1, sp.turn * dt);
+    a.vx += (desX - a.vx) * kk;
+    a.vy += (desY - a.vy) * kk;
+    var maxSp = sp.speed * (fleeing ? 2.3 : 1.3);
+    if (a.mode === 'dash') maxSp = sp.speed * 2.4;
+    var s = Math.hypot(a.vx, a.vy);
+    if (s > maxSp) { a.vx *= maxSp / s; a.vy *= maxSp / s; }
+    a.x += a.vx * dt;
+    a.y += a.vy * dt;
+  }
+  /* soft body separation, then fences */
+  for (i = 0; i < n; i++) {
+    for (var j2 = i + 1; j2 < n; j2++) {
+      var A = animals[i], B = animals[j2];
+      var ox = B.x - A.x, oy = B.y - A.y, od = Math.hypot(ox, oy);
+      var minOD = A.r + B.r + 1;
+      if (od < minOD && od > 0.01) {
+        var push = (minOD - od) / 2;
+        A.x -= (ox / od) * push; A.y -= (oy / od) * push;
+        B.x += (ox / od) * push; B.y += (oy / od) * push;
+      }
+    }
+  }
+  animals.forEach(collideCircle);
+
+  /* pen counts + win hold */
+  var targets = LEVELS[levelIndex].targets;
+  var satisfied = true, html = '';
+  targets.forEach(function (t, ti) {
+    var c = 0;
+    animals.forEach(function (an) {
+      if (an.species === t.species && pointInPoly(an.x, an.y, PENS[t.pen].poly)) c++;
+    });
+    if (c < t.count) satisfied = false;
+    html += '<span data-target="' + ti + '">' + PENS[t.pen].name + ': <b>' + c + '/' + t.count + '</b> ' + t.species + '</span>';
+  });
+  if (html !== lastCounts) {
+    lastCounts = html;
+    document.getElementById('hudTargets').innerHTML = html;
+  }
+  if (satisfied) {
+    holdT += dt;
+    if (holdT >= 1) winLevel();
+  } else holdT = 0;
+  document.getElementById('hudTimer').textContent = fmtTime(timer);
+}
+
+/* ---------- background: grass, dirt, fences, pen labels ---------- */
+var bgCanvas = document.createElement('canvas');
+bgCanvas.width = W * dpr;
+bgCanvas.height = H * dpr;
+var bctx = bgCanvas.getContext('2d');
+bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+(function paintBackground() {
+  var rng = mulberry32(1234);
+  bctx.fillStyle = '#86a860';
+  bctx.fillRect(0, 0, W, H);
+  var i, x, y;
+  for (i = 0; i < 260; i++) {
+    bctx.fillStyle = rng() < 0.5 ? 'rgba(60,90,45,0.08)' : 'rgba(190,215,150,0.08)';
+    bctx.beginPath();
+    bctx.ellipse(rng() * W, rng() * H, 20 + rng() * 70, 12 + rng() * 40, rng() * Math.PI, 0, Math.PI * 2);
+    bctx.fill();
+  }
+  /* yard dirt: rect plus round pen */
+  bctx.beginPath();
+  bctx.moveTo(60, 60);
+  bctx.lineTo(840, 60);
+  ARC_POINTS.forEach(function (p) { bctx.lineTo(p[0], p[1]); });
+  bctx.lineTo(840, 580);
+  bctx.lineTo(60, 580);
+  bctx.closePath();
+  bctx.fillStyle = '#c7a26e';
+  bctx.fill();
+  PENS.forEach(function (pen) {
+    bctx.beginPath();
+    pen.poly.forEach(function (p, idx) { if (idx === 0) bctx.moveTo(p[0], p[1]); else bctx.lineTo(p[0], p[1]); });
+    bctx.closePath();
+    bctx.fillStyle = pen.tint;
+    bctx.globalAlpha = 0.55;
+    bctx.fill();
+    bctx.globalAlpha = 1;
+  });
+  for (i = 0; i < 600; i++) {
+    bctx.fillStyle = 'rgba(90,70,40,0.10)';
+    x = 60 + rng() * 880; y = 60 + rng() * 520;
+    bctx.fillRect(x, y, 2, 2);
+  }
+  /* fences */
+  bctx.strokeStyle = '#3a332a';
+  bctx.lineWidth = 5;
+  bctx.lineCap = 'round';
+  segments.forEach(function (s) {
+    bctx.beginPath();
+    bctx.moveTo(s.x1, s.y1);
+    bctx.lineTo(s.x2, s.y2);
+    bctx.stroke();
+  });
+  var posts = {};
+  segments.forEach(function (s) {
+    [[s.x1, s.y1], [s.x2, s.y2]].forEach(function (p) {
+      var key = Math.round(p[0]) + ',' + Math.round(p[1]);
+      if (posts[key]) return;
+      posts[key] = true;
+      bctx.fillStyle = '#2c251d';
+      bctx.fillRect(p[0] - 3.5, p[1] - 3.5, 7, 7);
+    });
+  });
+  /* pen labels */
+  bctx.textAlign = 'center';
+  bctx.fillStyle = 'rgba(90,70,40,0.5)';
+  PENS.forEach(function (pen) {
+    bctx.font = '700 ' + (pen.labelSize || 22) + 'px system-ui, sans-serif';
+    bctx.fillText(pen.name.toUpperCase(), pen.label[0], pen.label[1]);
+  });
+})();
+
+/* ---------- render ---------- */
+function drawAnimal(a) {
+  var sp = SPECIES[a.species];
+  var spd = Math.hypot(a.vx, a.vy);
+  var face = spd > 8 ? Math.atan2(a.vy, a.vx) : a.heading;
+  var hx = Math.cos(face), hy = Math.sin(face);
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath();
+  ctx.ellipse(a.x, a.y + a.r * 0.55, a.r, a.r * 0.55, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = sp.body;
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  if (a.species === 'sheep') {
+    ctx.fillStyle = '#ffffff';
+    for (var i = 0; i < 4; i++) {
+      var ang = (i / 4) * Math.PI * 2 + 0.6;
+      ctx.beginPath();
+      ctx.arc(a.x + Math.cos(ang) * a.r * 0.62, a.y + Math.sin(ang) * a.r * 0.62, a.r * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  if (a.species === 'goat') {
+    ctx.fillStyle = sp.head;
+    ctx.beginPath(); ctx.arc(a.x - hy * 3 - hx * 2, a.y + hx * 3 - hy * 2, 1.6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(a.x + hy * 3 - hx * 2, a.y - hx * 3 - hy * 2, 1.6, 0, Math.PI * 2); ctx.fill();
+  }
+  if (a.species === 'chicken') {
+    ctx.fillStyle = sp.head;
+    ctx.beginPath(); ctx.arc(a.x + hx * 3, a.y + hy * 3, 1.8, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = sp.head;
+  ctx.beginPath();
+  ctx.arc(a.x + hx * a.r * 0.85, a.y + hy * a.r * 0.85, Math.max(2.2, a.r * 0.38), 0, Math.PI * 2);
+  ctx.fill();
+}
+function drawPlayer() {
+  var p = player;
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(p.x, p.y + 6, 11, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#2f6b3a';
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#8a6742';
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 12.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#6b4a2f';
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#3a2c1c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+  ctx.lineTo(p.x + Math.cos(p.heading) * 14, p.y + Math.sin(p.heading) * 14);
+  ctx.stroke();
+}
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(bgCanvas, 0, 0, W, H);
+  var sorted = animals.slice().sort(function (a, b) { return a.y - b.y; });
+  sorted.forEach(drawAnimal);
+  drawPlayer();
+  if (joy.active) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(joy.bx, joy.by, 50, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.beginPath();
+    ctx.arc(joy.bx + joy.dx * 50 * joy.mag, joy.by + joy.dy * 50 * joy.mag, 20, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (state === 'paused') {
+    ctx.fillStyle = 'rgba(16,16,20,0.35)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 34px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Paused', W / 2, H / 2);
+  }
+}
+
+/* ---------- loop ---------- */
+var last = 0;
+function loop(t) {
+  var dt = Math.min(0.033, (t - last) / 1000 || 0);
+  last = t;
+  if (state === 'playing') update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+window.HERD = {
+  get state() { return state; },
+  get animals() { return animals; },
+  get player() { return player; },
+  get level() { return levelIndex; },
+  start: startLevel
+};
+
+startLevel(0, false);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
+
