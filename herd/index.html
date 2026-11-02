@@ -454,6 +454,62 @@ document.getElementById('btnPause').addEventListener('click', function () {
 });
 
 /* ---------- update ---------- */
+/* Keep the player and the animals from overlapping. The shove also carries
+   the animal with the player's motion along the contact normal and damps
+   its sideways slide, so the player can steer a sheep with their body
+   instead of it slipping around them. The shove itself never crosses a
+   fence line: it is shortened to slide along the fence instead, so the
+   final separation pass can never push an animal out of the yard. */
+function moveBlocked(sx, sy, px, py) {
+  if (inYard(sx, sy) && !inYard(px, py)) return true;
+  for (var i = 0; i < segments.length; i++) {
+    var sg = segments[i];
+    var dx = sg.x2 - sg.x1, dy = sg.y2 - sg.y1;
+    var sideS = dx * (sy - sg.y1) - dy * (sx - sg.x1);
+    var sideP = dx * (py - sg.y1) - dy * (px - sg.x1);
+    if (sideS === 0 || sideP === 0) continue;
+    if ((sideS < 0) !== (sideP < 0)) {
+      var f = sideS / (sideS - sideP);
+      var cx = sx + (px - sx) * f, cy = sy + (py - sy) * f;
+      var u = ((cx - sg.x1) * dx + (cy - sg.y1) * dy) / (dx * dx + dy * dy);
+      if (u > 0.001 && u < 0.999) return true;
+    }
+  }
+  return false;
+}
+
+function separatePlayer() {
+  animals.forEach(function (an) {
+    var ox = an.x - player.x, oy = an.y - player.y;
+    var od = Math.hypot(ox, oy), minOD = player.r + an.r;
+    if (od < minOD) {
+      if (od < 0.01) { ox = 0; oy = -1; od = 1; }
+      var nx = ox / od, ny = oy / od;
+      var destX = player.x + nx * minOD, destY = player.y + ny * minOD;
+      /* Shorten the shove at the first fence it would cross, so the
+         animal slides along the fence instead of through it. */
+      var sx = an.x, sy = an.y, ddx = destX - sx, ddy = destY - sy;
+      var lo = 0, hi = 1;
+      for (var k = 0; k < 8; k++) {
+        var mid = (lo + hi) / 2;
+        if (moveBlocked(sx, sy, sx + ddx * mid, sy + ddy * mid)) hi = mid; else lo = mid;
+      }
+      an.x = sx + ddx * lo;
+      an.y = sy + ddy * lo;
+      var pvn = player.vx * nx + player.vy * ny;
+      var avn = an.vx * nx + an.vy * ny;
+      if (pvn > avn) {
+        an.vx += nx * (pvn - avn);
+        an.vy += ny * (pvn - avn);
+      }
+      var tx = -ny, ty = nx;
+      var vt = an.vx * tx + an.vy * ty;
+      an.vx -= tx * vt * 0.3;
+      an.vy -= ty * vt * 0.3;
+    }
+  });
+}
+
 function update(dt) {
   timer += dt;
   /* player */
@@ -511,13 +567,19 @@ function update(dt) {
     var fleeing = false;
     if (pd < fleeR && pd > 0.01) {
       fleeing = true;
-      var wgt = (1 - pd / fleeR) * sp.flee;
+      /* Body contact overrides panic: the closer the player's body, the
+         less the animal sprints, so the player can close in and shove it
+         instead of it always darting away before contact. */
+      var contactD = player.r + a.r + 2;
+      var press = pd < 45 ? 0.3 + 0.7 * Math.max(0, (pd - contactD) / (45 - contactD)) : 1;
+      var calm = Math.min(1, press);
+      var wgt = (1 - pd / fleeR) * sp.flee * calm;
       desX += (pdx / pd) * wgt * sp.speed * 2.8;
       desY += (pdy / pd) * wgt * sp.speed * 2.8;
       var ps = player.speedNow;
       if (ps > 40) {
         var dot = (pdx * player.vx + pdy * player.vy) / (pd * ps);
-        if (dot < 0) { desX += (pdx / pd) * (-dot) * sp.speed * 0.9; desY += (pdy / pd) * (-dot) * sp.speed * 0.9; }
+        if (dot < 0) { desX += (pdx / pd) * (-dot) * sp.speed * 0.9 * calm; desY += (pdy / pd) * (-dot) * sp.speed * 0.9 * calm; }
       }
     }
     /* quirks: goat dash/nibble, pig rooting */
@@ -580,15 +642,7 @@ function update(dt) {
   }
   /* player and animals never overlap: the animal gets shoved out, so walking
      into the herd pushes it along instead of passing through it */
-  animals.forEach(function (an) {
-    var ox = an.x - player.x, oy = an.y - player.y;
-    var od = Math.hypot(ox, oy), minOD = player.r + an.r;
-    if (od < minOD) {
-      if (od < 0.01) { ox = 0; oy = -1; od = 1; }
-      an.x = player.x + (ox / od) * minOD;
-      an.y = player.y + (oy / od) * minOD;
-    }
-  });
+  separatePlayer();
   animals.forEach(collideCircle);
 
   /* stuck escape, judged on achieved displacement after all collisions:
@@ -611,6 +665,11 @@ function update(dt) {
     }
     an.px = an.x; an.py = an.y;
   });
+
+  /* Second separation pass: the fence guard's snap-back can restore an
+     animal into the player, so separate once more after all collisions
+     and the stuck loop, so no animal is ever rendered overlapping. */
+  separatePlayer();
 
   /* pen counts + win hold */
   var targets = LEVELS[levelIndex].targets;
