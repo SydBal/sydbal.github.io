@@ -348,6 +348,7 @@ var levelIndex = 0;
 var animals = [];
 var player = { x: 720, y: 320, px: 720, py: 320, vx: 0, vy: 0, r: 10, heading: -Math.PI / 2, speedNow: 0 };
 var timer = 0, holdT = 0, lastCounts = '';
+var GRAB_RANGE = 34;
 var sprintOn = false, caneOn = false, grabbed = null, bags = [];
 
 function spawnAnimals(spec) {
@@ -367,7 +368,8 @@ function spawnAnimals(spec) {
         }
       }
       list.push({ species: entry[0], x: x, y: y, px: x, py: y, vx: 0, vy: 0, r: SPECIES[entry[0]].r,
-        heading: Math.random() * Math.PI * 2, timer: 1 + Math.random() * 3,
+        heading: Math.random() * Math.PI * 2, wanderA: Math.random() * Math.PI * 2,
+        timer: 1 + Math.random() * 3,
         mode: '', modeT: 0, modeAng: 0, stuckT: 0 });
     }
   });
@@ -447,7 +449,7 @@ function toggleGrab() {
     grabbed.vx = player.vx * 0.5; grabbed.vy = player.vy * 0.5;
     grabbed = null; updateHud(); return;
   }
-  var best = null, bd = 70;
+  var best = null, bd = GRAB_RANGE;
   animals.forEach(function (a) {
     var d = Math.hypot(a.x - player.x, a.y - player.y);
     if (d < bd) { bd = d; best = a; }
@@ -638,12 +640,23 @@ function update(dt) {
     }
     agg.push(ag);
   }
+  /* species centroids for the flock pull */
+  var cen = {};
+  for (i = 0; i < n; i++) {
+    var cb = animals[i];
+    var c = cen[cb.species] || (cen[cb.species] = { n: 0, x: 0, y: 0 });
+    c.n++; c.x += cb.x; c.y += cb.y;
+  }
   for (i = 0; i < n; i++) {
     a = animals[i]; sp = SPECIES[a.species]; ag = agg[i];
     if (a === grabbed) { a.px = a.x; a.py = a.y; continue; }
-    a.heading += (Math.random() - 0.5) * sp.wander * 3.0 * dt;
-    var desX = Math.cos(a.heading) * sp.speed;
-    var desY = Math.sin(a.heading) * sp.speed;
+    /* Wander is a target direction re-picked every few seconds (step size
+       scaled by the species' wander temperament), not a fixed heading:
+       a fixed heading random-walks too slowly, so an animal facing a wall
+       grinds against it for a minute instead of turning away. The drawn
+       heading follows the actual velocity, below. */
+    var desX = Math.cos(a.wanderA) * sp.speed;
+    var desY = Math.sin(a.wanderA) * sp.speed;
     if (ag.n > 0) {
       desX += (ag.cx / ag.n - a.x) * sp.cohesion * 1.1;
       desY += (ag.cy / ag.n - a.y) * sp.cohesion * 1.1;
@@ -652,6 +665,20 @@ function update(dt) {
       desX += ag.sx * sp.sep * 2.2;
       desY += ag.sy * sp.sep * 2.2;
     }
+    /* Flock pull: close-neighbor cohesion alone lets the flock fragment,
+       since a sheep past 70px from all others feels no pull home. A weak
+       pull toward the species centroid keeps the flock one mass. Penned
+       animals are exempt, so they settle in the pen instead of drifting
+       back out toward the flock, and settle there: base motion halves
+       inside a pen while flee stays full strength. */
+    var inPen = false;
+    for (var pi = 0; pi < PENS.length; pi++) if (pointInPoly(a.x, a.y, PENS[pi].poly)) { inPen = true; break; }
+    var cc = cen[a.species];
+    if (!inPen && cc && cc.n > 1) {
+      desX += (cc.x / cc.n - a.x) * sp.cohesion * 0.35;
+      desY += (cc.y / cc.n - a.y) * sp.cohesion * 0.35;
+    }
+    if (inPen) { desX *= 0.5; desY *= 0.5; }
     var pdx = a.x - player.x, pdy = a.y - player.y;
     var pd = Math.hypot(pdx, pdy);
     /* food bags attract, and animals linger to eat once they arrive */
@@ -692,6 +719,7 @@ function update(dt) {
     if (a.timer <= 0) {
       if (a.mode === 'escape') { a.timer = 0.1; }
       else {
+      a.wanderA += (Math.random() - 0.5) * sp.wander * 3;
       var r = Math.random();
       if (a.species === 'goat') {
         if (r < 0.35) { a.mode = 'dash'; a.modeT = 0.6; a.modeAng = Math.random() * Math.PI * 2; a.timer = 0.6; }
@@ -700,6 +728,9 @@ function update(dt) {
       } else if (a.species === 'pig') {
         if (r < 0.5) { a.mode = 'idle'; a.modeT = 1 + Math.random() * 1.5; a.timer = a.modeT; }
         else { a.mode = ''; a.timer = 2 + Math.random() * 3; }
+      } else if (a.species === 'chicken') {
+        if (r < 0.3) { a.mode = 'idle'; a.modeT = 0.8; a.timer = 0.8; }
+        else { a.mode = ''; a.timer = 1.5 + Math.random() * 2; }
       } else { a.mode = ''; a.timer = 1 + Math.random() * 2; }
       }
     }
@@ -731,6 +762,14 @@ function update(dt) {
     if (s > maxSp) { a.vx *= maxSp / s; a.vy *= maxSp / s; }
     a.x += a.vx * dt;
     a.y += a.vy * dt;
+    /* drawn heading follows the actual direction of travel */
+    var asp = Math.hypot(a.vx, a.vy);
+    if (asp > 20) {
+      var wantH = Math.atan2(a.vy, a.vx), dh = wantH - a.heading;
+      while (dh > Math.PI) dh -= Math.PI * 2;
+      while (dh < -Math.PI) dh += Math.PI * 2;
+      a.heading += dh * Math.min(1, 5 * dt);
+    }
   }
   /* soft body separation, then fences */
   for (i = 0; i < n; i++) {
@@ -984,7 +1023,7 @@ function render() {
     drawAnimal(grabbed);
   }
   if (state === 'playing' && !grabbed) {
-    var near = null, nd = 70;
+    var near = null, nd = GRAB_RANGE;
     animals.forEach(function (a) {
       var d = Math.hypot(a.x - player.x, a.y - player.y);
       if (d < nd) { nd = d; near = a; }
