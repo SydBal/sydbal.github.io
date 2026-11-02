@@ -51,6 +51,12 @@
   .hud .spacer { flex: 1; }
   .hud button { font: inherit; cursor: pointer; border: 2px solid var(--purple); background: transparent; color: var(--ink); padding: 0.3rem 0.8rem; }
   .hud button:hover { background: var(--purple-soft); }
+  .abilities { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; -webkit-user-select: none; user-select: none; }
+  .abilities .abtn { font: inherit; font-size: 0.92rem; cursor: pointer; border: 2px solid var(--purple); background: var(--card); color: var(--ink); padding: 0.3rem 0.7rem; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .abilities .abtn:hover { background: var(--purple-soft); }
+  .abilities .abtn.on { background: var(--purple); color: #fff; border-color: var(--purple-deep); }
+  .abilities kbd { font-family: ui-monospace, monospace; font-size: 0.82em; border: 1px solid currentColor; border-radius: 3px; padding: 0 0.3em; opacity: 0.75; }
+  .abilities .astatus { color: var(--muted); font-size: 0.92rem; }
   .stage { position: relative; max-width: 1000px; margin: 0 auto; border: 1px solid var(--border); background: var(--grass); touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
   canvas { display: block; width: 100%; height: auto; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
   .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(16, 16, 20, 0.62); padding: 1rem; }
@@ -90,6 +96,14 @@
     <button type="button" id="btnRestart">Restart</button>
   </div>
 
+  <div class="abilities">
+    <button type="button" class="abtn" id="btnGrab">Grab <kbd>E</kbd></button>
+    <button type="button" class="abtn" id="btnFood">Food <kbd>Q</kbd> <span id="foodCount">0/3</span></button>
+    <button type="button" class="abtn" id="btnSprint" aria-pressed="false">Sprint <kbd>F</kbd></button>
+    <button type="button" class="abtn" id="btnCane" aria-pressed="false">Cane <kbd>C</kbd></button>
+    <span class="astatus" id="hudStatus"></span>
+  </div>
+
   <div class="stage">
     <canvas id="game" width="1000" height="640" aria-label="Top-down herding yard. Use WASD or arrow keys to move the herder, or drag on touch screens."></canvas>
     <div class="overlay" id="startOverlay">
@@ -97,7 +111,7 @@
         <h2>Herd</h2>
         <p class="big">Get every animal into its target pen before the yard wins.</p>
         <p>Walk into the herd to push animals ahead of you. Run with Shift to push harder, but running spooks them. Fences stop everyone. Gates are the gaps.</p>
-        <p><span class="mono">WASD</span> or <span class="mono">arrows</span> to walk &middot; <span class="mono">Shift</span> to run &middot; <span class="mono">R</span> restart &middot; <span class="mono">P</span> pause<br>On touch: drag anywhere to steer, push far to run.</p>
+        <p><span class="mono">WASD</span> or <span class="mono">arrows</span> to walk &middot; <span class="mono">Shift</span> to run &middot; <span class="mono">R</span> restart &middot; <span class="mono">P</span> pause<br>On touch: drag anywhere to steer, push far to run.<br>Abilities: <span class="mono">E</span> grab &middot; <span class="mono">Q</span> food bag &middot; <span class="mono">F</span> sprint &middot; <span class="mono">C</span> cane</p>
         <button type="button" id="btnStart">Start herding</button>
       </div>
     </div>
@@ -111,6 +125,7 @@
     </div>
   </div>
   <p class="controls-note">Tip: approach slowly from behind the flock and walk them through the gate. Charging in splits the flock and sends chickens everywhere.</p>
+  <p class="controls-note">Abilities: Grab (E) picks up the nearest animal and carries it until pressed again. Food (Q) drops a bag that draws animals in; press Q near a bag to pick it back up, up to 3 out at once. Sprint (F) toggles faster movement that spooks animals more. Cane (C) toggles the shepherd's cane, which makes animals a little less afraid of you.</p>
 
   <h2 class="section">Four animals, four brains</h2>
   <div class="guide">
@@ -333,6 +348,7 @@ var levelIndex = 0;
 var animals = [];
 var player = { x: 720, y: 320, px: 720, py: 320, vx: 0, vy: 0, r: 10, heading: -Math.PI / 2, speedNow: 0 };
 var timer = 0, holdT = 0, lastCounts = '';
+var sprintOn = false, caneOn = false, grabbed = null, bags = [];
 
 function spawnAnimals(spec) {
   var list = [];
@@ -363,6 +379,8 @@ function startLevel(idx, autostart) {
   animals = spawnAnimals(LEVELS[idx].animals);
   player.x = 720; player.y = 320; player.vx = 0; player.vy = 0;
   timer = 0; holdT = 0; lastCounts = '';
+  grabbed = null; bags = [];
+  updateHud();
   document.getElementById('hudLevel').textContent = 'Level ' + (idx + 1) + ': ' + LEVELS[idx].name;
   var rows = LEVELS[idx].targets.map(function (t, i) {
     return '<span data-target="' + i + '">' + PENS[t.pen].name + ': <b>0/' + t.count + '</b> ' + t.species + '</span>';
@@ -400,11 +418,68 @@ window.addEventListener('keydown', function (e) {
   keys[e.code] = true;
   if (e.code === 'KeyR' && state !== 'ready') startLevel(levelIndex, true);
   if ((e.code === 'KeyP' || e.code === 'Escape' || e.code === 'Space') && (state === 'playing' || state === 'paused')) togglePause();
+  if (e.code === 'KeyE') toggleGrab();
+  if (e.code === 'KeyQ') foodAction();
+  if (e.code === 'KeyF') toggleSprint();
+  if (e.code === 'KeyC') toggleCane();
 });
 window.addEventListener('keyup', function (e) { keys[e.code] = false; });
 function togglePause() {
   if (state === 'playing') { state = 'paused'; document.getElementById('btnPause').textContent = 'Resume'; }
   else if (state === 'paused') { state = 'playing'; document.getElementById('btnPause').textContent = 'Pause'; }
+}
+
+/* ---------- abilities ---------- */
+function updateHud() {
+  var b = document.getElementById('btnSprint');
+  b.classList.toggle('on', sprintOn);
+  b.setAttribute('aria-pressed', sprintOn ? 'true' : 'false');
+  var c = document.getElementById('btnCane');
+  c.classList.toggle('on', caneOn);
+  c.setAttribute('aria-pressed', caneOn ? 'true' : 'false');
+  document.getElementById('btnGrab').classList.toggle('on', !!grabbed);
+  document.getElementById('foodCount').textContent = bags.length + '/3';
+  document.getElementById('hudStatus').textContent = grabbed ? ('Holding: ' + grabbed.species) : '';
+}
+function toggleGrab() {
+  if (state !== 'playing') return;
+  if (grabbed) {
+    grabbed.vx = player.vx * 0.5; grabbed.vy = player.vy * 0.5;
+    grabbed = null; updateHud(); return;
+  }
+  var best = null, bd = 70;
+  animals.forEach(function (a) {
+    var d = Math.hypot(a.x - player.x, a.y - player.y);
+    if (d < bd) { bd = d; best = a; }
+  });
+  if (best) {
+    grabbed = best;
+    grabbed.mode = ''; grabbed.modeT = 0; grabbed.stuckT = 0;
+    grabbed.timer = 1 + Math.random() * 2;
+    updateHud();
+  }
+}
+function foodAction() {
+  if (state !== 'playing') return;
+  var best = -1, bd = 34;
+  bags.forEach(function (b, i) {
+    var d = Math.hypot(b.x - player.x, b.y - player.y);
+    if (d < bd) { bd = d; best = i; }
+  });
+  if (best >= 0) { bags.splice(best, 1); updateHud(); return; }
+  if (bags.length >= 3) return;
+  var bx = player.x + Math.cos(player.heading) * 16, by = player.y + Math.sin(player.heading) * 16;
+  if (!inYard(bx, by)) { bx = player.x; by = player.y; }
+  bags.push({ x: bx, y: by });
+  updateHud();
+}
+function toggleSprint() {
+  if (state !== 'playing') return;
+  sprintOn = !sprintOn; updateHud();
+}
+function toggleCane() {
+  if (state !== 'playing') return;
+  caneOn = !caneOn; updateHud();
 }
 document.addEventListener('visibilitychange', function () {
   if (document.hidden && state === 'playing') togglePause();
@@ -452,6 +527,10 @@ document.getElementById('btnRestart').addEventListener('click', function () {
 document.getElementById('btnPause').addEventListener('click', function () {
   if (state === 'playing' || state === 'paused') togglePause();
 });
+document.getElementById('btnGrab').addEventListener('click', function () { toggleGrab(); this.blur(); });
+document.getElementById('btnFood').addEventListener('click', function () { foodAction(); this.blur(); });
+document.getElementById('btnSprint').addEventListener('click', function () { toggleSprint(); this.blur(); });
+document.getElementById('btnCane').addEventListener('click', function () { toggleCane(); this.blur(); });
 
 /* ---------- update ---------- */
 /* Keep the player and the animals from overlapping. The shove also carries
@@ -480,6 +559,7 @@ function moveBlocked(sx, sy, px, py) {
 
 function separatePlayer() {
   animals.forEach(function (an) {
+    if (an === grabbed) return;
     var ox = an.x - player.x, oy = an.y - player.y;
     var od = Math.hypot(ox, oy), minOD = player.r + an.r;
     if (od < minOD) {
@@ -519,7 +599,9 @@ function update(dt) {
   var mag = Math.hypot(ix, iy);
   if (mag > 1) { ix /= mag; iy /= mag; mag = 1; }
   var running = !!(keys.ShiftLeft || keys.ShiftRight || (joy.active && joy.mag > 0.85));
-  var spd = running ? 250 : 160;
+  var spd = sprintOn ? 275 : running ? 250 : 160;
+  var scare = sprintOn ? 1.5 : running ? 1.35 : 1;
+  var caneMul = caneOn ? 0.85 : 1;
   var k = Math.min(1, 10 * dt);
   player.vx += (ix * spd - player.vx) * k;
   player.vy += (iy * spd - player.vy) * k;
@@ -529,6 +611,14 @@ function update(dt) {
   player.speedNow = Math.hypot(player.vx, player.vy);
   if (player.speedNow > 20) player.heading = Math.atan2(player.vy, player.vx);
   collideCircle(player);
+
+  /* carry the grabbed animal just ahead of the player, kept inside fences */
+  if (grabbed) {
+    var hx = Math.cos(player.heading), hy = Math.sin(player.heading);
+    grabbed.x = player.x + hx * 20; grabbed.y = player.y + hy * 20;
+    grabbed.vx = player.vx; grabbed.vy = player.vy;
+    collideCircle(grabbed);
+  }
 
   /* animals */
   var n = animals.length;
@@ -550,6 +640,7 @@ function update(dt) {
   }
   for (i = 0; i < n; i++) {
     a = animals[i]; sp = SPECIES[a.species]; ag = agg[i];
+    if (a === grabbed) { a.px = a.x; a.py = a.y; continue; }
     a.heading += (Math.random() - 0.5) * sp.wander * 3.0 * dt;
     var desX = Math.cos(a.heading) * sp.speed;
     var desY = Math.sin(a.heading) * sp.speed;
@@ -563,7 +654,21 @@ function update(dt) {
     }
     var pdx = a.x - player.x, pdy = a.y - player.y;
     var pd = Math.hypot(pdx, pdy);
-    var fleeR = sp.fleeR * (running ? 1.35 : 1);
+    /* food bags attract, and animals linger to eat once they arrive */
+    var nearBag = null, nearBagD = 260;
+    for (var bi = 0; bi < bags.length; bi++) {
+      var bdx = bags[bi].x - a.x, bdy = bags[bi].y - a.y, bd2 = Math.hypot(bdx, bdy);
+      if (bd2 < nearBagD) { nearBagD = bd2; nearBag = bags[bi]; }
+    }
+    if (nearBag) {
+      if (nearBagD > 0.01) {
+        var aw = 0.25 + (1 - nearBagD / 260) * 0.9;
+        desX += ((nearBag.x - a.x) / nearBagD) * sp.speed * 1.1 * aw;
+        desY += ((nearBag.y - a.y) / nearBagD) * sp.speed * 1.1 * aw;
+      }
+      if (nearBagD < 30) { desX *= 0.3; desY *= 0.3; }
+    }
+    var fleeR = sp.fleeR * scare * caneMul;
     var fleeing = false;
     if (pd < fleeR && pd > 0.01) {
       fleeing = true;
@@ -573,13 +678,13 @@ function update(dt) {
       var contactD = player.r + a.r + 2;
       var press = pd < 45 ? 0.3 + 0.7 * Math.max(0, (pd - contactD) / (45 - contactD)) : 1;
       var calm = Math.min(1, press);
-      var wgt = (1 - pd / fleeR) * sp.flee * calm;
+      var wgt = (1 - pd / fleeR) * sp.flee * calm * caneMul;
       desX += (pdx / pd) * wgt * sp.speed * 2.8;
       desY += (pdy / pd) * wgt * sp.speed * 2.8;
       var ps = player.speedNow;
       if (ps > 40) {
         var dot = (pdx * player.vx + pdy * player.vy) / (pd * ps);
-        if (dot < 0) { desX += (pdx / pd) * (-dot) * sp.speed * 0.9 * calm; desY += (pdy / pd) * (-dot) * sp.speed * 0.9 * calm; }
+        if (dot < 0) { desX += (pdx / pd) * (-dot) * sp.speed * 0.9 * calm * caneMul; desY += (pdy / pd) * (-dot) * sp.speed * 0.9 * calm * caneMul; }
       }
     }
     /* quirks: goat dash/nibble, pig rooting */
@@ -631,6 +736,7 @@ function update(dt) {
   for (i = 0; i < n; i++) {
     for (var j2 = i + 1; j2 < n; j2++) {
       var A = animals[i], B = animals[j2];
+      if (A === grabbed || B === grabbed) continue;
       var ox = B.x - A.x, oy = B.y - A.y, od = Math.hypot(ox, oy);
       var minOD = A.r + B.r + 1;
       if (od < minOD && od > 0.01) {
@@ -650,6 +756,7 @@ function update(dt) {
      Velocity alone lies here, since a pinned animal still has velocity
      pointing into the wall. Burst out toward open ground. */
   animals.forEach(function (an) {
+    if (an === grabbed) { an.px = an.x; an.py = an.y; an.stuckT = 0; return; }
     var sp2 = SPECIES[an.species];
     var moved = Math.hypot(an.x - an.px, an.y - an.py);
     var pdd = Math.hypot(an.x - player.x, an.y - player.y);
@@ -827,13 +934,69 @@ function drawPlayer() {
   ctx.moveTo(p.x, p.y);
   ctx.lineTo(p.x + Math.cos(p.heading) * 14, p.y + Math.sin(p.heading) * 14);
   ctx.stroke();
+  if (caneOn) {
+    var ca = p.heading - 0.6;
+    ctx.strokeStyle = '#8a6a3b';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(p.x + Math.cos(ca) * 6, p.y + Math.sin(ca) * 6);
+    ctx.lineTo(p.x + Math.cos(ca) * 20, p.y + Math.sin(ca) * 20);
+    ctx.stroke();
+  }
+  if (sprintOn) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 }
 function render() {
   ctx.clearRect(0, 0, W, H);
   ctx.drawImage(bgCanvas, 0, 0, W, H);
+  bags.forEach(function (b) {
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.beginPath();
+    ctx.ellipse(b.x, b.y + 5, 9, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#d9b380';
+    ctx.strokeStyle = '#8a6a3b';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(b.x - 4, b.y - 6);
+    ctx.lineTo(b.x, b.y - 11);
+    ctx.lineTo(b.x + 4, b.y - 6);
+    ctx.stroke();
+  });
   var sorted = animals.slice().sort(function (a, b) { return a.y - b.y; });
-  sorted.forEach(drawAnimal);
+  sorted.forEach(function (a) { if (a !== grabbed) drawAnimal(a); });
   drawPlayer();
+  if (grabbed) {
+    ctx.strokeStyle = '#7c3aed';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(grabbed.x, grabbed.y, grabbed.r + 4, 0, Math.PI * 2);
+    ctx.stroke();
+    drawAnimal(grabbed);
+  }
+  if (state === 'playing' && !grabbed) {
+    var near = null, nd = 70;
+    animals.forEach(function (a) {
+      var d = Math.hypot(a.x - player.x, a.y - player.y);
+      if (d < nd) { nd = d; near = a; }
+    });
+    if (near) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(near.x, near.y, near.r + 3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
   if (joy.active) {
     ctx.strokeStyle = 'rgba(255,255,255,0.7)';
     ctx.lineWidth = 2;
@@ -870,6 +1033,10 @@ window.HERD = {
   get animals() { return animals; },
   get player() { return player; },
   get level() { return levelIndex; },
+  get grabbed() { return grabbed; },
+  get bags() { return bags; },
+  get sprintOn() { return sprintOn; },
+  get caneOn() { return caneOn; },
   start: startLevel
 };
 
