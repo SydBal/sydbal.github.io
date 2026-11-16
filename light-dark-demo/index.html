@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>light-dark(): one declaration picks the color for both themes</title>
+<meta name="description" content="Every themed color used to live in two places: a custom property on :root, then the same property again inside a prefers-color-scheme media query. light-dark() collapses the pair into one declaration. Try the theme toggle, see the color-scheme gotcha live, and check what your own browser supports.">
+<meta property="og:title" content="light-dark(): one declaration picks the color for both themes">
+<meta property="og:description" content="Every themed color used to live in two places. light-dark() collapses the pair into one declaration. Try the theme toggle, see the color-scheme gotcha live, and check what your own browser supports.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/light-dark-demo/">
+<meta property="og:image" content="https://dominic.balass.one/light-dark-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="light-dark(): one declaration picks the color for both themes">
+<meta name="twitter:description" content="Every themed color used to live in two places. light-dark() collapses the pair into one declaration. Try the theme toggle and check what your own browser supports.">
+<meta name="twitter:image" content="https://dominic.balass.one/light-dark-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root { color-scheme: light dark; }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+
+  /* Theme tokens, written with light-dark(). The @supports block below
+     keeps the page readable in browsers that do not know the function yet. */
+  @supports (color: light-dark(#fff, #000)) {
+    :root {
+      --bg: light-dark(#fafaf9, #101014);
+      --card: light-dark(#ffffff, #18181e);
+      --ink: light-dark(#17171c, #f1f0f5);
+      --muted: light-dark(#55555e, #b6b6c0);
+      --purple-soft: light-dark(#ede9fe, #2e1a5e);
+      --border: light-dark(#e4e4e7, #2c2c34);
+      --good: light-dark(#15803d, #4ade80);
+      --input-bg: light-dark(#ffffff, #101014);
+      --code-bg: #1d1d26;
+      --code-ink: #eceaf6;
+    }
+  }
+  @supports not (color: light-dark(#fff, #000)) {
+    :root {
+      --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+      --purple-soft: #ede9fe; --border: #e4e4e7; --good: #15803d;
+      --input-bg: #ffffff; --code-bg: #1d1d26; --code-ink: #eceaf6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+        --purple-soft: #2e1a5e; --border: #2c2c34; --good: #4ade80;
+        --input-bg: #101014;
+      }
+    }
+  }
+
+  :root {
+    --purple: #7c3aed; --purple-deep: #5b21b6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  .hero { padding: 2.5rem 1.5rem 2rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  .hero-inner { max-width: 42rem; margin: 0 auto; }
+  .hero h1 { margin: 0 0 0.75rem; font-size: clamp(2rem, 9vw, 3.25rem); line-height: 1.1; }
+  .hero h1 span { color: var(--purple); font-family: ui-monospace, monospace; }
+  .hero p { margin: 0; max-width: 34rem; color: var(--muted); }
+  .readout { margin-top: 1.25rem; background: var(--card); border: 1px solid var(--border); padding: 0.75rem 1rem; font-family: ui-monospace, monospace; font-size: 0.95rem; }
+  .readout b { color: var(--purple); }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  section > p { color: var(--muted); }
+  pre { background: var(--code-bg); color: var(--code-ink); padding: 1rem; overflow-x: auto; font-size: 0.9rem; }
+  pre .cm { color: #7ee787; }
+  code { font-family: ui-monospace, monospace; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .note { background: var(--purple-soft); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; }
+  .note + .note { margin-top: 0.75rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+  footer a { color: var(--purple); }
+
+  .toggle-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; }
+  .toggle-row button { font: inherit; cursor: pointer; border: 2px solid var(--purple); background: transparent; color: var(--ink); font-weight: 600; padding: 0.6rem 1.1rem; }
+  .toggle-row button[aria-pressed="true"] { background: var(--purple); color: #fff; }
+  .toggle-status { margin: 0 0 1rem; color: var(--muted); font-size: 0.95rem; }
+
+  .minis { display: grid; gap: 1rem; }
+  @media (min-width: 40rem) { .minis { grid-template-columns: 1fr 1fr; } }
+  .mini { background: var(--card); border: 2px solid var(--border); padding: 1rem; }
+  .mini h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+  .mini p { margin: 0 0 0.75rem; font-size: 0.95rem; }
+  .mini a { color: var(--purple); }
+  .mini .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; }
+  .btn-primary { font: inherit; cursor: pointer; border: 2px solid var(--purple); background: var(--purple); color: #fff; font-weight: 600; padding: 0.5rem 1rem; }
+  .btn-secondary { font: inherit; cursor: pointer; border: 2px solid var(--border); background: transparent; color: var(--ink); padding: 0.5rem 1rem; }
+  .mini input[type="text"] { width: 100%; font: inherit; padding: 0.55rem 0.7rem; border: 1px solid var(--border); background: var(--input-bg); color: var(--ink); }
+  .mini input[type="text"]:focus { outline: 2px solid var(--purple); outline-offset: 1px; }
+  .status { display: flex; align-items: center; gap: 0.5rem; margin: 0.75rem 0 0; font-size: 0.95rem; }
+  .dot { width: 0.75rem; height: 0.75rem; background: var(--good); flex: none; }
+  .mini .verdict { margin: 0.75rem 0 0; font-size: 0.92rem; color: var(--muted); }
+  .resolved { margin-top: 1rem; background: var(--card); border: 1px solid var(--border); padding: 0.75rem 1rem; font-family: ui-monospace, monospace; font-size: 0.95rem; }
+
+  /* Gotcha demo: same box, two color-scheme scopes. The light-scoped box
+     stays light even when the page is dark, because light-dark() reads the
+     used color-scheme, not the OS preference. */
+  .gotcha-box {
+    background: #ffffff; background: light-dark(#ffffff, #1a1a22);
+    color: #17171c; color: light-dark(#17171c, #f1f0f5);
+    border: 2px solid #e4e4e7; border-color: light-dark(#e4e4e7, #3a3a44);
+    padding: 1rem; margin-top: 0.75rem;
+  }
+  .gotcha-box p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+  .gotcha-box .mono { font-size: 0.9rem; }
+  .gotcha-light { color-scheme: light; }
+  .gotcha-auto { color-scheme: light dark; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1><span>light-dark()</span> picks the color for both themes, in one declaration.</h1>
+    <p>Every themed color used to live in two places: a custom property on :root for the light value, then the same property again inside a prefers-color-scheme media query. light-dark() collapses the pair. First value for light mode, second for dark, resolved by the color-scheme in effect. This page is themed with it. Flip the toggle below and watch every color on the page change with a single property flip.</p>
+    <div class="readout" id="supportReadout">Checking this browser…</div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>Try it: flip the theme</h2>
+    <p>System follows your operating system. Light and Dark override it by setting color-scheme on the root, and every light-dark() value on the page follows. No media query re-runs, no class swap on every component.</p>
+    <div class="toggle-row" role="group" aria-label="Theme">
+      <button type="button" id="themeSystem" aria-pressed="true">System</button>
+      <button type="button" id="themeLight" aria-pressed="false">Light</button>
+      <button type="button" id="themeDark" aria-pressed="false">Dark</button>
+    </div>
+    <p class="toggle-status" id="toggleStatus">Following your system preference.</p>
+    <div class="minis">
+      <div class="mini" id="sampleCard">
+        <h3>Sample card</h3>
+        <p>Every color in this card comes from a light-dark() token. Background, text, border, button, link, and the status dot all resolve from one color-scheme flip.</p>
+        <div class="row">
+          <button type="button" class="btn-primary">Save changes</button>
+          <button type="button" class="btn-secondary">Cancel</button>
+        </div>
+        <input type="text" value="Your name here" aria-label="Your name">
+        <p class="status"><span class="dot" aria-hidden="true"></span> Online <a href="#try">View profile</a></p>
+        <p class="verdict">The form input above is native browser chrome too. color-scheme themes it along with the rest of the page.</p>
+      </div>
+      <div class="mini">
+        <h3>What just happened</h3>
+        <p>One property changed: color-scheme on :root. That is the whole toggle. The light-dark() calls do not know or care whether the scheme came from your operating system or from a button.</p>
+        <div class="row">
+          <button type="button" class="btn-primary">Primary action</button>
+        </div>
+        <p class="verdict">A toggle built this way cannot drift out of sync with the stylesheet, because there is only one switch and it lives in CSS.</p>
+      </div>
+    </div>
+    <div class="resolved" id="resolvedReadout">Reading the resolved color…</div>
+  </section>
+
+  <section>
+    <h2>The one line you cannot skip</h2>
+    <p>light-dark() reads the element's used color-scheme, not your operating system setting directly. Without <code>color-scheme: light dark</code> set somewhere above it, every light-dark() call quietly returns its light value forever, even in dark mode. That is the single most common reason the function looks broken.</p>
+    <p>Switch the page to Dark above, then compare these two boxes. They use the exact same light-dark() background. The only difference is the color-scheme in effect.</p>
+    <div class="gotcha-box gotcha-light" id="gotchaLight">
+      <p><strong>color-scheme: light</strong></p>
+      <p>This box only supports the light scheme, so light-dark() always picks its first value.</p>
+      <p class="mono" id="gotchaLightValue">background: …</p>
+    </div>
+    <div class="gotcha-box gotcha-auto" id="gotchaAuto">
+      <p><strong>color-scheme: light dark</strong></p>
+      <p>This box supports both schemes, so light-dark() follows the page theme.</p>
+      <p class="mono" id="gotchaAutoValue">background: …</p>
+    </div>
+    <div class="note" style="margin-top: 1rem;">
+      <code>color-scheme: light dark</code> on :root also themes native browser UI to match: scrollbars, form controls, date pickers, and the default canvas background.
+    </div>
+  </section>
+
+  <section>
+    <h2>Old way, new way</h2>
+    <p>The old way works everywhere, and it is twice the code for every color. The new way is one declaration per color.</p>
+    <pre><code><span class="cm">/* Old way: every color declared twice */</span>
+:root {
+  --surface: #ffffff;
+  --ink: #17171c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #18181e;
+    --ink: #f1f0f5;
+  }
+}</code></pre>
+    <pre><code><span class="cm">/* New way: one declaration per color */</span>
+:root {
+  color-scheme: light dark;
+  --surface: light-dark(#ffffff, #18181e);
+  --ink: light-dark(#17171c, #f1f0f5);
+}</code></pre>
+    <p>light-dark() only helps with color values. Layout, spacing, and anything else that differs between themes still belongs in a media query or a class.</p>
+  </section>
+
+  <section>
+    <h2>Fallback for older browsers</h2>
+    <p>Declare the light color first, then light-dark() right after it. A browser that does not know the function ignores the second line and keeps the first. The page stays light themed instead of breaking.</p>
+    <pre><code>.card {
+  background: #ffffff;
+  background: light-dark(#ffffff, #18181e);
+}</code></pre>
+    <div class="note">That trick does not work inside a custom property. An unregistered custom property stores the light-dark() text and resolves it at the use site, so a plain declaration first is not a real fallback there. Use the @supports pattern this page uses, or put light-dark() directly in the declaration.</div>
+  </section>
+
+  <section>
+    <h2>Support</h2>
+    <p>light-dark() is Baseline, widely available. It shipped in every engine during 2024, and iPhone Safari has it from iOS 17.5.</p>
+    <table>
+      <tr><th>Browser</th><th>First version</th></tr>
+      <tr><td>Chrome</td><td>123</td></tr>
+      <tr><td>Edge</td><td>123</td></tr>
+      <tr><td>Firefox</td><td>120</td></tr>
+      <tr><td>Safari (macOS)</td><td>17.5</td></tr>
+      <tr><td>Safari (iOS)</td><td>17.5</td></tr>
+    </table>
+    <p>Older browsers ignore the function and keep whatever plain color you declared first, so the fallback above is the whole compatibility story.</p>
+  </section>
+</main>
+
+<footer>
+  <p>A Friday browser feature demo by <a href="https://dominic.balass.one/">Dominic Balassone</a>. More demos on the <a href="https://dominic.balass.one/">homepage</a>.</p>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var readout = document.getElementById('supportReadout');
+  var resolved = document.getElementById('resolvedReadout');
+  var status = document.getElementById('toggleStatus');
+  var sample = document.getElementById('sampleCard');
+  var lightVal = document.getElementById('gotchaLightValue');
+  var autoVal = document.getElementById('gotchaAutoValue');
+  var buttons = {
+    system: document.getElementById('themeSystem'),
+    light: document.getElementById('themeLight'),
+    dark: document.getElementById('themeDark')
+  };
+  var supports = CSS.supports('color', 'light-dark(#fff, #000)');
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function systemPref() { return mq.matches ? 'dark' : 'light'; }
+
+  function updateReadouts() {
+    var scheme = root.getAttribute('data-theme') || 'system';
+    var effective = scheme === 'system' ? systemPref() : scheme;
+    var bg = getComputedStyle(sample).backgroundColor;
+    readout.innerHTML = '<b>light-dark() supported:</b> ' + (supports ? 'yes' : 'no') +
+      ' &nbsp;·&nbsp; <b>system preference:</b> ' + systemPref() +
+      ' &nbsp;·&nbsp; <b>toggle:</b> ' + scheme +
+      ' &nbsp;·&nbsp; <b>effective scheme:</b> ' + effective;
+    resolved.textContent = 'Sample card background right now: ' + bg + ' (' + effective + ' branch)';
+    lightVal.textContent = 'background: ' + getComputedStyle(document.getElementById('gotchaLight')).backgroundColor;
+    autoVal.textContent = 'background: ' + getComputedStyle(document.getElementById('gotchaAuto')).backgroundColor;
+  }
+
+  function setTheme(mode) {
+    if (mode === 'system') { root.removeAttribute('data-theme'); }
+    else { root.setAttribute('data-theme', mode); }
+    Object.keys(buttons).forEach(function (k) {
+      buttons[k].setAttribute('aria-pressed', k === mode ? 'true' : 'false');
+    });
+    status.textContent = mode === 'system'
+      ? 'Following your system preference (' + systemPref() + ').'
+      : 'Forced ' + mode + ' mode. Your system preference is ' + systemPref() + '.';
+    updateReadouts();
+  }
+
+  buttons.system.addEventListener('click', function () { setTheme('system'); });
+  buttons.light.addEventListener('click', function () { setTheme('light'); });
+  buttons.dark.addEventListener('click', function () { setTheme('dark'); });
+  if (mq.addEventListener) { mq.addEventListener('change', updateReadouts); }
+
+  if (!supports) {
+    status.textContent = 'This browser does not support light-dark(). The page falls back to plain colors plus a prefers-color-scheme media query.';
+  }
+  updateReadouts();
+})();
+</script>
+</body>
+</html>
