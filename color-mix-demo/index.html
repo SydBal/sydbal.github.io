@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>color-mix(): mix colors in the stylesheet</title>
+<meta name="description" content="Mixing two colors in CSS used to mean precomputing hex values or reaching for a preprocessor. color-mix() blends them live in the stylesheet with a percentage. Try it here.">
+<meta property="og:title" content="color-mix(): mix colors in the stylesheet">
+<meta property="og:description" content="Mixing two colors in CSS used to mean precomputing hex values or reaching for a preprocessor. color-mix() blends them live in the stylesheet with a percentage.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/color-mix-demo/">
+<meta property="og:image" content="https://dominic.balass.one/color-mix-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="color-mix(): mix colors in the stylesheet">
+<meta name="twitter:description" content="Mixing two colors in CSS used to mean precomputing hex values or reaching for a preprocessor. color-mix() blends them live in the stylesheet with a percentage.">
+<meta name="twitter:image" content="https://dominic.balass.one/color-mix-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  header { padding: 2rem 1.25rem 1.5rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0 auto; max-width: 42rem; font-size: clamp(2rem, 9vw, 3.2rem); line-height: 1.1; }
+  header h1 span { color: var(--purple); }
+  header p { margin: 0.75rem auto 0; max-width: 42rem; color: var(--muted); }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+  section { margin-bottom: 2.5rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  p { margin-top: 0.25rem; }
+  .readout { background: var(--card); border: 1px solid var(--border); padding: 0.75rem 1rem; font-family: ui-monospace, monospace; font-size: 0.95rem; }
+  .readout b { color: var(--purple); }
+  .mixer { background: var(--card); border: 1px solid var(--border); padding: 1.25rem; }
+  .swatches { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+  .swatch { height: 96px; border: 1px solid var(--border); display: flex; align-items: flex-end; padding: 0.4rem 0.5rem; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+  .swatch span { background: var(--card); color: var(--ink); padding: 0.1rem 0.35rem; }
+  .swatch.result { grid-column: 1 / -1; height: 120px; }
+  .controls { display: grid; gap: 0.9rem; }
+  .controls label { font-weight: 600; display: block; margin-bottom: 0.25rem; }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .row > div { flex: 1 1 12rem; }
+  input[type="color"] { width: 100%; height: 2.75rem; border: 1px solid var(--border); background: var(--card); padding: 0.2rem; cursor: pointer; }
+  input[type="range"] { width: 100%; accent-color: var(--purple); }
+  .seg { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .seg button { font: inherit; font-family: ui-monospace, monospace; cursor: pointer; border: 2px solid var(--purple); background: transparent; color: var(--ink); padding: 0.4rem 0.8rem; }
+  .seg button[aria-pressed="true"] { background: var(--purple); color: #fff; }
+  .variants { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+  @media (max-width: 480px) { .variants { grid-template-columns: 1fr; } }
+  .variant { border: 1px solid var(--border); padding: 0.9rem; }
+  .variant .chip { height: 56px; border: 1px solid var(--border); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+  .variant code { font-size: 0.8rem; word-break: break-all; }
+  .btn { display: inline-block; padding: 0.6rem 1.2rem; border: none; cursor: pointer; font: inherit; font-weight: 600; color: #fff; background: var(--brand, #7c3aed); }
+  .btn:hover { background: color-mix(in oklch, var(--brand, #7c3aed), black 14%); }
+  pre { background: #1d1d26; color: #eceaf6; padding: 1rem; overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: ui-monospace, monospace; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .note { background: var(--purple-soft); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mix colors <span>in the stylesheet</span></h1>
+  <p>Mixing two colors in CSS used to mean precomputing hex values or reaching for a preprocessor. <code>color-mix()</code> blends them live, with a percentage, in any color space. Change the inputs below and the browser does the math.</p>
+</header>
+
+<main>
+  <section aria-labelledby="mixer-h">
+    <h2 id="mixer-h">The mixer</h2>
+    <div class="mixer">
+      <div class="swatches">
+        <div class="swatch" id="swatchA"><span id="labelA">#7c3aed</span></div>
+        <div class="swatch" id="swatchB"><span id="labelB">#ffffff</span></div>
+        <div class="swatch result" id="swatchResult"><span id="labelResult">result</span></div>
+      </div>
+      <div class="controls">
+        <div class="row">
+          <div>
+            <label for="colorA">First color</label>
+            <input type="color" id="colorA" value="#7c3aed">
+          </div>
+          <div>
+            <label for="colorB">Second color</label>
+            <input type="color" id="colorB" value="#ffffff">
+          </div>
+        </div>
+        <div>
+          <label for="pct">Mix: <span id="pctLabel">50%</span> of the second color</label>
+          <input type="range" id="pct" min="0" max="100" value="50">
+        </div>
+        <div>
+          <label id="spaceLabel">Color space</label>
+          <div class="seg" role="group" aria-labelledby="spaceLabel" id="spaceSeg">
+            <button type="button" data-space="srgb" aria-pressed="false">srgb</button>
+            <button type="button" data-space="oklab" aria-pressed="false">oklab</button>
+            <button type="button" data-space="oklch" aria-pressed="true">oklch</button>
+            <button type="button" data-space="hsl" aria-pressed="false">hsl</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="readout" id="mixReadout" aria-live="polite">color-mix(in oklch, #7c3aed 50%, #ffffff)</p>
+    <p>Switch the color space and watch the middle of the scale change. <code>srgb</code> midpoints often look muddy or grey. <code>oklch</code> keeps the hue and stays bright, which is why it is the usual pick for UI work.</p>
+  </section>
+
+  <section aria-labelledby="brand-h">
+    <h2 id="brand-h">One brand color, a whole palette</h2>
+    <p>Pick a brand color and every variant below regenerates from it. No new hex values, no Sass function. This is the whole point.</p>
+    <div class="row" style="margin-bottom: 1rem;">
+      <div>
+        <label for="brand">Brand color</label>
+        <input type="color" id="brand" value="#7c3aed">
+      </div>
+    </div>
+    <div class="variants" id="variants">
+      <div class="variant">
+        <div class="chip" id="chipTint">Tint</div>
+        <code>color-mix(in oklch, var(--brand) 80%, white)</code>
+      </div>
+      <div class="variant">
+        <div class="chip" id="chipHover">Hover</div>
+        <code>color-mix(in oklch, var(--brand), black 14%)</code>
+      </div>
+      <div class="variant">
+        <div class="chip" id="chipSubtle">Subtle background</div>
+        <code>color-mix(in oklch, var(--brand) 12%, transparent)</code>
+      </div>
+      <div class="variant">
+        <div class="chip" id="chipMuted">Muted text</div>
+        <code>color-mix(in oklch, var(--brand) 55%, var(--ink))</code>
+      </div>
+    </div>
+    <p style="margin-top: 1rem;"><button class="btn" id="demoBtn" type="button">A button that hovers itself</button></p>
+    <p>The button above uses the same trick: its hover state is <code>color-mix(in oklch, var(--brand), black 14%)</code>. Change the brand color and the hover follows.</p>
+  </section>
+
+  <section aria-labelledby="code-h">
+    <h2 id="code-h">The pattern</h2>
+<pre><code>:root {
+  --brand: #7c3aed;
+}
+
+.button {
+  background: var(--brand);
+}
+
+.button:hover {
+  background: color-mix(in oklch, var(--brand), black 14%);
+}
+
+.card {
+  background: color-mix(in oklch, var(--brand) 12%, transparent);
+}</code></pre>
+    <div class="note">
+      <p><strong>Fallback for the long tail:</strong> write the static color first, then the <code>color-mix()</code> line. A browser that cannot parse the second declaration keeps the first.</p>
+<pre style="margin-top: 0.5rem;"><code>.button:hover {
+  background: #6a30d4;
+  background: color-mix(in oklch, var(--brand), black 14%);
+}</code></pre>
+    </div>
+  </section>
+
+  <section aria-labelledby="support-h">
+    <h2 id="support-h">Support</h2>
+    <p class="readout" id="supportReadout">Checking this browser…</p>
+    <table>
+      <thead><tr><th>Browser</th><th>Since</th></tr></thead>
+      <tbody>
+        <tr><td>Chrome / Edge</td><td>111</td></tr>
+        <tr><td>Firefox</td><td>113</td></tr>
+        <tr><td>Safari</td><td>16.2</td></tr>
+        <tr><td>Safari on iPhone</td><td>iOS 16.2</td></tr>
+      </tbody>
+    </table>
+    <p><code>color-mix()</code> is Baseline Widely Available. It shipped in every major browser in early 2023, so any browser updated since mid-2023 has it, including Safari on iPhone from iOS 16.2.</p>
+  </section>
+</main>
+
+<footer>Built by Dominic Balassone. Part of a Friday series on underused browser features.</footer>
+
+<script>
+(function () {
+  var supported = CSS.supports('color', 'color-mix(in srgb, red, blue)');
+  document.getElementById('supportReadout').innerHTML = supported
+    ? 'This browser: <b>color-mix() supported</b>.'
+    : 'This browser: <b>color-mix() NOT supported</b>. The swatches above fall back to the first color.';
+
+  var colorA = document.getElementById('colorA');
+  var colorB = document.getElementById('colorB');
+  var pct = document.getElementById('pct');
+  var pctLabel = document.getElementById('pctLabel');
+  var space = 'oklch';
+  var swatchA = document.getElementById('swatchA');
+  var swatchB = document.getElementById('swatchB');
+  var swatchResult = document.getElementById('swatchResult');
+  var labelA = document.getElementById('labelA');
+  var labelB = document.getElementById('labelB');
+  var labelResult = document.getElementById('labelResult');
+  var readout = document.getElementById('mixReadout');
+
+  function rgbToHex(rgb) {
+    var m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!m) return rgb;
+    function h(n) { return ('0' + parseInt(n, 10).toString(16)).slice(-2); }
+    return '#' + h(m[1]) + h(m[2]) + h(m[3]);
+  }
+
+  function updateMixer() {
+    var a = colorA.value, b = colorB.value, p = parseInt(pct.value, 10);
+    pctLabel.textContent = p + '%';
+    swatchA.style.background = a;
+    swatchB.style.background = b;
+    labelA.textContent = a;
+    labelB.textContent = b;
+    var mix = 'color-mix(in ' + space + ', ' + a + ' ' + (100 - p) + '%, ' + b + ')';
+    swatchResult.style.background = mix;
+    var computed = rgbToHex(getComputedStyle(swatchResult).backgroundColor);
+    labelResult.textContent = computed;
+    readout.textContent = mix + '  =  ' + computed;
+  }
+
+  document.getElementById('spaceSeg').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-space]');
+    if (!btn) return;
+    space = btn.dataset.space;
+    document.querySelectorAll('#spaceSeg button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+    });
+    updateMixer();
+  });
+
+  [colorA, colorB, pct].forEach(function (el) {
+    el.addEventListener('input', updateMixer);
+  });
+
+  var brand = document.getElementById('brand');
+  var root = document.documentElement;
+  function updateBrand() {
+    var v = brand.value;
+    root.style.setProperty('--brand', v);
+    document.getElementById('chipTint').style.background = 'color-mix(in oklch, ' + v + ' 80%, white)';
+    document.getElementById('chipHover').style.background = 'color-mix(in oklch, ' + v + ', black 14%)';
+    document.getElementById('chipSubtle').style.background = 'color-mix(in oklch, ' + v + ' 12%, transparent)';
+    document.getElementById('chipMuted').style.color = 'color-mix(in oklch, ' + v + ' 55%, var(--ink))';
+    document.getElementById('chipMuted').style.background = 'var(--card)';
+  }
+  brand.addEventListener('input', updateBrand);
+
+  updateMixer();
+  updateBrand();
+})();
+</script>
+</body>
+</html>
