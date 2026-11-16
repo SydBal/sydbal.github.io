@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forced colors mode strips your palette. Your site should not break.</title>
+<meta name="description" content="Windows High Contrast hands your page a fixed palette and overrides nearly every color you wrote. The forced-colors media query lets you adapt instead of breaking. Try the same small UI with and without a fix, plus a live readout from your own browser.">
+<meta property="og:title" content="Forced colors mode strips your palette. Your site should not break.">
+<meta property="og:description" content="Windows High Contrast hands your page a fixed palette and overrides nearly every color you wrote. The forced-colors media query lets you adapt instead of breaking. Try it live.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/forced-colors-demo/">
+<meta property="og:image" content="https://dominic.balass.one/forced-colors-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Forced colors mode strips your palette. Your site should not break.">
+<meta name="twitter:description" content="Windows High Contrast hands your page a fixed palette and overrides nearly every color you wrote. The forced-colors media query lets you adapt instead of breaking. Try it live.">
+<meta name="twitter:image" content="https://dominic.balass.one/forced-colors-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --good: #15803d; --bad: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+      --good: #4ade80; --bad: #f87171;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  .hero { padding: 2.5rem 1.5rem 2rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  .hero-inner { max-width: 42rem; margin: 0 auto; }
+  .hero h1 { margin: 0 0 0.75rem; font-size: clamp(2rem, 9vw, 3.25rem); line-height: 1.1; }
+  .hero h1 span { color: var(--purple); font-family: ui-monospace, monospace; }
+  .hero p { margin: 0; max-width: 34rem; color: var(--muted); }
+  .readout { margin-top: 1.25rem; background: var(--card); border: 1px solid var(--border); padding: 0.75rem 1rem; font-family: ui-monospace, monospace; font-size: 0.95rem; }
+  .readout b { color: var(--purple); }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  section > p { color: var(--muted); }
+  pre { background: #1d1d26; color: #eceaf6; padding: 1rem; overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: ui-monospace, monospace; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .note { background: var(--purple-soft); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; }
+  .note + .note { margin-top: 0.75rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+
+  .sim-toggle { font: inherit; cursor: pointer; border: 2px solid var(--purple); background: var(--purple); color: #fff; font-weight: 600; padding: 0.7rem 1.25rem; }
+  .sim-toggle[aria-pressed="true"] { background: transparent; color: var(--ink); }
+  .sim-status { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.95rem; }
+
+  .minis { display: grid; gap: 1rem; }
+  @media (min-width: 40rem) { .minis { grid-template-columns: 1fr 1fr; } }
+  .mini { background: var(--card); border: 2px solid var(--border); padding: 1rem; }
+  .mini h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+  .mini p { margin: 0 0 0.75rem; font-size: 0.95rem; }
+  .mini a { color: var(--purple); }
+  .mini .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; }
+  .btn-primary { font: inherit; cursor: pointer; border: 2px solid var(--purple); background: var(--purple); color: #fff; font-weight: 600; padding: 0.5rem 1rem; }
+  .btn-secondary { font: inherit; cursor: pointer; border: 2px solid var(--border); background: transparent; color: var(--ink); padding: 0.5rem 1rem; }
+  .mini input[type="text"] { width: 100%; font: inherit; padding: 0.55rem 0.7rem; border: 1px solid var(--border); background: var(--bg); color: var(--ink); }
+  .mini input[type="text"]:focus { outline: 2px solid var(--purple); outline-offset: 1px; }
+  .status { display: flex; align-items: center; gap: 0.5rem; margin: 0.75rem 0 0; font-size: 0.95rem; }
+  .dot { width: 0.75rem; height: 0.75rem; background: var(--good); flex: none; }
+  .mini .verdict { margin: 0.75rem 0 0; font-size: 0.92rem; color: var(--muted); }
+
+  /* Simulated forced-colors palette: black canvas, white text, yellow links */
+  .sim-forced .mini { background: #000; color: #fff; border-color: #fff; }
+  .sim-forced .mini p, .sim-forced .mini .verdict, .sim-forced .mini .status { color: #fff; }
+  .sim-forced .mini input[type="text"] { background: #000; color: #fff; border: 1px solid #fff; }
+  .sim-forced .broken .btn-primary { background: transparent; color: #fff; border-color: transparent; }
+  .sim-forced .broken .btn-secondary { background: transparent; color: #fff; border-color: transparent; }
+  .sim-forced .broken a { color: #fff; text-decoration: none; }
+  .sim-forced .broken .dot { background: #fff; }
+  .sim-forced .fixed .btn-primary { background: transparent; color: #fff; border: 2px solid #fff; }
+  .sim-forced .fixed .btn-secondary { background: transparent; color: #fff; border: 2px solid #fff; }
+  .sim-forced .fixed a { color: #ffff00; text-decoration: underline; }
+  .sim-forced .fixed .dot { background: #ffff00; }
+
+  /* Real forced-colors mode: adapt with system colors */
+  @media (forced-colors: active) {
+    .mini { border-color: ButtonText; }
+    .btn-primary { border: 2px solid ButtonText; background: ButtonFace; color: ButtonText; }
+    .btn-secondary { border: 2px solid ButtonText; background: Canvas; color: CanvasText; }
+    .mini a { color: LinkText; text-decoration: underline; }
+    .dot { background: Highlight; }
+    .sim-toggle { border: 2px solid ButtonText; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1><span>forced-colors</span> strips your palette. Your site should not break.</h1>
+    <p>Windows High Contrast does not ask your site to look nicer. It hands the browser a fixed palette from the operating system and overrides nearly every color you wrote. Your purple button becomes plain text on a flat background. Your link loses its color and looks like a sentence. The green dot that meant online means nothing. The <span class="mono">forced-colors</span> media query tells you the mode is active, and the system colors tell you what to draw with.</p>
+    <div class="readout" id="supportReadout">Checking this browser…</div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>Try it: the same UI, with and without a fix</h2>
+    <p>Flip the simulation. It previews the Windows High Contrast palette on the two cards below. The left card has no forced-colors handling. The right card has the fix. The simulation is an approximation. The real mode is an operating system switch, and you cannot turn it on from JavaScript.</p>
+    <button type="button" class="sim-toggle" id="simToggle" aria-pressed="false">Simulate forced colors</button>
+    <p class="sim-status" id="simStatus">Simulation off. Showing the page as designed.</p>
+    <div class="minis" id="stage" style="margin-top: 1.25rem;">
+      <div class="mini broken">
+        <h3>Without a fix</h3>
+        <p>Welcome back. Your <a href="#demo">billing page</a> has a new invoice.</p>
+        <div class="row">
+          <button type="button" class="btn-primary">Pay now</button>
+          <button type="button" class="btn-secondary">Remind me later</button>
+        </div>
+        <input type="text" value="Card ending in 4242" aria-label="Payment method" readonly>
+        <p class="status"><span class="dot" aria-hidden="true"></span> Online</p>
+        <p class="verdict">In forced colors, the Pay button has no border and no background, the billing link looks like plain text, and the green dot carries no meaning.</p>
+      </div>
+      <div class="mini fixed">
+        <h3>With a fix</h3>
+        <p>Welcome back. Your <a href="#demo">billing page</a> has a new invoice.</p>
+        <div class="row">
+          <button type="button" class="btn-primary">Pay now</button>
+          <button type="button" class="btn-secondary">Remind me later</button>
+        </div>
+        <input type="text" value="Card ending in 4242" aria-label="Payment method" readonly>
+        <p class="status"><span class="dot" aria-hidden="true"></span> Online</p>
+        <p class="verdict">Borders are drawn with the system palette, the link is underlined, and the status is a word, not a color alone.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The fix, in one rule</h2>
+    <p>Borders survive when backgrounds do not. Underlines survive when link color does not. Words survive when a colored dot does not. The system colors are the palette the user chose: <span class="mono">Canvas</span>, <span class="mono">CanvasText</span>, <span class="mono">LinkText</span>, <span class="mono">ButtonText</span>, <span class="mono">ButtonFace</span>, <span class="mono">Highlight</span>.</p>
+    <pre><code>@media (forced-colors: active) {
+  .btn {
+    border: 2px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+  a { color: LinkText; }
+}</code></pre>
+  </section>
+
+  <section>
+    <h2>On this device</h2>
+    <p>The readout at the top is a live check run in your browser, not a claim from a table. It evaluates <span class="mono">matchMedia('(forced-colors: active)')</span>. If it says true, the real mode is on right now and the fixed card above is running its real forced-colors styles.</p>
+    <table>
+      <tr><th>Browser</th><th><span class="mono">forced-colors</span> shipped in</th></tr>
+      <tr><td>Chrome</td><td class="mono">89</td></tr>
+      <tr><td>Edge</td><td class="mono">79</td></tr>
+      <tr><td>Firefox</td><td class="mono">89</td></tr>
+      <tr><td>Safari</td><td class="mono">16</td></tr>
+    </table>
+    <p><span class="mono">forced-colors</span> is Baseline, widely available since March 2025. Safari 16 covers macOS and iOS. One honest catch: iOS has no forced-colors mode to turn on, so the readout on an iPhone will say false. That is expected. The simulator above is how you preview it there. On Windows, Chrome and Edge DevTools can also emulate it from the Rendering tab.</p>
+  </section>
+
+  <section>
+    <h2>The escape hatch, and why to reach for it slowly</h2>
+    <p><span class="mono">forced-color-adjust: none</span> opts an element out of forced colors entirely, so it renders with its own colors exactly as written. It has its uses, a brand logo or a photo that would be unreadable any other way. But the user chose this palette for a reason, so treat it as a scalpel, not a default. And one more honest catch: <span class="mono">forced-color-adjust</span> works in Chrome, Edge, and Firefox, but Safari does not support it yet. Do not build on it as a universal escape hatch.</p>
+    <pre><code>.logo {
+  forced-color-adjust: none;
+}</code></pre>
+    <div class="note"><strong>Worth knowing:</strong> <span class="mono">forced-colors</span> is not the same as <span class="mono">prefers-contrast</span>. The contrast query reports a preference for more or less contrast and touches none of your styles. Forced colors is not a hint. When it is active, the browser overrides nearly every color property you wrote.</div>
+    <div class="note"><strong>Worth knowing:</strong> never rely on color alone for meaning. A green dot, a red border, a greyed-out button. If the meaning lives only in a color, forced colors mode deletes it. Pair it with text, a shape, or an underline.</div>
+  </section>
+</main>
+
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>
+</footer>
+
+<script>
+  var mq = window.matchMedia('(forced-colors: active)');
+  var readout = document.getElementById('supportReadout');
+  var adjustSupported = false;
+  try { adjustSupported = CSS.supports('forced-color-adjust: none'); } catch (e) { adjustSupported = false; }
+  function renderReadout() {
+    readout.innerHTML =
+      'matchMedia(\'(forced-colors: active)\') = <b>' + mq.matches + '</b>' +
+      (mq.matches ? ' &nbsp; Forced colors is on in this browser right now. The fixed card above is running its real forced-colors styles.' : ' &nbsp; Forced colors is not active on this device. Use the simulator below to preview it.') +
+      '<br>CSS.supports(\'forced-color-adjust: none\') = <b>' + adjustSupported + '</b>';
+  }
+  if (mq.addEventListener) { mq.addEventListener('change', renderReadout); }
+  renderReadout();
+
+  var stage = document.getElementById('stage');
+  var toggle = document.getElementById('simToggle');
+  var statusEl = document.getElementById('simStatus');
+  toggle.addEventListener('click', function () {
+    var on = stage.classList.toggle('sim-forced');
+    toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    toggle.textContent = on ? 'Back to normal colors' : 'Simulate forced colors';
+    statusEl.textContent = on
+      ? 'Simulation on. This previews the Windows High Contrast palette: black canvas, white text, yellow links. It is an approximation, not the real operating system mode.'
+      : 'Simulation off. Showing the page as designed.';
+  });
+</script>
+</body>
+</html>
