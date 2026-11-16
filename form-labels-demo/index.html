@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A placeholder is not a label</title>
+<meta name="description" content="A placeholder vanishes the moment you type, and screen readers often skip it entirely. Try the same small form twice: once with placeholder-only inputs, once with real labels, and see what the screen reader hears.">
+<meta property="og:title" content="A placeholder is not a label">
+<meta property="og:description" content="A placeholder vanishes the moment you type, and screen readers often skip it entirely. Try the same form twice: placeholder-only vs real labels, and see what the screen reader hears.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/form-labels-demo/">
+<meta property="og:image" content="https://dominic.balass.one/form-labels-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A placeholder is not a label">
+<meta name="twitter:description" content="A placeholder vanishes the moment you type, and screen readers often skip it entirely. Try the same form twice and see what the screen reader hears.">
+<meta name="twitter:image" content="https://dominic.balass.one/form-labels-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --good: #15803d; --bad: #b91c1c; --warn: #a16207;
+    --good-soft: #dcfce7; --bad-soft: #fee2e2; --warn-soft: #fef9c3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+      --good: #4ade80; --bad: #f87171; --warn: #facc15;
+      --good-soft: #14532d; --bad-soft: #450a0a; --warn-soft: #422006;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  .hero { padding: 2.5rem 1.5rem 2rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  .hero-inner { max-width: 42rem; margin: 0 auto; }
+  .hero h1 { margin: 0 0 0.75rem; font-size: clamp(2rem, 9vw, 3.25rem); line-height: 1.1; }
+  .hero h1 span { color: var(--purple); font-family: ui-monospace, monospace; }
+  .hero p { margin: 0; max-width: 34rem; color: var(--muted); }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  section > p { color: var(--muted); }
+  pre { background: #1d1d26; color: #eceaf6; padding: 1rem; overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: ui-monospace, monospace; }
+  .note { background: var(--purple-soft); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; }
+  .note + .note { margin-top: 0.75rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+
+  /* Forms */
+  .form-card { background: var(--card); border: 2px solid var(--border); padding: 1.25rem; margin-top: 1rem; }
+  .form-card.broken { border-color: var(--bad); }
+  .form-card.fixed { border-color: var(--good); }
+  .form-card h3 { margin: 0 0 0.25rem; font-size: 1.1rem; }
+  .form-card .tag { display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 0.15rem 0.5rem; margin-bottom: 0.75rem; color: #fff; }
+  .form-card.broken .tag { background: var(--bad); }
+  .form-card.fixed .tag { background: var(--good); }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+  .field input { width: 100%; font: inherit; font-size: 16px; padding: 0.6rem 0.75rem; border: 1px solid var(--border); background: var(--bg); color: var(--ink); }
+  .field input:focus { outline: 2px solid var(--purple); outline-offset: 1px; }
+  .field input::placeholder { color: #9a9aa5; }
+  .field .hint { font-size: 0.88rem; color: var(--muted); margin: 0.35rem 0 0; }
+  .demo-button { font: inherit; font-size: 16px; cursor: pointer; border: 2px solid var(--purple); background: transparent; color: var(--ink); padding: 0.6rem 1.1rem; margin-top: 0.5rem; }
+  .demo-button:hover { background: var(--purple-soft); }
+  .demo-button.secondary { border-color: var(--border); }
+
+  /* Accessible-name readout under each field */
+  .name-readout { margin-top: 0.4rem; font-size: 0.92rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border); background: var(--bg); }
+  .name-readout .src { font-weight: 700; }
+  .name-readout.good { border-color: var(--good); background: var(--good-soft); }
+  .name-readout.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .name-readout.bad { border-color: var(--bad); background: var(--bad-soft); }
+  .name-readout.good .src { color: var(--good); }
+  .name-readout.warn .src { color: var(--warn); }
+  .name-readout.bad .src { color: var(--bad); }
+
+  /* Transcript */
+  .transcript { background: #1d1d26; color: #eceaf6; padding: 1rem; font-family: ui-monospace, monospace; font-size: 0.9rem; min-height: 7.5rem; max-height: 14rem; overflow-y: auto; white-space: pre-wrap; }
+  .transcript .sr-bad { color: #fca5a5; }
+  .transcript .sr-good { color: #86efac; }
+  .transcript .sr-note { color: #a5b4fc; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1>A <span>placeholder</span> is not a label</h1>
+    <p>A placeholder looks like a label until you start typing. Then it vanishes, right when you might want to re-read it. And for a screen reader user, it often was never a label at all. Below is the same small sign-up form twice: once the way too many sites build it, once the fixed way. Tab through both, or press the button to fill them in, and watch what the screen reader hears.</p>
+  </div>
+</header>
+
+<main>
+  <section>
+    <h2>1. The broken way: placeholder only</h2>
+    <p>Three fields, no labels anywhere. The grey text inside each box is doing all the work, and it stops working the moment you type. Focus a field and read the line underneath it: that is the name the browser can offer a screen reader, and where it came from.</p>
+    <div class="form-card broken">
+      <h3>Sign up</h3>
+      <span class="tag">BROKEN</span>
+      <form id="brokenForm" action="#" onsubmit="return false;">
+        <div class="field">
+          <input type="text" id="b-name" placeholder="Full name" autocomplete="name">
+          <div class="name-readout" id="readout-b-name" aria-live="polite"></div>
+        </div>
+        <div class="field">
+          <input type="email" id="b-email" placeholder="Email address" autocomplete="email">
+          <div class="name-readout" id="readout-b-email" aria-live="polite"></div>
+        </div>
+        <div class="field">
+          <input type="password" id="b-password" placeholder="Choose a password" autocomplete="new-password">
+          <div class="name-readout" id="readout-b-password" aria-live="polite"></div>
+        </div>
+        <button class="demo-button" type="button" id="fillBroken">Fill in this form</button>
+        <button class="demo-button secondary" type="button" id="clearBroken">Clear it</button>
+      </form>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. The fixed way: a real label on every field</h2>
+    <p>Same three fields. Each one has a visible <code>&lt;label&gt;</code> tied to it with <code>for</code> and <code>id</code>. The placeholder is still there, but now it only shows an example value, which is all a placeholder is for. The label stays put while you type.</p>
+    <div class="form-card fixed">
+      <h3>Sign up</h3>
+      <span class="tag">FIXED</span>
+      <form id="fixedForm" action="#" onsubmit="return false;">
+        <div class="field">
+          <label for="f-name">Full name</label>
+          <input type="text" id="f-name" placeholder="Ada Lovelace" autocomplete="name">
+          <div class="name-readout" id="readout-f-name" aria-live="polite"></div>
+        </div>
+        <div class="field">
+          <label for="f-email">Email address</label>
+          <input type="email" id="f-email" placeholder="ada@example.com" autocomplete="email">
+          <div class="name-readout" id="readout-f-email" aria-live="polite"></div>
+        </div>
+        <div class="field">
+          <label for="f-password">Choose a password</label>
+          <input type="password" id="f-password" placeholder="At least 12 characters" autocomplete="new-password">
+          <div class="name-readout" id="readout-f-password" aria-live="polite"></div>
+          <p class="hint">At least 12 characters. The hint stays visible too, because it lives outside the input.</p>
+        </div>
+        <button class="demo-button" type="button" id="fillFixed">Fill in this form</button>
+        <button class="demo-button secondary" type="button" id="clearFixed">Clear it</button>
+      </form>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. What the screen reader hears</h2>
+    <p>Tab through both forms above. Every time a field gets focus, a line is added here, showing what a screen reader announces for it. The broken form leans on the placeholder, and some screen readers skip that entirely, so for those users the field is just "edit text". The fixed form announces the label every time.</p>
+    <div class="transcript" id="transcript" aria-live="polite">Focus a field in either form to hear what a screen reader announces for it.</div>
+    <p><button class="demo-button secondary" type="button" id="clearTranscript">Clear transcript</button></p>
+  </section>
+
+  <section>
+    <h2>The fix, in full</h2>
+    <p>One label per field, connected with <code>for</code> and <code>id</code>. That is the whole fix, and it is about five minutes of work.</p>
+    <pre><code>&lt;!-- Before: the placeholder does all the work --&gt;
+&lt;input type="email" placeholder="Email address"&gt;
+
+&lt;!-- After: the label names the field, the
+     placeholder only shows an example --&gt;
+&lt;label for="email"&gt;Email address&lt;/label&gt;
+&lt;input type="email" id="email"
+       placeholder="ada@example.com"&gt;</code></pre>
+    <div class="note">
+      <strong>Why this is a real failure, not a nitpick.</strong> WCAG 2.2 calls it out at Level A, the strictest tier: 1.3.1 Info and Relationships (the label must be programmatically tied to the field), 3.3.2 Labels or Instructions (a label or instructions must be provided), and 4.1.2 Name, Role, Value (every control needs a name assistive tech can read). A placeholder-only field fails all three.
+    </div>
+    <div class="note">
+      <strong>No room for a visible label?</strong> Keep the <code>&lt;label&gt;</code> in the markup and hide it with a 1-by-1px clip, never with <code>display: none</code>, which removes it from the accessibility tree. And if the field needs no visible text at all, like a search box next to a magnifier, <code>aria-label="Search"</code> gives it a name. But a visible label is almost always better: sighted users read it too, and it keeps the visible and announced names the same.
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Built by <a href="https://dominic.balass.one/">Dominic Balassone</a> &middot; Part of the prefers-* accessibility series</p>
+</footer>
+
+<script>
+(function () {
+  // Simplified accessible-name computation, in the same priority order
+  // browsers use: aria-labelledby, aria-label, associated <label>,
+  // then placeholder as an unreliable fallback, then nothing.
+  function computeName(input) {
+    var labelledBy = input.getAttribute('aria-labelledby');
+    if (labelledBy) {
+      var parts = labelledBy.split(/\s+/).map(function (id) {
+        var el = document.getElementById(id);
+        return el ? el.textContent.trim() : '';
+      }).filter(Boolean);
+      if (parts.length) return { name: parts.join(' '), source: 'aria-labelledby', solid: true };
+    }
+    var ariaLabel = input.getAttribute('aria-label');
+    if (ariaLabel) return { name: ariaLabel, source: 'aria-label', solid: true };
+    if (input.id) {
+      var label = document.querySelector('label[for="' + input.id + '"]');
+      if (label) return { name: label.textContent.trim(), source: '<label>', solid: true };
+    }
+    var wrapping = input.closest('label');
+    if (wrapping) {
+      var text = wrapping.textContent.replace(input.value, '').trim();
+      if (text) return { name: text, source: '<label> (wrapped)', solid: true };
+    }
+    if (input.placeholder) return { name: input.placeholder, source: 'placeholder (unreliable fallback)', solid: false };
+    return { name: '', source: 'none', solid: false };
+  }
+
+  function renderReadout(input) {
+    var box = document.getElementById('readout-' + input.id);
+    if (!box) return;
+    var result = computeName(input);
+    var filled = input.value.length > 0;
+    box.classList.remove('good', 'warn', 'bad');
+    if (result.solid) {
+      box.classList.add('good');
+      box.innerHTML = 'Screen reader hears: &ldquo;<span class="src">' + escapeHtml(result.name) + '</span>&rdquo; &mdash; from ' + escapeHtml(result.source) + '.';
+    } else if (result.name && !filled) {
+      box.classList.add('warn');
+      box.innerHTML = 'Screen reader hears: &ldquo;<span class="src">' + escapeHtml(result.name) + '</span>&rdquo; &mdash; from ' + escapeHtml(result.source) + '. Some screen readers skip the placeholder entirely, so for those users this field is just &ldquo;edit text&rdquo;.';
+    } else if (result.name && filled) {
+      box.classList.add('bad');
+      box.innerHTML = '<span class="src">The placeholder is gone.</span> You typed, so the hint vanished, and nothing is left to say what this field wants.';
+    } else {
+      box.classList.add('bad');
+      box.innerHTML = '<span class="src">No name at all.</span> A screen reader announces this field as just &ldquo;edit text&rdquo;.';
+    }
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var transcript = document.getElementById('transcript');
+  var transcriptStarted = false;
+  function logFocus(input) {
+    var result = computeName(input);
+    var filled = input.value.length > 0;
+    if (!transcriptStarted) { transcript.textContent = ''; transcriptStarted = true; }
+    var line = document.createElement('div');
+    if (result.solid) {
+      line.innerHTML = '<span class="sr-good">Focus: &ldquo;' + escapeHtml(result.name) + ', edit text&rdquo;</span> <span class="sr-note">&mdash; from ' + escapeHtml(result.source) + '</span>';
+    } else if (result.name && !filled) {
+      line.innerHTML = '<span class="sr-bad">Focus: &ldquo;' + escapeHtml(result.name) + ', edit text&rdquo;</span> <span class="sr-note">&mdash; from placeholder, not a label. Some screen readers announce nothing here.</span>';
+    } else if (result.name && filled) {
+      line.innerHTML = '<span class="sr-bad">Focus: &ldquo;edit text&rdquo;</span> <span class="sr-note">&mdash; the placeholder vanished when you typed. Nothing names this field now.</span>';
+    } else {
+      line.innerHTML = '<span class="sr-bad">Focus: &ldquo;edit text&rdquo;</span> <span class="sr-note">&mdash; this field has no name at all.</span>';
+    }
+    transcript.appendChild(line);
+    transcript.scrollTop = transcript.scrollHeight;
+  }
+
+  var inputs = Array.prototype.slice.call(document.querySelectorAll('#brokenForm input, #fixedForm input'));
+  inputs.forEach(function (input) {
+    renderReadout(input);
+    input.addEventListener('focus', function () { logFocus(input); });
+    input.addEventListener('input', function () { renderReadout(input); });
+  });
+
+  function fill(formId, values) {
+    Object.keys(values).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) { el.value = values[id]; renderReadout(el); }
+    });
+  }
+  function clear(formId, ids) {
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) { el.value = ''; renderReadout(el); }
+    });
+  }
+  document.getElementById('fillBroken').addEventListener('click', function () {
+    fill('brokenForm', { 'b-name': 'Ada Lovelace', 'b-email': 'ada@example.com', 'b-password': 'correct-horse-battery' });
+  });
+  document.getElementById('clearBroken').addEventListener('click', function () {
+    clear('brokenForm', ['b-name', 'b-email', 'b-password']);
+  });
+  document.getElementById('fillFixed').addEventListener('click', function () {
+    fill('fixedForm', { 'f-name': 'Ada Lovelace', 'f-email': 'ada@example.com', 'f-password': 'correct-horse-battery' });
+  });
+  document.getElementById('clearFixed').addEventListener('click', function () {
+    clear('fixedForm', ['f-name', 'f-email', 'f-password']);
+  });
+  document.getElementById('clearTranscript').addEventListener('click', function () {
+    transcript.textContent = 'Focus a field in either form to hear what a screen reader announces for it.';
+    transcriptStarted = false;
+  });
+})();
+</script>
+</body>
+</html>
