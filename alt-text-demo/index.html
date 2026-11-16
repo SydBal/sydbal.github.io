@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alt text: what the screen reader actually hears</title>
+<meta name="description" content="A screen reader cannot see your images. It reads the alt attribute out loud instead. Try four images with bad, good, and empty alt text and hear the difference in text form.">
+<meta property="og:title" content="Alt text: what the screen reader actually hears">
+<meta property="og:description" content="A screen reader cannot see your images. It reads the alt attribute out loud instead. Try four images with bad, good, and empty alt text and hear the difference.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dominic.balass.one/alt-text-demo/">
+<meta property="og:image" content="https://dominic.balass.one/alt-text-demo/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Alt text: what the screen reader actually hears">
+<meta name="twitter:description" content="A screen reader cannot see your images. It reads the alt attribute out loud instead. Try four images with bad, good, and empty alt text and hear the difference.">
+<meta name="twitter:image" content="https://dominic.balass.one/alt-text-demo/og-image.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0DG17Z442"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C0DG17Z442');
+</script>
+<style>
+  :root {
+    --bg: #fafaf9; --card: #ffffff; --ink: #17171c; --muted: #55555e;
+    --purple: #7c3aed; --purple-deep: #5b21b6; --purple-soft: #ede9fe;
+    --border: #e4e4e7; --good: #15803d; --bad: #b91c1c; --good-soft: #dcfce7; --bad-soft: #fee2e2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101014; --card: #18181e; --ink: #f1f0f5; --muted: #b6b6c0;
+      --purple-soft: #2e1a5e; --border: #2c2c34;
+      --good: #4ade80; --bad: #f87171; --good-soft: #14532d; --bad-soft: #450a0a;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.55; }
+  .mono { font-family: ui-monospace, monospace; }
+  .hero { padding: 2.5rem 1.5rem 2rem; background: linear-gradient(135deg, var(--purple-soft), var(--bg) 70%); border-bottom: 1px solid var(--border); }
+  .hero-inner { max-width: 42rem; margin: 0 auto; }
+  .hero h1 { margin: 0 0 0.75rem; font-size: clamp(1.9rem, 9vw, 3rem); line-height: 1.15; }
+  .hero h1 span { color: var(--purple); }
+  .hero p { margin: 0; max-width: 34rem; color: var(--muted); }
+  main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  section > p { color: var(--muted); }
+  .demo-card { background: var(--card); border: 2px solid var(--border); padding: 1rem; }
+  .demo-card img { display: block; max-width: 100%; height: auto; }
+  .demo-card img.divider-img { width: 100%; }
+  .icon-row { display: flex; align-items: center; gap: 1rem; }
+  .icon-button { font: inherit; cursor: pointer; background: var(--card); border: 2px solid var(--purple); padding: 0.5rem; line-height: 0; }
+  .icon-button:hover { background: var(--purple-soft); }
+  .icon-button img { width: 48px; height: 48px; }
+  fieldset { border: 1px solid var(--border); margin: 1rem 0 0; padding: 0.75rem 1rem; }
+  legend { font-weight: 600; padding: 0 0.4rem; }
+  fieldset label { display: block; padding: 0.35rem 0; cursor: pointer; }
+  fieldset input { accent-color: var(--purple); margin-right: 0.5rem; }
+  .alt-line { margin: 1rem 0 0; font-size: 0.95rem; }
+  .alt-line code { background: var(--purple-soft); padding: 0.15rem 0.4rem; }
+  .hears { margin: 1rem 0 0; border-left: 4px solid var(--purple); background: var(--purple-soft); padding: 0.75rem 1rem; }
+  .hears .label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .hears blockquote { margin: 0.4rem 0 0; font-size: 1.05rem; }
+  .hears .verdict { margin: 0.5rem 0 0; font-size: 0.95rem; }
+  .hears.good { border-left-color: var(--good); }
+  .hears.bad { border-left-color: var(--bad); }
+  .transcript { background: var(--card); border: 1px solid var(--border); padding: 1rem 1.25rem; }
+  .transcript ol { margin: 0.5rem 0 0; padding-left: 1.4rem; }
+  .transcript li { margin: 0.35rem 0; }
+  .transcript .skipped { color: var(--muted); font-style: italic; }
+  .rules { list-style: none; padding: 0; margin: 0; }
+  .rules li { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
+  .rules li strong { display: block; margin-bottom: 0.2rem; }
+  .note { background: var(--purple-soft); border-left: 4px solid var(--purple); padding: 0.75rem 1rem; margin-top: 0.75rem; }
+  footer { text-align: center; color: var(--muted); font-size: 0.92rem; padding: 2rem 1.25rem; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1><span>Alt text:</span> what the screen reader actually hears</h1>
+    <p>A screen reader cannot see your images. It reads the <span class="mono">alt</span> attribute out loud instead. Three words of lazy alt text can hide a chart's whole point, and one empty attribute can silence a decoration that should never have spoken. Pick an alt version under each image below and read what a screen reader would announce.</p>
+  </div>
+</header>
+
+<main>
+  <section id="ex-chart">
+    <h2>1. The chart</h2>
+    <p>A bar chart of sales by quarter. The numbers are the point of the image, so the alt text has to carry them.</p>
+    <div class="demo-card">
+      <img id="img-chart" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22360%22%20viewBox%3D%220%200%20640%20360%22%3E%0A%3Crect%20width%3D%22640%22%20height%3D%22360%22%20fill%3D%22%23ffffff%22%2F%3E%0A%3Ctext%20x%3D%2232%22%20y%3D%2240%22%20font-family%3D%22sans-serif%22%20font-size%3D%2222%22%20font-weight%3D%22bold%22%20fill%3D%22%2317171c%22%3ESales%20by%20quarter%3C%2Ftext%3E%0A%3Cline%20x1%3D%2260%22%20y1%3D%22300%22%20x2%3D%22600%22%20y2%3D%22300%22%20stroke%3D%22%2317171c%22%20stroke-width%3D%222%22%2F%3E%0A%3Crect%20x%3D%2290%22%20y%3D%22222%22%20width%3D%2290%22%20height%3D%2278%22%20fill%3D%22%23ede9fe%22%2F%3E%0A%3Crect%20x%3D%22220%22%20y%3D%22183%22%20width%3D%2290%22%20height%3D%22117%22%20fill%3D%22%23c4b5fd%22%2F%3E%0A%3Crect%20x%3D%22350%22%20y%3D%22144%22%20width%3D%2290%22%20height%3D%22156%22%20fill%3D%22%238b5cf6%22%2F%3E%0A%3Crect%20x%3D%22480%22%20y%3D%2293%22%20width%3D%2290%22%20height%3D%22207%22%20fill%3D%22%237c3aed%22%2F%3E%0A%3Ctext%20x%3D%22135%22%20y%3D%22212%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2317171c%22%3E120%3C%2Ftext%3E%0A%3Ctext%20x%3D%22265%22%20y%3D%22173%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2317171c%22%3E180%3C%2Ftext%3E%0A%3Ctext%20x%3D%22395%22%20y%3D%22134%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2317171c%22%3E240%3C%2Ftext%3E%0A%3Ctext%20x%3D%22525%22%20y%3D%2283%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2317171c%22%3E310%3C%2Ftext%3E%0A%3Ctext%20x%3D%22135%22%20y%3D%22330%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2355555e%22%3EQ1%3C%2Ftext%3E%0A%3Ctext%20x%3D%22265%22%20y%3D%22330%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2355555e%22%3EQ2%3C%2Ftext%3E%0A%3Ctext%20x%3D%22395%22%20y%3D%22330%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2355555e%22%3EQ3%3C%2Ftext%3E%0A%3Ctext%20x%3D%22525%22%20y%3D%22330%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20text-anchor%3D%22middle%22%20fill%3D%22%2355555e%22%3EQ4%3C%2Ftext%3E%0A%3C%2Fsvg%3E" alt="Bar chart: sales grew from 120 units in Q1 to 310 in Q4, with the biggest jump in Q3." width="640" height="360">
+      <fieldset data-demo="chart">
+        <legend>Alt text for this chart</legend>
+        <label><input type="radio" name="alt-chart" value="bad"> Bad alt</label>
+        <label><input type="radio" name="alt-chart" value="good" checked> Good alt</label>
+        <label><input type="radio" name="alt-chart" value="empty"> Empty alt</label>
+      </fieldset>
+      <p class="alt-line">Current markup: <code id="code-chart"></code></p>
+      <div class="hears" id="hears-chart" aria-live="polite">
+        <div class="label">Screen reader hears</div>
+        <blockquote id="quote-chart"></blockquote>
+        <p class="verdict" id="verdict-chart"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="ex-photo">
+    <h2>2. The photo</h2>
+    <p>A sunset over a mountain lake. The photo sets the scene, so the alt text has to say what the scene is.</p>
+    <div class="demo-card">
+      <img id="img-photo" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22360%22%20viewBox%3D%220%200%20640%20360%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22sky%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%0A%3Cstop%20offset%3D%220%22%20stop-color%3D%22%237c3aed%22%2F%3E%3Cstop%20offset%3D%220.55%22%20stop-color%3D%22%23f97316%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fbbf24%22%2F%3E%0A%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22lake%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%0A%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f59e0b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235b21b6%22%2F%3E%0A%3C%2FlinearGradient%3E%3C%2Fdefs%3E%0A%3Crect%20width%3D%22640%22%20height%3D%22230%22%20fill%3D%22url%28%23sky%29%22%2F%3E%0A%3Ccircle%20cx%3D%22320%22%20cy%3D%22180%22%20r%3D%2242%22%20fill%3D%22%23fef3c7%22%2F%3E%0A%3Cpolygon%20points%3D%220%2C230%20150%2C110%20300%2C230%22%20fill%3D%22%234c1d95%22%2F%3E%0A%3Cpolygon%20points%3D%22180%2C230%20380%2C80%20580%2C230%22%20fill%3D%22%232e1065%22%2F%3E%0A%3Cpolygon%20points%3D%22430%2C230%20540%2C150%20640%2C230%22%20fill%3D%22%234c1d95%22%2F%3E%0A%3Crect%20y%3D%22230%22%20width%3D%22640%22%20height%3D%22130%22%20fill%3D%22url%28%23lake%29%22%2F%3E%0A%3Crect%20x%3D%22270%22%20y%3D%22250%22%20width%3D%22100%22%20height%3D%228%22%20fill%3D%22%23fef3c7%22%20opacity%3D%220.7%22%2F%3E%0A%3Crect%20x%3D%22220%22%20y%3D%22275%22%20width%3D%22200%22%20height%3D%226%22%20fill%3D%22%23fef3c7%22%20opacity%3D%220.45%22%2F%3E%0A%3Crect%20x%3D%22290%22%20y%3D%22300%22%20width%3D%22140%22%20height%3D%226%22%20fill%3D%22%23fef3c7%22%20opacity%3D%220.3%22%2F%3E%0A%3C%2Fsvg%3E" alt="Sunset over a mountain lake, orange sky reflected in still water." width="640" height="360">
+      <fieldset data-demo="photo">
+        <legend>Alt text for this photo</legend>
+        <label><input type="radio" name="alt-photo" value="bad"> Bad alt</label>
+        <label><input type="radio" name="alt-photo" value="good" checked> Good alt</label>
+        <label><input type="radio" name="alt-photo" value="empty"> Empty alt</label>
+      </fieldset>
+      <p class="alt-line">Current markup: <code id="code-photo"></code></p>
+      <div class="hears" id="hears-photo" aria-live="polite">
+        <div class="label">Screen reader hears</div>
+        <blockquote id="quote-photo"></blockquote>
+        <p class="verdict" id="verdict-photo"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="ex-divider">
+    <h2>3. The decorative divider</h2>
+    <p>A purple flourish between two sections. It carries no information at all, which is the one case where silence is the right answer.</p>
+    <div class="demo-card">
+      <img id="img-divider" class="divider-img" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%2260%22%20viewBox%3D%220%200%20640%2060%22%3E%0A%3Cline%20x1%3D%2220%22%20y1%3D%2230%22%20x2%3D%22290%22%20y2%3D%2230%22%20stroke%3D%22%237c3aed%22%20stroke-width%3D%222%22%2F%3E%0A%3Cline%20x1%3D%22350%22%20y1%3D%2230%22%20x2%3D%22620%22%20y2%3D%2230%22%20stroke%3D%22%237c3aed%22%20stroke-width%3D%222%22%2F%3E%0A%3Crect%20x%3D%22308%22%20y%3D%2218%22%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22%237c3aed%22%20transform%3D%22rotate%2845%20320%2030%29%22%2F%3E%0A%3C%2Fsvg%3E" alt="" width="640" height="60">
+      <fieldset data-demo="divider">
+        <legend>Alt text for this divider</legend>
+        <label><input type="radio" name="alt-divider" value="bad"> Bad alt</label>
+        <label><input type="radio" name="alt-divider" value="good" checked> Good alt</label>
+        <label><input type="radio" name="alt-divider" value="empty"> Empty alt</label>
+      </fieldset>
+      <p class="alt-line">Current markup: <code id="code-divider"></code></p>
+      <div class="hears" id="hears-divider" aria-live="polite">
+        <div class="label">Screen reader hears</div>
+        <blockquote id="quote-divider"></blockquote>
+        <p class="verdict" id="verdict-divider"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="ex-icon">
+    <h2>4. The icon button</h2>
+    <p>A search button that is only a magnifying glass icon. There is no visible label, so the alt text is the button's entire name.</p>
+    <div class="demo-card">
+      <div class="icon-row">
+        <button type="button" class="icon-button" id="search-btn">
+          <img id="img-icon" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2296%22%20height%3D%2296%22%20viewBox%3D%220%200%2096%2096%22%3E%0A%3Crect%20width%3D%2296%22%20height%3D%2296%22%20fill%3D%22%23ffffff%22%2F%3E%0A%3Ccircle%20cx%3D%2242%22%20cy%3D%2242%22%20r%3D%2224%22%20fill%3D%22none%22%20stroke%3D%22%237c3aed%22%20stroke-width%3D%227%22%2F%3E%0A%3Cline%20x1%3D%2260%22%20y1%3D%2260%22%20x2%3D%2282%22%20y2%3D%2282%22%20stroke%3D%22%237c3aed%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3C%2Fsvg%3E" alt="Search" width="96" height="96">
+        </button>
+        <span>Press it and nothing happens. It is here to be announced, not to search.</span>
+      </div>
+      <fieldset data-demo="icon">
+        <legend>Alt text for this icon</legend>
+        <label><input type="radio" name="alt-icon" value="bad"> Bad alt</label>
+        <label><input type="radio" name="alt-icon" value="good" checked> Good alt</label>
+        <label><input type="radio" name="alt-icon" value="empty"> Empty alt</label>
+      </fieldset>
+      <p class="alt-line">Current markup: <code id="code-icon"></code></p>
+      <div class="hears" id="hears-icon" aria-live="polite">
+        <div class="label">Screen reader hears</div>
+        <blockquote id="quote-icon"></blockquote>
+        <p class="verdict" id="verdict-icon"></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Listen to the whole page</h2>
+    <p>This is the order a screen reader meets the four images, with your current alt choices applied. Skipped images never appear in the flow at all.</p>
+    <div class="transcript">
+      <ol id="transcript"></ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>The rules behind it</h2>
+    <ul class="rules">
+      <li><strong>Describe the purpose, not the pixels.</strong> A chart's alt text should carry the trend, not the fact that it is a bar chart. Ask what the reader would miss if the image vanished.</li>
+      <li><strong>Never start with "image of" or "photo of".</strong> The screen reader already announces that the element is an image. Those words are dead weight before the useful part starts.</li>
+      <li><strong>If the image adds nothing, leave alt empty on purpose.</strong> <span class="mono">alt=""</span> is a deliberate instruction: skip this. It is not laziness, and it is not the same as leaving the attribute off.</li>
+      <li><strong>Never leave the alt attribute off entirely.</strong> With no attribute at all, some screen readers fall back to reading the file name out loud, which is worse than silence.</li>
+      <li><strong>A functional image gets the function, not the picture.</strong> An icon button's alt text is its name: "Search", not "magnifying glass". An image that is the only content of a link or button is never decorative.</li>
+    </ul>
+    <div class="note"><strong>WCAG 1.1.1 Non-text Content, Level A:</strong> every image that carries information needs a text alternative that serves the same purpose, and decorative content must be implemented so assistive technology can ignore it. One short sentence is usually enough. There is no character limit in the standard.</div>
+  </section>
+</main>
+
+<footer>
+  Built by <a href="https://dominic.balass.one/">Dominic Balassone</a>
+</footer>
+
+<script>
+var DEMOS = {
+  chart: {
+    img: 'img-chart',
+    label: 'Chart',
+    bad:    { alt: 'image of a chart showing sales growth',
+              hears: 'Image, image of a chart showing sales growth.',
+              verdict: 'Says "image" twice and never says what grew, or by how much. The whole point of the chart is missing.',
+              tone: 'bad' },
+    good:   { alt: 'Bar chart: sales grew from 120 units in Q1 to 310 in Q4, with the biggest jump in Q3.',
+              hears: 'Image, bar chart: sales grew from 120 units in Q1 to 310 in Q4, with the biggest jump in Q3.',
+              verdict: 'The listener gets the trend and the numbers. That is the whole job of this alt text.',
+              tone: 'good' },
+    empty:  { alt: '',
+              hears: '(nothing, the chart is skipped)',
+              verdict: 'Skipped entirely. The chart carried the numbers, so its point is lost.',
+              tone: 'bad' }
+  },
+  photo: {
+    img: 'img-photo',
+    label: 'Photo',
+    bad:    { alt: 'photo',
+              hears: 'Image, photo.',
+              verdict: 'Tells the listener nothing at all. A one-word alt is barely better than no alt.',
+              tone: 'bad' },
+    good:   { alt: 'Sunset over a mountain lake, orange sky reflected in still water.',
+              hears: 'Image, sunset over a mountain lake, orange sky reflected in still water.',
+              verdict: 'Short, and the listener can picture the scene. One sentence is enough.',
+              tone: 'good' },
+    empty:  { alt: '',
+              hears: '(nothing, the photo is skipped)',
+              verdict: 'Skipped entirely. The scene is gone for anyone who cannot see it.',
+              tone: 'bad' }
+  },
+  divider: {
+    img: 'img-divider',
+    label: 'Divider',
+    bad:    { alt: 'beautiful decorative purple swirl divider line',
+              hears: 'Image, beautiful decorative purple swirl divider line.',
+              verdict: 'Noise between paragraphs. The listener has to sit through a description of something that adds nothing.',
+              tone: 'bad' },
+    good:   { alt: '',
+              hears: '(nothing, the divider is skipped)',
+              verdict: 'Nothing. That is the right answer here. The divider carries no information, so silence is correct.',
+              tone: 'good' },
+    empty:  { alt: '',
+              hears: '(nothing, the divider is skipped)',
+              verdict: 'Nothing. Same as the good choice: for a decorative image, empty alt is the good choice.',
+              tone: 'good' }
+  },
+  icon: {
+    img: 'img-icon',
+    label: 'Search button',
+    bad:    { alt: 'magnifying glass icon',
+              hears: 'Image, magnifying glass icon, button.',
+              verdict: 'Describes the picture, not the function. The listener still does not know what the button does.',
+              tone: 'bad' },
+    good:   { alt: 'Search',
+              hears: 'Search, button.',
+              verdict: 'Names the function. The button now has a name, and the listener knows what it does.',
+              tone: 'good' },
+    empty:  { alt: '',
+              hears: 'Button.',
+              verdict: 'A button with no name. The listener knows something is clickable and nothing else. This fails WCAG 1.1.1.',
+              tone: 'bad' }
+  }
+};
+
+function render(key) {
+  var demo = DEMOS[key];
+  var choice = document.querySelector('input[name="alt-' + key + '"]:checked').value;
+  var state = demo[choice];
+  var img = document.getElementById(demo.img);
+  img.setAttribute('alt', state.alt);
+  document.getElementById('code-' + key).textContent = 'alt="' + state.alt + '"';
+  document.getElementById('quote-' + key).textContent = state.hears;
+  document.getElementById('verdict-' + key).textContent = state.verdict;
+  var box = document.getElementById('hears-' + key);
+  box.classList.remove('good', 'bad');
+  box.classList.add(state.tone);
+}
+
+function renderTranscript() {
+  var list = document.getElementById('transcript');
+  list.innerHTML = '';
+  Object.keys(DEMOS).forEach(function (key) {
+    var demo = DEMOS[key];
+    var choice = document.querySelector('input[name="alt-' + key + '"]:checked').value;
+    var state = demo[choice];
+    var li = document.createElement('li');
+    if (state.alt === '' && key !== 'icon') {
+      li.innerHTML = '<span class="skipped">[skipped: ' + demo.label.toLowerCase() + ']</span>';
+    } else {
+      li.textContent = demo.label + ': ' + state.hears;
+    }
+    list.appendChild(li);
+  });
+}
+
+function renderAll() {
+  Object.keys(DEMOS).forEach(render);
+  renderTranscript();
+}
+
+document.querySelectorAll('fieldset[data-demo]').forEach(function (fs) {
+  fs.addEventListener('change', renderAll);
+});
+renderAll();
+</script>
+</body>
+</html>
