@@ -66,14 +66,13 @@
   .presets span { align-self: center; color: var(--muted); font-size: 0.9rem; }
 
   .grid {
-    display: grid;
-    grid-template-columns: 4.25rem repeat(16, 1fr);
-    gap: 4px;
     touch-action: none;
     -webkit-user-select: none; user-select: none;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }
+  .grid .row { display: grid; grid-template-columns: 4.25rem repeat(16, 1fr); gap: 4px; }
+  .grid .row + .row { margin-top: 4px; }
   .grid .corner { font-size: 0.8rem; color: var(--muted); display: flex; align-items: flex-end; justify-content: flex-end; padding: 0 0.35rem 0.35rem 0; }
   .grid .stepnum { font-family: ui-monospace, monospace; font-size: 0.75rem; color: var(--muted); text-align: center; padding-bottom: 0.15rem; }
   .grid .stepnum.beat { color: var(--ink); font-weight: 700; }
@@ -98,7 +97,9 @@
   .status { margin-top: 0.75rem; font-family: ui-monospace, monospace; font-size: 0.9rem; color: var(--muted); min-height: 1.4em; }
   .status b { color: var(--purple); }
   @media (max-width: 560px) {
-    .grid { grid-template-columns: 3.25rem repeat(16, 1fr); gap: 3px; }
+    /* Two rows of 8 steps per track, so cells stay big enough to tap. */
+    .grid .row { grid-template-columns: 3rem repeat(8, 1fr); gap: 3px; }
+    .grid .row .corner, .grid .row .track-label { grid-row: span 2; }
     .track-label { font-size: 0.78rem; }
     .cell { min-height: 2.75rem; }
     .tempo input[type="range"] { width: 7rem; }
@@ -207,6 +208,7 @@
   var nextNoteTime = 0;
   var paintValue = null;
   var paintTrack = null;
+  var lastPointerToggle = 0;
 
   var gridEl = document.getElementById('grid');
   var playBtn = document.getElementById('playBtn');
@@ -217,22 +219,27 @@
 
   function buildGrid() {
     var i, t, s;
+    var headRow = document.createElement('div');
+    headRow.className = 'row';
     var corner = document.createElement('div');
     corner.className = 'corner';
     corner.textContent = 'step';
-    gridEl.appendChild(corner);
+    headRow.appendChild(corner);
     for (s = 0; s < STEPS; s++) {
       var num = document.createElement('div');
       num.className = 'stepnum' + (s % 4 === 0 ? ' beat' : '');
       num.textContent = String(s + 1);
-      gridEl.appendChild(num);
+      headRow.appendChild(num);
     }
+    gridEl.appendChild(headRow);
     TRACKS.forEach(function (track) {
       cells[track.id] = [];
+      var row = document.createElement('div');
+      row.className = 'row';
       var label = document.createElement('div');
       label.className = 'track-label';
       label.textContent = track.label;
-      gridEl.appendChild(label);
+      row.appendChild(label);
       for (s = 0; s < STEPS; s++) {
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -242,9 +249,10 @@
         btn.dataset.track = track.id;
         btn.dataset.step = String(s);
         btn.style.setProperty('--track', track.color);
-        gridEl.appendChild(btn);
+        row.appendChild(btn);
         cells[track.id][s] = btn;
       }
+      gridEl.appendChild(row);
     });
   }
 
@@ -427,6 +435,7 @@
     e.preventDefault();
     paintValue = !state[btn.dataset.track][parseInt(btn.dataset.step, 10)];
     paintTrack = btn.dataset.track;
+    lastPointerToggle = Date.now();
     paintCell(btn, paintValue);
   });
 
@@ -451,13 +460,15 @@
 
   // Keyboard toggling on buttons: pointerdown already handles mouse/touch,
   // but keyboard activation fires click without pointerdown, so handle it.
+  // Note: touch taps in Chrome fire click with detail 0, exactly like a
+  // keyboard activation, so detail alone cannot tell them apart. The
+  // timestamp guard is what stops the click from toggling a cell twice.
   gridEl.addEventListener('click', function (e) {
     var btn = e.target.closest ? e.target.closest('.cell') : null;
     if (!btn) return;
-    if (e.detail === 0) { // keyboard activation
-      setCell(btn.dataset.track, parseInt(btn.dataset.step, 10),
-        !state[btn.dataset.track][parseInt(btn.dataset.step, 10)]);
-    }
+    if (Date.now() - lastPointerToggle < 1000) return;
+    setCell(btn.dataset.track, parseInt(btn.dataset.step, 10),
+      !state[btn.dataset.track][parseInt(btn.dataset.step, 10)]);
   });
 
   playBtn.addEventListener('click', function () {
