@@ -480,6 +480,7 @@
     get bpm() { return bpm; },
     get playing() { return playing; },
     get currentStep() { return currentStep; },
+    get audioState() { return audioCtx ? audioCtx.state : 'none'; },
     applyPattern: applyPattern,
     clearGrid: clearGrid
   };
